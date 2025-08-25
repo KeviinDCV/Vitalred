@@ -5,10 +5,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import { Edit, Calendar, Upload, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import axios from 'axios';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -151,6 +152,8 @@ export default function IngresarRegistro() {
     const [currentStep, setCurrentStep] = useState(1);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [validationErrors, setValidationErrors] = useState<string[]>([]);
+    const [isAnalyzingWithAI, setIsAnalyzingWithAI] = useState(false);
+    const [aiAnalysisResult, setAiAnalysisResult] = useState<any>(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         // Paso 1: Información Personal
@@ -328,6 +331,102 @@ export default function IngresarRegistro() {
 
         setValidationErrors([]);
         return true;
+    };
+
+    // Función para analizar archivo con IA
+    const analyzeFileWithAI = async (file: File) => {
+        setIsAnalyzingWithAI(true);
+        setAiAnalysisResult(null);
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Usar axios para manejar la respuesta JSON correctamente
+            const response = await axios.post(route('medico.ai.extract-patient-data'), formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+            });
+
+            const result = response.data;
+
+            if (result.success) {
+                setAiAnalysisResult(result);
+
+                // Llenar automáticamente los campos con los datos extraídos
+                const extractedData = result.data;
+
+                console.log('Datos extraídos por IA:', extractedData);
+
+                if (extractedData.tipo_identificacion) {
+                    setData('tipo_identificacion', extractedData.tipo_identificacion);
+                    console.log('Tipo identificación llenado:', extractedData.tipo_identificacion);
+                }
+                if (extractedData.numero_identificacion) {
+                    setData('numero_identificacion', extractedData.numero_identificacion);
+                    console.log('Número identificación llenado:', extractedData.numero_identificacion);
+                }
+                if (extractedData.nombre) {
+                    setData('nombre', extractedData.nombre);
+                    console.log('Nombre llenado:', extractedData.nombre);
+                }
+                if (extractedData.apellidos) {
+                    setData('apellidos', extractedData.apellidos);
+                    console.log('Apellidos llenado:', extractedData.apellidos);
+                }
+                // Manejar fecha de nacimiento y edad
+                if (extractedData.fecha_nacimiento) {
+                    // Usar handleDateChange para que también calcule la edad
+                    handleDateChange(extractedData.fecha_nacimiento);
+                    console.log('Fecha nacimiento llenada:', extractedData.fecha_nacimiento);
+
+                    // Si también hay edad de la IA, usarla en lugar de la calculada
+                    if (extractedData.edad) {
+                        setData('edad', extractedData.edad);
+                        console.log('Edad de IA usada:', extractedData.edad);
+                    } else {
+                        console.log('Edad calculada desde fecha');
+                    }
+                } else if (extractedData.edad) {
+                    // Si no hay fecha pero sí edad, llenar la edad
+                    setData('edad', extractedData.edad);
+                    console.log('Edad llenada desde IA:', extractedData.edad);
+                    console.log('Fecha de nacimiento no disponible - usuario deberá ingresarla manualmente');
+                } else {
+                    console.log('No se encontró fecha_nacimiento ni edad en los datos extraídos');
+                }
+
+                if (extractedData.sexo) {
+                    setData('sexo', extractedData.sexo);
+                    console.log('Sexo llenado:', extractedData.sexo);
+                }
+
+                toast.success("🤖 ¡Datos extraídos automáticamente!", {
+                    description: "Los campos se han llenado con IA. Revisa los datos y haz clic en 'Siguiente' para continuar.",
+                    duration: 6000,
+                });
+            } else {
+                throw new Error(result.message || 'Error desconocido');
+            }
+        } catch (error: any) {
+            console.error('Error analizando archivo con IA:', error);
+
+            let errorMessage = "No se pudieron extraer los datos del documento.";
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+
+            toast.error("Error al analizar el archivo", {
+                description: errorMessage,
+                duration: 5000,
+            });
+        } finally {
+            setIsAnalyzingWithAI(false);
+        }
     };
 
     // Helper para verificar si un campo tiene error
@@ -610,6 +709,8 @@ export default function IngresarRegistro() {
                                                 const file = e.target.files?.[0];
                                                 if (file) {
                                                     setData('historia_clinica', file);
+                                                    // Analizar automáticamente con IA
+                                                    analyzeFileWithAI(file);
                                                 }
                                             }}
                                         />
@@ -618,13 +719,55 @@ export default function IngresarRegistro() {
                                             size="sm"
                                             type="button"
                                             onClick={() => document.getElementById('historia-clinica-upload')?.click()}
+                                            disabled={isAnalyzingWithAI}
                                         >
-                                            Seleccionar archivo
+                                            <Upload className="h-4 w-4 mr-2" />
+                                            {isAnalyzingWithAI ? 'Analizando con IA...' : 'Seleccionar archivo'}
                                         </Button>
-                                        {data.historia_clinica && (
-                                            <p className="text-sm text-green-600 mt-2">
-                                                Archivo seleccionado: {data.historia_clinica.name}
-                                            </p>
+
+                                        {data.historia_clinica && !isAnalyzingWithAI && !aiAnalysisResult && (
+                                            <div className="mt-2">
+                                                <p className="text-sm text-blue-600">
+                                                    📄 Archivo seleccionado: {data.historia_clinica.name}
+                                                </p>
+                                                <p className="text-xs text-blue-500 mt-1">
+                                                    🤖 Analizando automáticamente con IA...
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {isAnalyzingWithAI && (
+                                            <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                                                    <span className="text-sm font-medium text-blue-800">Analizando documento con IA...</span>
+                                                </div>
+                                                <p className="text-xs text-blue-600 mt-1">
+                                                    Extrayendo texto y analizando datos del paciente. Esto puede tomar unos segundos.
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {aiAnalysisResult && (
+                                            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <span className="text-green-600">✅</span>
+                                                    <span className="text-sm font-medium text-green-800">Datos extraídos automáticamente</span>
+                                                </div>
+                                                <p className="text-xs text-green-600 mb-2">
+                                                    Los campos se han llenado con la información del documento. Revisa los datos y haz clic en "Siguiente".
+                                                </p>
+                                                {aiAnalysisResult.extracted_text_preview && (
+                                                    <details className="mt-2">
+                                                        <summary className="text-xs text-green-600 cursor-pointer hover:text-green-800">
+                                                            Ver texto extraído del documento
+                                                        </summary>
+                                                        <p className="text-xs text-gray-600 mt-1 p-2 bg-gray-50 rounded border max-h-20 overflow-y-auto">
+                                                            {aiAnalysisResult.extracted_text_preview}
+                                                        </p>
+                                                    </details>
+                                                )}
+                                            </div>
                                         )}
                                     </div>
                                 </div>
