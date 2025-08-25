@@ -17,7 +17,19 @@ createInertiaApp({
         root.render(
             <>
                 <App {...props} />
-                <Toaster />
+                <Toaster
+                    position="top-right"
+                    toastOptions={{
+                        style: {
+                            background: 'white',
+                            color: 'black',
+                            border: '1px solid #e5e7eb',
+                            fontSize: '14px',
+                        },
+                        className: 'toast-custom',
+                        descriptionClassName: 'toast-description',
+                    }}
+                />
             </>
         );
     },

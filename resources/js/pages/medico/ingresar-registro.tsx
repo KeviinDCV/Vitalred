@@ -152,14 +152,14 @@ export default function IngresarRegistro() {
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         // Paso 1: Información Personal
         tipo_identificacion: '',
         numero_identificacion: '',
         nombre: '',
         apellidos: '',
         fecha_nacimiento: '',
-        edad: '',
+        edad: 0,
         sexo: '',
         historia_clinica: null as File | null,
 
@@ -175,18 +175,18 @@ export default function IngresarRegistro() {
         diagnostico_1: '',
         diagnostico_2: '',
         fecha_ingreso: '',
-        dias_hospitalizados: '',
+        dias_hospitalizados: 0,
         motivo_consulta: '',
         clasificacion_triage: '',
         enfermedad_actual: '',
         antecedentes: '',
-        frecuencia_cardiaca: '',
-        frecuencia_respiratoria: '',
-        temperatura: '',
-        tension_sistolica: '',
-        tension_diastolica: '',
-        saturacion_oxigeno: '',
-        glucometria: '',
+        frecuencia_cardiaca: 0,
+        frecuencia_respiratoria: 0,
+        temperatura: 0,
+        tension_sistolica: 0,
+        tension_diastolica: 0,
+        saturacion_oxigeno: 0,
+        glucometria: 0,
         escala_glasgow: '',
         examen_fisico: '',
         tratamiento: '',
@@ -248,7 +248,7 @@ export default function IngresarRegistro() {
     };
 
     const calculateAge = (birthDate: string) => {
-        if (!birthDate) return '';
+        if (!birthDate) return 0;
 
         const today = new Date();
         const birth = new Date(birthDate);
@@ -259,7 +259,7 @@ export default function IngresarRegistro() {
             age--;
         }
 
-        return age.toString();
+        return age;
     };
 
     const handleDateChange = (date: string) => {
@@ -277,14 +277,14 @@ export default function IngresarRegistro() {
     };
 
     const calculateDiasHospitalizados = (fechaIngreso: string) => {
-        if (!fechaIngreso) return '';
+        if (!fechaIngreso) return 0;
 
         const today = new Date();
         const ingreso = new Date(fechaIngreso);
         const diffTime = Math.abs(today.getTime() - ingreso.getTime());
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        return diffDays.toString();
+        return diffDays;
     };
 
     const handleFechaIngresoChange = (fecha: string) => {
@@ -322,12 +322,6 @@ export default function IngresarRegistro() {
             toast.error("Campos obligatorios faltantes", {
                 description: `Por favor complete: ${missingFieldNames.join(', ')}`,
                 duration: 5000,
-                style: {
-                    background: '#fee2e2',
-                    border: '1px solid #fca5a5',
-                    color: '#991b1b',
-                },
-                className: 'font-medium',
             });
             return false;
         }
@@ -371,12 +365,6 @@ export default function IngresarRegistro() {
             toast.error("Campos obligatorios faltantes", {
                 description: `Por favor complete: ${missingFieldNames.join(', ')}`,
                 duration: 5000,
-                style: {
-                    background: '#fee2e2',
-                    border: '1px solid #fca5a5',
-                    color: '#991b1b',
-                },
-                className: 'font-medium',
             });
             return false;
         }
@@ -1050,7 +1038,7 @@ export default function IngresarRegistro() {
                                                             id="frecuencia_cardiaca"
                                                             type="number"
                                                             value={data.frecuencia_cardiaca}
-                                                            onChange={(e) => setData('frecuencia_cardiaca', e.target.value)}
+                                                            onChange={(e) => setData('frecuencia_cardiaca', parseInt(e.target.value) || 0)}
                                                             placeholder="60-100"
                                                         />
                                                     </div>
@@ -1061,7 +1049,7 @@ export default function IngresarRegistro() {
                                                             id="frecuencia_respiratoria"
                                                             type="number"
                                                             value={data.frecuencia_respiratoria}
-                                                            onChange={(e) => setData('frecuencia_respiratoria', e.target.value)}
+                                                            onChange={(e) => setData('frecuencia_respiratoria', parseInt(e.target.value) || 0)}
                                                             placeholder="12-20"
                                                         />
                                                     </div>
@@ -1073,7 +1061,7 @@ export default function IngresarRegistro() {
                                                             type="number"
                                                             step="0.1"
                                                             value={data.temperatura}
-                                                            onChange={(e) => setData('temperatura', e.target.value)}
+                                                            onChange={(e) => setData('temperatura', parseFloat(e.target.value) || 0)}
                                                             placeholder="36.5"
                                                         />
                                                     </div>
@@ -1084,7 +1072,7 @@ export default function IngresarRegistro() {
                                                             id="tension_sistolica"
                                                             type="number"
                                                             value={data.tension_sistolica}
-                                                            onChange={(e) => setData('tension_sistolica', e.target.value)}
+                                                            onChange={(e) => setData('tension_sistolica', parseInt(e.target.value) || 0)}
                                                             placeholder="120"
                                                         />
                                                     </div>
@@ -1095,7 +1083,7 @@ export default function IngresarRegistro() {
                                                             id="tension_diastolica"
                                                             type="number"
                                                             value={data.tension_diastolica}
-                                                            onChange={(e) => setData('tension_diastolica', e.target.value)}
+                                                            onChange={(e) => setData('tension_diastolica', parseInt(e.target.value) || 0)}
                                                             placeholder="80"
                                                         />
                                                     </div>
@@ -1106,7 +1094,7 @@ export default function IngresarRegistro() {
                                                             id="saturacion_oxigeno"
                                                             type="number"
                                                             value={data.saturacion_oxigeno}
-                                                            onChange={(e) => setData('saturacion_oxigeno', e.target.value)}
+                                                            onChange={(e) => setData('saturacion_oxigeno', parseInt(e.target.value) || 0)}
                                                             placeholder="95-100"
                                                         />
                                                     </div>
@@ -1117,7 +1105,7 @@ export default function IngresarRegistro() {
                                                             id="glucometria"
                                                             type="number"
                                                             value={data.glucometria}
-                                                            onChange={(e) => setData('glucometria', e.target.value)}
+                                                            onChange={(e) => setData('glucometria', parseInt(e.target.value) || 0)}
                                                             placeholder="70-110"
                                                         />
                                                     </div>
@@ -1330,11 +1318,35 @@ export default function IngresarRegistro() {
                                                     onClick={() => {
                                                         // Validar paso 4 antes de finalizar
                                                         if (validateStep4()) {
-                                                            toast.success("¡Formulario completado exitosamente!", {
-                                                                description: "Los datos del registro médico han sido procesados correctamente.",
-                                                                duration: 4000,
+                                                            console.log('Datos a enviar:', data);
+
+                                                            // Enviar formulario al servidor
+                                                            post(route('medico.ingresar-registro.store'), {
+                                                                onStart: () => {
+                                                                    console.log('Iniciando envío...');
+                                                                },
+                                                                onSuccess: (response) => {
+                                                                    console.log('Éxito:', response);
+                                                                    toast.success("¡Registro médico guardado exitosamente!", {
+                                                                        description: "Los datos del paciente han sido registrados en el sistema.",
+                                                                        duration: 4000,
+                                                                    });
+                                                                    // Limpiar formulario después del éxito
+                                                                    reset();
+                                                                    setCurrentStep(1);
+                                                                    setValidationErrors([]);
+                                                                },
+                                                                onError: (errors) => {
+                                                                    console.error('Errores de validación:', errors);
+                                                                    toast.error("Error al guardar el registro", {
+                                                                        description: "Por favor revise los datos e intente nuevamente.",
+                                                                        duration: 5000,
+                                                                    });
+                                                                },
+                                                                onFinish: () => {
+                                                                    console.log('Envío finalizado');
+                                                                }
                                                             });
-                                                            // Aquí se podría agregar lógica para enviar el formulario al servidor
                                                         }
                                                     }}
                                                     disabled={isTransitioning}
