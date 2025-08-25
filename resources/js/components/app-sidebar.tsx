@@ -9,7 +9,7 @@ import AppLogo from './app-logo';
 // Navegación para Administrador
 const adminNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Tablero',
         href: '/dashboard',
         icon: LayoutGrid,
     },

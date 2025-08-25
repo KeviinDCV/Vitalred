@@ -14,7 +14,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $user = auth()->user();
 
         if ($user->role === 'administrador') {
-            return Inertia::render('dashboard');
+            return app(App\Http\Controllers\Admin\DashboardController::class)->index(request());
         } else {
             // Médicos van directamente a Ingresar Registro
             return redirect()->route('medico.ingresar-registro');
@@ -32,6 +32,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('supervision', function () {
             return Inertia::render('admin/supervision');
         })->name('supervision');
+
+        // Rutas para dashboard de administrador
+        Route::get('buscar-registros', [App\Http\Controllers\Admin\DashboardController::class, 'buscarRegistros'])->name('buscar-registros');
+        Route::get('descargar-historia/{registro}', [App\Http\Controllers\Admin\DashboardController::class, 'descargarHistoria'])->name('descargar-historia');
     });
 
     // Rutas para Médico

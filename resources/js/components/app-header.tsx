@@ -18,7 +18,7 @@ import AppLogoIcon from './app-logo-icon';
 // Navegación para Administrador
 const adminNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Tablero',
         href: '/dashboard',
         icon: LayoutGrid,
     },
@@ -75,7 +75,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 </Button>
                             </SheetTrigger>
                             <SheetContent side="left" className="flex h-full w-64 flex-col items-stretch justify-between bg-sidebar">
-                                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                                <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
                                 <SheetHeader className="flex justify-start text-left">
                                     <AppLogoIcon className="h-6 w-6 fill-current text-black dark:text-white" />
                                 </SheetHeader>
