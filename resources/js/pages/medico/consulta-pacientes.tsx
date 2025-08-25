@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { Search, Users, FileText, Calendar, Filter, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Users, FileText, Calendar, Filter, Eye, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 interface RegistroMedico {
@@ -24,6 +24,9 @@ interface RegistroMedico {
     diagnostico_principal: string;
     fecha_ingreso: string;
     estado: string;
+    tipo_paciente: string;
+    clasificacion_triage: string;
+    historia_clinica_path?: string;
     created_at: string;
     updated_at: string;
 }
@@ -74,26 +77,43 @@ export default function ConsultaPacientes({ registros, filters }: Props) {
         );
     };
 
-    const getEstadoBadge = (estado: string) => {
+    const getPrioridadBadge = (triage: string) => {
         const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-            'borrador': 'outline',
-            'enviado': 'default',
-            'procesado': 'secondary',
-            'completado': 'destructive'
+            'triage_1': 'destructive',
+            'triage_2': 'destructive',
+            'triage_3': 'default',
+            'triage_4': 'secondary',
+            'triage_5': 'outline'
         };
 
         const labels: Record<string, string> = {
-            'borrador': 'Borrador',
-            'enviado': 'Enviado',
-            'procesado': 'Procesado',
-            'completado': 'Completado'
+            'triage_1': 'Crítico',
+            'triage_2': 'Alto',
+            'triage_3': 'Medio',
+            'triage_4': 'Bajo',
+            'triage_5': 'Mínimo'
         };
 
         return (
-            <Badge variant={variants[estado] || 'outline'}>
-                {labels[estado] || estado}
+            <Badge variant={variants[triage] || 'outline'}>
+                {labels[triage] || 'Sin clasificar'}
             </Badge>
         );
+    };
+
+    const handleDownloadHistoria = (registro: RegistroMedico) => {
+        if (registro.historia_clinica_path) {
+            // Usar la ruta protegida del controlador
+            const downloadUrl = route('medico.descargar-historia', registro.id);
+
+            // Crear elemento temporal para descargar
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.target = '_blank'; // Abrir en nueva pestaña por si hay errores
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     };
 
     const formatDate = (dateString: string) => {
@@ -124,52 +144,7 @@ export default function ConsultaPacientes({ registros, filters }: Props) {
                     </div>
                 </div>
 
-                {/* Estadísticas */}
-                <div className="grid gap-4 md:grid-cols-4">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Registros</CardTitle>
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{registros.total}</div>
-                            <p className="text-xs text-muted-foreground">Pacientes registrados</p>
-                        </CardContent>
-                    </Card>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Página Actual</CardTitle>
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{registros.current_page}</div>
-                            <p className="text-xs text-muted-foreground">de {registros.last_page} páginas</p>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Mostrando</CardTitle>
-                            <Eye className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{registros.data.length}</div>
-                            <p className="text-xs text-muted-foreground">de {registros.per_page} por página</p>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Rango</CardTitle>
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{registros.from || 0}-{registros.to || 0}</div>
-                            <p className="text-xs text-muted-foreground">registros mostrados</p>
-                        </CardContent>
-                    </Card>
-                </div>
 
                 {/* Buscador principal */}
                 <Card>
@@ -241,32 +216,42 @@ export default function ConsultaPacientes({ registros, filters }: Props) {
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead>Paciente</TableHead>
-                                                <TableHead>Identificación</TableHead>
+                                                <TableHead>ID</TableHead>
+                                                <TableHead>Nombre</TableHead>
+                                                <TableHead>Fecha solicitud</TableHead>
+                                                <TableHead>EPS</TableHead>
                                                 <TableHead>Edad</TableHead>
-                                                <TableHead>Asegurador</TableHead>
-                                                <TableHead>Diagnóstico Principal</TableHead>
-                                                <TableHead>Fecha Ingreso</TableHead>
-                                                <TableHead>Estado</TableHead>
-                                                <TableHead>Acciones</TableHead>
+                                                <TableHead>Tipo de Paciente</TableHead>
+                                                <TableHead>Prioridad</TableHead>
+                                                <TableHead>Descargar Historia</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {registros.data.map((registro) => (
                                                 <TableRow key={registro.id}>
                                                     <TableCell>
+                                                        <div className="font-mono text-sm font-medium">
+                                                            #{registro.id}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
                                                         <div>
                                                             <div className="font-medium">
                                                                 {registro.nombre} {registro.apellidos}
                                                             </div>
                                                             <div className="text-sm text-muted-foreground">
-                                                                {registro.sexo} • {registro.ciudad}, {registro.departamento}
+                                                                {registro.numero_identificacion}
                                                             </div>
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <div className="font-mono text-sm">
-                                                            {registro.numero_identificacion}
+                                                        <div className="text-sm">
+                                                            {formatDate(registro.created_at)}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="text-sm">
+                                                            {registro.asegurador}
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
@@ -275,26 +260,21 @@ export default function ConsultaPacientes({ registros, filters }: Props) {
                                                         </Badge>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <div className="text-sm">
-                                                            {registro.asegurador}
-                                                        </div>
+                                                        <Badge variant="secondary">
+                                                            {registro.tipo_paciente}
+                                                        </Badge>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <div className="max-w-xs truncate text-sm" title={registro.diagnostico_principal}>
-                                                            {registro.diagnostico_principal}
-                                                        </div>
+                                                        {getPrioridadBadge(registro.clasificacion_triage)}
                                                     </TableCell>
                                                     <TableCell>
-                                                        <div className="text-sm">
-                                                            {formatDate(registro.fecha_ingreso)}
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {getEstadoBadge(registro.estado)}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Button variant="ghost" size="sm">
-                                                            <Eye className="h-4 w-4" />
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleDownloadHistoria(registro)}
+                                                            disabled={!registro.historia_clinica_path}
+                                                        >
+                                                            <Download className="h-4 w-4" />
                                                         </Button>
                                                     </TableCell>
                                                 </TableRow>

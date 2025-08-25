@@ -142,4 +142,37 @@ class MedicoController extends Controller
 
         return response()->json($registros);
     }
+
+    /**
+     * Descargar historia clínica de un registro
+     */
+    public function descargarHistoria(RegistroMedico $registro)
+    {
+        // Verificar que el registro pertenece al médico actual
+        if ($registro->user_id !== auth()->id()) {
+            abort(403, 'No tienes permiso para descargar esta historia clínica.');
+        }
+
+        // Verificar que existe el archivo
+        if (!$registro->historia_clinica_path) {
+            abort(404, 'No hay historia clínica adjunta para este registro.');
+        }
+
+        $filePath = storage_path('app/public/' . $registro->historia_clinica_path);
+
+        // Verificar que el archivo existe físicamente
+        if (!file_exists($filePath)) {
+            abort(404, 'El archivo de historia clínica no se encuentra en el servidor.');
+        }
+
+        // Obtener información del archivo
+        $fileName = 'historia_clinica_' . $registro->numero_identificacion . '_' . $registro->nombre . '_' . $registro->apellidos;
+        $fileExtension = pathinfo($registro->historia_clinica_path, PATHINFO_EXTENSION);
+        $downloadName = $fileName . '.' . $fileExtension;
+
+        // Retornar el archivo para descarga
+        return response()->download($filePath, $downloadName, [
+            'Content-Type' => mime_content_type($filePath),
+        ]);
+    }
 }
