@@ -757,16 +757,6 @@ export default function IngresarRegistro() {
                                                 <p className="text-xs text-green-600 mb-2">
                                                     Los campos se han llenado con la información del documento. Revisa los datos y haz clic en "Siguiente".
                                                 </p>
-                                                {aiAnalysisResult.extracted_text_preview && (
-                                                    <details className="mt-2">
-                                                        <summary className="text-xs text-green-600 cursor-pointer hover:text-green-800">
-                                                            Ver texto extraído del documento
-                                                        </summary>
-                                                        <p className="text-xs text-gray-600 mt-1 p-2 bg-gray-50 rounded border max-h-20 overflow-y-auto">
-                                                            {aiAnalysisResult.extracted_text_preview}
-                                                        </p>
-                                                    </details>
-                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -1180,10 +1170,15 @@ export default function IngresarRegistro() {
                                                         <Input
                                                             id="frecuencia_cardiaca"
                                                             type="number"
+                                                            min="30"
+                                                            max="200"
                                                             value={data.frecuencia_cardiaca}
                                                             onChange={(e) => setData('frecuencia_cardiaca', parseInt(e.target.value) || 0)}
-                                                            placeholder="60-100"
+                                                            placeholder="Normal: 60-100 lpm"
                                                         />
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Rango normal: 60-100 lpm | Bradicardia: &lt;60 | Taquicardia: &gt;100
+                                                        </p>
                                                     </div>
 
                                                     <div className="space-y-2">
@@ -1191,10 +1186,15 @@ export default function IngresarRegistro() {
                                                         <Input
                                                             id="frecuencia_respiratoria"
                                                             type="number"
+                                                            min="8"
+                                                            max="40"
                                                             value={data.frecuencia_respiratoria}
                                                             onChange={(e) => setData('frecuencia_respiratoria', parseInt(e.target.value) || 0)}
-                                                            placeholder="12-20"
+                                                            placeholder="Normal: 12-20 rpm"
                                                         />
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Rango normal: 12-20 rpm | Bradipnea: &lt;12 | Taquipnea: &gt;20
+                                                        </p>
                                                     </div>
 
                                                     <div className="space-y-2">
@@ -1203,10 +1203,15 @@ export default function IngresarRegistro() {
                                                             id="temperatura"
                                                             type="number"
                                                             step="0.1"
+                                                            min="32"
+                                                            max="45"
                                                             value={data.temperatura}
                                                             onChange={(e) => setData('temperatura', parseFloat(e.target.value) || 0)}
-                                                            placeholder="36.5"
+                                                            placeholder="Normal: 36.1-37.2°C"
                                                         />
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Normal: 36.1-37.2°C | Hipotermia: &lt;36°C | Fiebre: &gt;37.5°C
+                                                        </p>
                                                     </div>
 
                                                     <div className="space-y-2">
@@ -1214,10 +1219,15 @@ export default function IngresarRegistro() {
                                                         <Input
                                                             id="tension_sistolica"
                                                             type="number"
+                                                            min="60"
+                                                            max="250"
                                                             value={data.tension_sistolica}
                                                             onChange={(e) => setData('tension_sistolica', parseInt(e.target.value) || 0)}
-                                                            placeholder="120"
+                                                            placeholder="Normal: 90-120 mmHg"
                                                         />
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Normal: 90-120 mmHg | Hipotensión: &lt;90 | Hipertensión: &gt;140
+                                                        </p>
                                                     </div>
 
                                                     <div className="space-y-2">
@@ -1225,10 +1235,15 @@ export default function IngresarRegistro() {
                                                         <Input
                                                             id="tension_diastolica"
                                                             type="number"
+                                                            min="40"
+                                                            max="150"
                                                             value={data.tension_diastolica}
                                                             onChange={(e) => setData('tension_diastolica', parseInt(e.target.value) || 0)}
-                                                            placeholder="80"
+                                                            placeholder="Normal: 60-80 mmHg"
                                                         />
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Normal: 60-80 mmHg | Hipotensión: &lt;60 | Hipertensión: &gt;90
+                                                        </p>
                                                     </div>
 
                                                     <div className="space-y-2">
@@ -1236,10 +1251,15 @@ export default function IngresarRegistro() {
                                                         <Input
                                                             id="saturacion_oxigeno"
                                                             type="number"
+                                                            min="70"
+                                                            max="100"
                                                             value={data.saturacion_oxigeno}
                                                             onChange={(e) => setData('saturacion_oxigeno', parseInt(e.target.value) || 0)}
-                                                            placeholder="95-100"
+                                                            placeholder="Normal: 95-100%"
                                                         />
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Normal: 95-100% | Hipoxemia leve: 90-94% | Hipoxemia severa: &lt;90%
+                                                        </p>
                                                     </div>
 
                                                     <div className="space-y-2">
@@ -1247,10 +1267,15 @@ export default function IngresarRegistro() {
                                                         <Input
                                                             id="glucometria"
                                                             type="number"
+                                                            min="20"
+                                                            max="600"
                                                             value={data.glucometria}
                                                             onChange={(e) => setData('glucometria', parseInt(e.target.value) || 0)}
-                                                            placeholder="70-110"
+                                                            placeholder="Normal: 70-110 mg/dL"
                                                         />
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Normal: 70-110 mg/dL | Hipoglucemia: &lt;70 | Hiperglucemia: &gt;126 (ayunas)
+                                                        </p>
                                                     </div>
 
                                                     <div className="space-y-2">
