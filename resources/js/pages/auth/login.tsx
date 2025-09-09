@@ -5,13 +5,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 import { Form, Head } from '@inertiajs/react';
-import { LoaderCircle, Mail, Lock } from 'lucide-react';
+import { LoaderCircle, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
 
 interface LoginProps {
     status?: string;
 }
 
 export default function Login({ status }: LoginProps) {
+    const [showPassword, setShowPassword] = useState(false);
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
     return (
         <AuthLayout title="Iniciar Sesión" description="Accede a tu cuenta de Vital Red">
             <Head title="Iniciar Sesión - Vital Red" />
@@ -49,14 +56,27 @@ export default function Login({ status }: LoginProps) {
                                     <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <Input
                                         id="password"
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         name="password"
                                         required
                                         tabIndex={2}
                                         autoComplete="current-password"
                                         placeholder="Ingresa tu contraseña"
-                                        className="pl-10 h-11 border-2 focus:border-primary transition-colors"
+                                        className="pl-10 pr-10 h-11 border-2 focus:border-primary transition-colors"
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={togglePasswordVisibility}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:text-foreground"
+                                        tabIndex={-1}
+                                        aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff className="h-4 w-4" />
+                                        ) : (
+                                            <Eye className="h-4 w-4" />
+                                        )}
+                                    </button>
                                 </div>
                                 <InputError message={errors.password} />
                             </div>
