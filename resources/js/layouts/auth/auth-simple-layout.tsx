@@ -1,6 +1,6 @@
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Link } from '@inertiajs/react';
-import { type PropsWithChildren } from 'react';
+import { type PropsWithChildren, useState, useEffect } from 'react';
 
 interface AuthLayoutProps {
     name?: string;
@@ -9,6 +9,17 @@ interface AuthLayoutProps {
 }
 
 export default function AuthSimpleLayout({ children, title, description }: PropsWithChildren<AuthLayoutProps>) {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const images = ['/images/1.png', '/images/2.png', '/images/3.png'];
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+        }, 4000); // Cambiar imagen cada 4 segundos
+
+        return () => clearInterval(interval);
+    }, [images.length]);
+
     return (
         <div className="flex min-h-screen bg-background">
             {/* Lado izquierdo - Formulario de Login */}
@@ -60,34 +71,45 @@ export default function AuthSimpleLayout({ children, title, description }: Props
                     <div className="relative z-10 text-center text-white p-12 max-w-lg">
                         <div className="mb-12">
                             <h2 className="text-4xl font-bold mb-6 leading-tight">
-                                Bienvenido a <br />
-                                <span className="text-white/90">Vital Red</span>
+                                Bienvenido a
+                                <span className="text-white/90"> Vital Red</span>
                             </h2>
-                            <p className="text-lg opacity-90 leading-relaxed">
-                                Sistema integral de referencia y contrareferencia para una atención médica coordinada y eficiente.
-                            </p>
                         </div>
 
-                        {/* Placeholder mejorado para futuras imágenes/videos */}
-                        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20 shadow-2xl">
-                            <div className="w-72 h-48 mx-auto bg-white/10 rounded-2xl flex items-center justify-center border border-white/10">
-                                <div className="text-center">
-                                    <div className="w-20 h-20 mx-auto mb-4 bg-white/20 rounded-2xl flex items-center justify-center">
-                                        <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                                        </svg>
+                        {/* Carousel de imágenes */}
+                        <div className="w-full max-w-md h-80 mx-auto rounded-2xl overflow-hidden shadow-2xl relative">
+                            <div 
+                                className="flex transition-transform duration-1000 ease-in-out h-full"
+                                style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
+                            >
+                                {images.map((image, index) => (
+                                    <div key={index} className="w-full h-full flex-shrink-0 relative">
+                                        <img
+                                            src={image}
+                                            alt={`Imagen ${index + 1} de Vital Red`}
+                                            className="w-full h-full object-cover"
+                                        />
+                                        {/* Overlay sutil para mejor contraste */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                                     </div>
-                                    <p className="text-sm opacity-75 font-medium">Espacio para contenido multimedia</p>
-                                    <p className="text-xs opacity-60 mt-1">Imágenes, videos o presentaciones</p>
-                                </div>
+                                ))}
                             </div>
-                        </div>
-
-                        {/* Indicadores decorativos */}
-                        <div className="flex justify-center space-x-2 mt-8">
-                            <div className="w-2 h-2 bg-white/60 rounded-full"></div>
-                            <div className="w-2 h-2 bg-white/40 rounded-full"></div>
-                            <div className="w-2 h-2 bg-white/40 rounded-full"></div>
+                            
+                            {/* Indicadores de navegación */}
+                            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                                {images.map((_, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setCurrentImageIndex(index)}
+                                        className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                                            currentImageIndex === index
+                                                ? 'bg-white shadow-lg scale-110'
+                                                : 'bg-white/50 hover:bg-white/70'
+                                        }`}
+                                        aria-label={`Ir a imagen ${index + 1}`}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
