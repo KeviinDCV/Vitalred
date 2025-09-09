@@ -68,7 +68,7 @@ export default function AuthSimpleLayout({ children, title, description }: Props
                     <div className="absolute top-1/3 left-1/4 w-16 h-16 bg-white/10 rounded-full blur-md"></div>
 
                     {/* Contenedor principal */}
-                    <div className="relative z-10 text-center text-white p-12 max-w-lg">
+                    <div className="relative z-10 text-center text-white p-12 w-full">
                         <div className="mb-12">
                             <h2 className="text-4xl font-bold mb-6 leading-tight">
                                 Bienvenido a
@@ -77,7 +77,7 @@ export default function AuthSimpleLayout({ children, title, description }: Props
                         </div>
 
                         {/* Carousel de imágenes */}
-                        <div className="w-full max-w-md h-80 mx-auto rounded-2xl overflow-hidden shadow-2xl relative">
+                        <div className="w-full max-w-4xl h-[28rem] mx-auto rounded-2xl overflow-hidden shadow-2xl relative">
                             <div 
                                 className="flex transition-transform duration-1000 ease-in-out h-full"
                                 style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
