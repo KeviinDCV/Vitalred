@@ -22,4 +22,14 @@ export default defineConfig({
             'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
         },
     },
+    server: {
+        host: true, // Permite acceso desde cualquier IP
+        cors: {
+            origin: ['http://192.168.2.202:8000', 'http://localhost:8000', 'http://127.0.0.1:8000'],
+            credentials: true,
+        },
+        hmr: {
+            host: 'localhost',
+        },
+    },
 });

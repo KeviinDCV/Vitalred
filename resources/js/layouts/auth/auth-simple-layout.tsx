@@ -88,6 +88,8 @@ export default function AuthSimpleLayout({ children, title, description }: Props
                                             src={image}
                                             alt={`Imagen ${index + 1} de Vital Red`}
                                             className="w-full h-full object-cover"
+                                            loading={index === 0 ? "eager" : "lazy"}
+                                            decoding="async"
                                         />
                                         {/* Overlay sutil para mejor contraste */}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>

@@ -21,7 +21,12 @@ export default function Login({ status }: LoginProps) {
 
     return (
         <AuthLayout title="Iniciar Sesión" description="Accede a tu cuenta de Vital Red">
-            <Head title="Iniciar Sesión - Vital Red" />
+            <Head title="Iniciar Sesión - Vital Red">
+                <meta 
+                    name="description" 
+                    content="Accede a Vital Red, el sistema integral de referencia y contrareferencia para una atención médica coordinada y eficiente. Inicia sesión de forma segura." 
+                />
+            </Head>
 
             <Form method="post" action={route('login')} resetOnSuccess={['password']} className="space-y-6">
                 {({ processing, errors }) => (
