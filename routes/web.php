@@ -50,6 +50,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('ai/extract-patient-data', [App\Http\Controllers\AIController::class, 'extractPatientData'])->name('ai.extract-patient-data');
         Route::post('ai/test-text-extraction', [App\Http\Controllers\AIController::class, 'testTextExtraction'])->name('ai.test-text-extraction');
         Route::post('ai/test-gemini', [App\Http\Controllers\AIController::class, 'testGeminiAPI'])->name('ai.test-gemini');
+
+        // Rutas para Priorización IA
+        Route::get('priorizacion/prueba', function () {
+            return Inertia::render('medico/analisis-priorizacion-campos');
+        })->name('priorizacion.prueba');
+        Route::post('priorizacion/prueba', [App\Http\Controllers\Medico\PriorizacionController::class, 'procesarArchivoPrueba'])->name('priorizacion.prueba.procesar');
+        Route::get('priorizacion/carga-archivo', [App\Http\Controllers\Medico\PriorizacionController::class, 'mostrarCargaArchivo'])->name('priorizacion.carga-archivo');
+        Route::get('priorizacion/analisis/{id}', [App\Http\Controllers\Medico\PriorizacionController::class, 'mostrarAnalisis'])->name('priorizacion.analisis');
+        Route::post('priorizacion/analizar', [App\Http\Controllers\Medico\PriorizacionController::class, 'analizarPriorizacion'])->name('priorizacion.analizar');
+        Route::post('priorizacion/lote', [App\Http\Controllers\Medico\PriorizacionController::class, 'analizarLote'])->name('priorizacion.lote');
+        Route::post('priorizacion/actualizar/{id}', [App\Http\Controllers\Medico\PriorizacionController::class, 'actualizarPriorizacion'])->name('priorizacion.actualizar');
+        Route::post('ai/extraer-datos-documento', [App\Http\Controllers\Medico\PriorizacionController::class, 'extraerDatosPaciente'])->name('ai.extraer-datos-documento');
+        Route::post('priorizacion/debug-analisis', [App\Http\Controllers\Medico\PriorizacionController::class, 'debugAnalisis'])->name('priorizacion.debug-analisis');
+        Route::post('priorizacion/analizar-sin-ia', [App\Http\Controllers\Medico\PriorizacionController::class, 'analizarSinIA'])->name('priorizacion.analizar-sin-ia');
+        Route::get('priorizacion/test-gemini', [App\Http\Controllers\Medico\PriorizacionController::class, 'testGeminiIA'])->name('priorizacion.test-gemini');
     });
 });
 

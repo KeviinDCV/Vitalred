@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { Search, Users, FileText, Calendar, Filter, Eye, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { Search, Users, FileText, Calendar, Filter, Eye, ChevronLeft, ChevronRight, Download, Brain } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 interface RegistroMedico {
@@ -138,13 +138,19 @@ export default function ConsultaPacientes({ registros, filters }: Props) {
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
+                        <Button
+                            onClick={() => router.visit('/medico/priorizacion/prueba')}
+                            variant="outline"
+                            className="border-green-200 text-green-700 hover:bg-green-50"
+                        >
+                            <Eye className="h-4 w-4 mr-2" />
+                            🧠 Prueba IA Priorización
+                        </Button>
                         <Badge variant="outline" className="text-sm">
                             {registros.total} registros totales
                         </Badge>
                     </div>
                 </div>
-
-
 
                 {/* Buscador principal */}
                 <Card>
@@ -223,6 +229,7 @@ export default function ConsultaPacientes({ registros, filters }: Props) {
                                                 <TableHead>Edad</TableHead>
                                                 <TableHead>Tipo de Paciente</TableHead>
                                                 <TableHead>Prioridad</TableHead>
+                                                <TableHead>Análisis IA</TableHead>
                                                 <TableHead>Descargar Historia</TableHead>
                                             </TableRow>
                                         </TableHeader>
@@ -266,6 +273,17 @@ export default function ConsultaPacientes({ registros, filters }: Props) {
                                                     </TableCell>
                                                     <TableCell>
                                                         {getPrioridadBadge(registro.clasificacion_triage)}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => router.visit(`/medico/priorizacion/analisis/${registro.id}`)}
+                                                            className="border-green-200 text-green-700 hover:bg-green-50"
+                                                            title="Analizar con IA"
+                                                        >
+                                                            <Brain className="h-4 w-4" />
+                                                        </Button>
                                                     </TableCell>
                                                     <TableCell>
                                                         <Button
