@@ -662,13 +662,17 @@ class OpenRouterAIService
         $prompt .= "   - Extrae NOMBRE EXACTO del asegurador (ej: 'Nueva EPS', 'Sura EPS', 'Colmédica')\n";
         $prompt .= "   - Categoría: EPS/ARL/SOAT/ADRES/PARTICULAR/SECRETARIA_SALUD\n";
         $prompt .= "2. CIUDAD: Busca 'Lugar Residencia:', 'POPAYAN', 'Procedencia:', cualquier mención de ciudad\n";
-        $prompt .= "3. DEPARTAMENTO: Si encuentras ciudad, infiere departamento (POPAYAN = Cauca)\n\n";
+        $prompt .= "3. DEPARTAMENTO: Si encuentras ciudad, infiere departamento (POPAYAN = Cauca)\n";
+        $prompt .= "4. INSTITUCIÓN REMITENTE: Busca el nombre del hospital/clínica en encabezado\n";
+        $prompt .= "   - Busca 'E.S.E.', 'HOSPITAL', 'CLÍNICA', 'CENTRO MÉDICO', 'IPS', 'ESE'\n";
+        $prompt .= "   - Extrae nombre completo de la institución médica que emite el documento\n\n";
         $prompt .= "🔥 RESPONDE ÚNICAMENTE CON JSON - INCLUYE TODOS LOS CAMPOS:\n";
         $prompt .= "{\n";
         $prompt .= '  "asegurador": "OBLIGATORIO - categoría: eps/arl/soat/adres/particular/secretaria_salud_departamental/secretaria_salud_distrital o null",' . "\n";
         $prompt .= '  "asegurador_nombre": "OBLIGATORIO - nombre exacto del asegurador (ej: Nueva EPS, Sura EPS) o null",' . "\n";
         $prompt .= '  "departamento": "OBLIGATORIO - busca o infiere o usa null",' . "\n";
         $prompt .= '  "ciudad": "OBLIGATORIO - busca residencia o usa null",' . "\n";
+        $prompt .= '  "institucion_remitente": "OBLIGATORIO - nombre completo del hospital/clínica (ej: E.S.E. Hospital San Vicente) o null",' . "\n";
         $prompt .= '  "nombre": "nombre(s) del paciente",' . "\n";
         $prompt .= '  "apellidos": "apellido(s) del paciente",' . "\n";
         $prompt .= '  "tipo_identificacion": "CC/TI/RC/CE/PA",' . "\n";
