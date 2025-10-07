@@ -36,8 +36,6 @@ class AIController extends Controller
             // Guardar archivo temporalmente
             $tempPath = $file->store('temp/ai_analysis', 'public');
             
-            Log::info("Iniciando análisis de IA para archivo: " . $tempPath);
-
             // Extraer texto del archivo usando OpenRouter (DeepSeek 3.1)
             $extractedText = $this->aiService->extractTextFromFile($tempPath);
             
@@ -45,15 +43,19 @@ class AIController extends Controller
                 throw new \Exception("No se pudo extraer texto del archivo o el archivo está vacío");
             }
 
-            Log::info("Texto extraído exitosamente, longitud: " . strlen($extractedText));
-
             // Analizar texto con IA (OpenRouter - DeepSeek 3.1)
             $patientData = $this->aiService->analyzePatientDocument($extractedText);
 
+            // 🔍 DEBUG: Mostrar específicamente campos sociodemográficos extraídos por IA
+            Log::info("🔍 DATOS SOCIODEMOGRÁFICOS EXTRAÍDOS POR IA:", [
+                'asegurador' => $patientData['asegurador'] ?? 'NO_ENCONTRADO',
+                'departamento' => $patientData['departamento'] ?? 'NO_ENCONTRADO', 
+                'ciudad' => $patientData['ciudad'] ?? 'NO_ENCONTRADO',
+                'institucion_remitente' => $patientData['institucion_remitente'] ?? 'NO_ENCONTRADO'
+            ]);
+
             // Limpiar archivo temporal
             Storage::disk('public')->delete($tempPath);
-
-            Log::info("Análisis de IA completado exitosamente", $patientData);
             Log::info("Fecha de nacimiento en respuesta: " . ($patientData['fecha_nacimiento'] ?? 'NULL'));
 
             return response()->json([

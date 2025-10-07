@@ -878,12 +878,22 @@ $textoCompleto
                 unlink($rutaCompleta);
             }
             
-            // PASO 2: Analizar con OpenRouter (DeepSeek 3.1)
-            \Log::info('ANALIZANDO CON OPENROUTER (DeepSeek 3.1)');
+            // PASO 2: Analizar con OpenRouter (DeepSeek 3.1) - CON FALLBACK SOCIODEMOGRÁFICO
+            \Log::info('ANALIZANDO CON OPENROUTER (DeepSeek 3.1) + FALLBACK');
             
             try {
-                $analisisIA = $this->aiService->analizarHistoriaClinicaLibre($textoCompleto);
-                \Log::info('ANÁLISIS COMPLETADO', ['longitud' => strlen($analisisIA)]);
+                // ✅ USAR EL MÉTODO CORRECTO CON FALLBACK
+                $datosEstructurados = $this->aiService->analizarHistoriaClinicaCompleta($textoCompleto);
+                \Log::info('ANÁLISIS COMPLETADO CON FALLBACK', ['campos' => array_keys($datosEstructurados)]);
+                
+                // Convertir directamente a la respuesta final
+                return response()->json([
+                    'success' => true,
+                    'data' => $datosEstructurados,
+                    'extracted_text_preview' => substr($textoCompleto, 0, 200) . '...',
+                    'message' => 'Datos extraídos exitosamente del documento'
+                ]);
+                
             } catch (\Exception $e) {
                 \Log::error('ERROR EN ANÁLISIS CON IA: ' . $e->getMessage());
                 

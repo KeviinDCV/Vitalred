@@ -322,7 +322,8 @@ class OpenRouterAIService
         try {
             $prompt = $this->buildHistoriaClinicaCompletaPrompt($text);
             $response = $this->callOpenRouterAPI($prompt);
-            return $this->parseHistoriaClinicaResponse($response);
+            // ✅ CONECTAR: Pasar el texto original para que funcione el fallback parsing
+            return $this->parseHistoriaClinicaResponse($response, $text);
         } catch (\Exception $e) {
             Log::error("Error en análisis completo con OpenRouter: " . $e->getMessage());
             throw new \Exception("Error en el análisis: " . $e->getMessage());
@@ -342,19 +343,69 @@ class OpenRouterAIService
         $prompt .= "2. NO inventes ni asumas datos que no estén explícitamente en el texto\n";
         $prompt .= "3. Si un dato no está disponible, usa null\n";
         $prompt .= "4. Presta especial atención a signos vitales, síntomas y datos clínicos\n\n";
+        $prompt .= "⚠️ IMPORTANTE - SEPARACIÓN DE NOMBRES Y APELLIDOS:\n";
+        $prompt .= "- Si el nombre completo del paciente aparece junto (ejemplo: 'Ricaute Ulchur Choque'), debes separarlo correctamente en nombre(s) y apellido(s)\n";
+        $prompt .= "- En Colombia/América Latina, generalmente las primeras 1-2 palabras son NOMBRES y las últimas 1-2 son APELLIDOS\n";
+        $prompt .= "- Ejemplos de separación correcta:\n";
+        $prompt .= "  * 'Juan Pérez' → nombre: 'Juan', apellidos: 'Pérez'\n";
+        $prompt .= "  * 'María García López' → nombre: 'María', apellidos: 'García López'\n";
+        $prompt .= "  * 'Carlos Andrés Ramírez' → nombre: 'Carlos Andrés', apellidos: 'Ramírez'\n";
+        $prompt .= "  * 'Ricaute Ulchur Choque' → nombre: 'Ricaute', apellidos: 'Ulchur Choque'\n";
+        $prompt .= "  * 'Ana María Rodríguez Sánchez' → nombre: 'Ana María', apellidos: 'Rodríguez Sánchez'\n";
+        $prompt .= "- Si no estás seguro de la separación, asume: 1 nombre + resto apellidos\n";
+        $prompt .= "- NUNCA pongas el nombre completo en un solo campo\n\n";
+        $prompt .= "⚠️ IMPORTANTE - EXTRACCIÓN DEL TIPO DE IDENTIFICACIÓN:\n";
+        $prompt .= "- Busca e identifica el tipo de documento de identidad del paciente en el texto\n";
+        $prompt .= "- Tipos de identificación válidos en Colombia:\n";
+        $prompt .= "  * CC = Cédula de Ciudadanía (adultos mayores de 18 años)\n";
+        $prompt .= "  * TI = Tarjeta de Identidad (menores de edad entre 7-17 años)\n";
+        $prompt .= "  * RC = Registro Civil (menores de 7 años)\n";
+        $prompt .= "  * CE = Cédula de Extranjería (extranjeros residentes)\n";
+        $prompt .= "  * PA = Pasaporte (extranjeros no residentes)\n";
+        $prompt .= "  * AS = Adulto Sin Identificación\n";
+        $prompt .= "  * MS = Menor Sin Identificación\n";
+        $prompt .= "- Busca palabras clave como: 'Cédula', 'C.C.', 'CC', 'Documento', 'Identificación', 'TI', 'RC', etc.\n";
+        $prompt .= "- Si no encuentras el tipo explícito pero hay edad, infiere: edad >= 18 años = 'CC', edad 7-17 = 'TI', edad < 7 = 'RC'\n";
+        $prompt .= "- Si definitivamente no puedes determinar el tipo, usa null\n\n";
+        $prompt .= "⚠️ IMPORTANTE - EXTRACCIÓN DE DEPARTAMENTO Y CIUDAD:\n";
+        $prompt .= "- Busca e identifica el departamento y ciudad de residencia del paciente en el texto\n";
+        $prompt .= "- Departamentos de Colombia: Amazonas, Antioquia, Arauca, Atlántico, Bolívar, Boyacá, Caldas, Caquetá, Casanare, Cauca, Cesar, Chocó, Córdoba, Cundinamarca, Guainía, Guaviare, Huila, La Guajira, Magdalena, Meta, Nariño, Norte de Santander, Putumayo, Quindío, Risaralda, San Andrés y Providencia, Santander, Sucre, Tolima, Valle del Cauca, Vaupés, Vichada\n";
+        $prompt .= "- Capitales principales: Leticia, Medellín, Arauca, Barranquilla, Cartagena, Tunja, Manizales, Florencia, Yopal, Popayán, Valledupar, Quibdó, Montería, Bogotá, Inírida, San José del Guaviare, Neiva, Riohacha, Santa Marta, Villavicencio, Pasto, Cúcuta, Mocoa, Armenia, Pereira, San Andrés, Bucaramanga, Sincelejo, Ibagué, Cali, Mitú, Puerto Carreño\n";
+        $prompt .= "- Si encuentra abreviaciones como 'Bog' = Bogotá, 'Med' = Medellín, 'Cali' = Cali, etc.\n";
+        $prompt .= "- Busca palabras clave como: 'Procedencia:', 'Residencia:', 'Dirección:', 'Domicilio:', 'Vive en:', etc.\n";
+        $prompt .= "- Si solo tienes ciudad, infiere el departamento más probable (ej: Medellín = Antioquia, Cali = Valle del Cauca)\n";
+        $prompt .= "- Si no encuentras datos geográficos explícitos, usa null\n\n";
+        $prompt .= "⚠️ CRÍTICO - EXTRACCIÓN DEL ASEGURADOR (OBLIGATORIO):\n";
+        $prompt .= "- BUSCA exactamente estas palabras: 'Entidad:', 'EPS', 'NUEVA EMPRESA PROMOTORA', 'Régimen:', 'DATOS DE AFILIACIÓN'\n";
+        $prompt .= "- Si encuentras 'NUEVA EMPRESA PROMOTORA DE SALUD' → usa 'Nueva EPS'\n";
+        $prompt .= "- Si encuentras 'Entidad:' seguido de cualquier nombre → usa ese nombre\n";
+        $prompt .= "- Variaciones: 'Nueva EPS', 'NUEVA EPS', 'Nueva Empresa Promotora'\n";
+        $prompt .= "- OBLIGATORIO: SIEMPRE incluye el campo 'asegurador' en el JSON, aunque sea null\n\n";
+
+        $prompt .= "⚠️ CRÍTICO - EXTRACCIÓN GEOGRÁFICA (OBLIGATORIO):\n";
+        $prompt .= "- BUSCA exactamente: 'Lugar Residencia:', 'POPAYAN', 'Dirección:', 'Residencia:', 'Domicilio:'\n";
+        $prompt .= "- Si encuentras 'POPAYAN' o 'Popayán' → ciudad: 'Popayán', departamento: 'Cauca'\n";
+        $prompt .= "- Si encuentras cualquier ciudad después de 'Lugar Residencia:' → úsa esa ciudad\n";
+        $prompt .= "- Inferencias críticas: POPAYAN=Popayán,Cauca | BOGOTA=Bogotá,Cundinamarca | MEDELLIN=Medellín,Antioquia | CALI=Cali,Valle del Cauca\n";
+        $prompt .= "- OBLIGATORIO: SIEMPRE incluye los campos 'departamento' y 'ciudad' en el JSON, aunque sean null\n\n";
+
+        $prompt .= "⚠️ CRÍTICO - INSTITUCIÓN REMITENTE:\n";
+        $prompt .= "- BUSCA nombres de hospitales, clínicas, centros de salud, IPS\n";
+        $prompt .= "- Palabras clave: 'Hospital', 'Clínica', 'Centro', 'IPS', 'Remite', 'Referido por', 'Enviado desde'\n";
+        $prompt .= "- SIEMPRE incluye el campo 'institucion_remitente' en el JSON, aunque sea null\n\n";
         $prompt .= "Responde ÚNICAMENTE con un JSON válido (sin markdown, sin explicaciones adicionales) con esta estructura:\n";
         $prompt .= "{\n";
-        $prompt .= '  "nombre": "nombre del paciente",' . "\n";
-        $prompt .= '  "apellidos": "apellidos del paciente",' . "\n";
-        $prompt .= '  "tipo_identificacion": "CC/TI/RC/etc",' . "\n";
-        $prompt .= '  "numero_identificacion": "número",' . "\n";
-        $prompt .= '  "fecha_nacimiento": "YYYY-MM-DD",' . "\n";
-        $prompt .= '  "edad": número,' . "\n";
-        $prompt .= '  "sexo": "masculino/femenino/otro",' . "\n";
         $prompt .= '  "asegurador": "nombre EPS/asegurador",' . "\n";
         $prompt .= '  "departamento": "departamento",' . "\n";
         $prompt .= '  "ciudad": "ciudad",' . "\n";
         $prompt .= '  "institucion_remitente": "nombre institución",' . "\n";
+        $prompt .= '  "nombre": "nombre(s) del paciente - separado correctamente",' . "\n";
+        $prompt .= '  "apellidos": "apellido(s) del paciente - separado correctamente",' . "\n";
+        $prompt .= '  "tipo_identificacion": "CC/TI/RC/CE/PA/AS/MS - extraído o inferido según edad",' . "\n";
+        $prompt .= '  "numero_identificacion": "número",' . "\n";
+        $prompt .= '  "fecha_nacimiento": "YYYY-MM-DD",' . "\n";
+        $prompt .= '  "edad": número,' . "\n";
+        $prompt .= '  "sexo": "masculino/femenino/otro",' . "\n";
         $prompt .= '  "tipo_paciente": "Adulto/Gestante/Menor de edad",' . "\n";
         $prompt .= '  "diagnostico_principal": "diagnóstico principal",' . "\n";
         $prompt .= '  "diagnostico_1": "diagnóstico secundario 1",' . "\n";
@@ -390,7 +441,7 @@ class OpenRouterAIService
     /**
      * Parsear respuesta del análisis completo de historia clínica
      */
-    private function parseHistoriaClinicaResponse(string $response): array
+    private function parseHistoriaClinicaResponse(string $response, string $originalText = ''): array
     {
         try {
             // Buscar el JSON en la respuesta
@@ -408,11 +459,185 @@ class OpenRouterAIService
                 throw new \Exception("Error al decodificar JSON: " . json_last_error_msg());
             }
             
+            // ✅ FALLBACK: Si la IA no devolvió campos sociodemográficos, extraerlos directamente del texto
+            $data = $this->addMissingSociodemographicData($data, $originalText);
+            
             return $data;
         } catch (\Exception $e) {
             Log::error("Error parseando respuesta de OpenRouter: " . $e->getMessage());
             throw $e;
         }
+    }
+
+    /**
+     * Agregar datos sociodemográficos faltantes extrayéndolos directamente del texto
+     */
+    private function addMissingSociodemographicData(array $data, string $text): array
+    {
+        Log::info("🔍 FALLBACK: Verificando campos sociodemográficos faltantes");
+        
+        // Si no hay asegurador, buscarlo en el texto
+        if (empty($data['asegurador'])) {
+            $asegurador = $this->extractAseguradorFromText($text);
+            if ($asegurador) {
+                $data['asegurador'] = $asegurador;
+                Log::info("✅ FALLBACK: Asegurador extraído del texto: {$asegurador}");
+            }
+        }
+        
+        // Si no hay ciudad, buscarla en el texto
+        if (empty($data['ciudad'])) {
+            $ciudad = $this->extractCiudadFromText($text);
+            if ($ciudad) {
+                $data['ciudad'] = $ciudad;
+                Log::info("✅ FALLBACK: Ciudad extraída del texto: {$ciudad}");
+            }
+        }
+        
+        // Si no hay departamento pero sí ciudad, inferirlo
+        if (empty($data['departamento'])) {
+            $departamento = $this->extractDepartamentoFromText($text, $data['ciudad'] ?? '');
+            if ($departamento) {
+                $data['departamento'] = $departamento;
+                Log::info("✅ FALLBACK: Departamento extraído/inferido: {$departamento}");
+            }
+        }
+        
+        // Si no hay institución remitente, buscarla en el texto
+        if (empty($data['institucion_remitente'])) {
+            $institucion = $this->extractInstitucionFromText($text);
+            if ($institucion) {
+                $data['institucion_remitente'] = $institucion;
+                Log::info("✅ FALLBACK: Institución extraída del texto: {$institucion}");
+            }
+        }
+        
+        return $data;
+    }
+
+    /**
+     * Extraer asegurador directamente del texto
+     */
+    private function extractAseguradorFromText(string $text): ?string
+    {
+        // Buscar patrones específicos del asegurador
+        $patterns = [
+            '/Entidad:\s*([^\n\r\t]+)/i',
+            '/EPS:\s*([^\n\r\t]+)/i',
+            '/NUEVA EMPRESA PROMOTORA DE SALUD/i',
+            '/Asegurador:\s*([^\n\r\t]+)/i',
+        ];
+        
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                $asegurador = trim($matches[1] ?? $matches[0]);
+                
+                // Mapear nombres comunes
+                if (stripos($asegurador, 'NUEVA EMPRESA PROMOTORA') !== false) {
+                    return 'Nueva EPS';
+                }
+                if (stripos($asegurador, 'SANITAS') !== false) {
+                    return 'Sanitas';
+                }
+                
+                return $asegurador;
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Extraer ciudad directamente del texto
+     */
+    private function extractCiudadFromText(string $text): ?string
+    {
+        // Buscar patrones específicos de ciudad
+        $patterns = [
+            '/Lugar Residencia:\s*([^\n\r\t]+)/i',
+            '/Residencia:\s*([^\n\r\t]+)/i',
+            '/Procedencia:\s*([^\n\r\t]+)/i',
+            '/Domicilio:\s*([^\n\r\t]+)/i',
+        ];
+        
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                $ciudad = trim($matches[1]);
+                
+                // Mapear nombres comunes
+                if (stripos($ciudad, 'POPAYAN') !== false) {
+                    return 'Popayán';
+                }
+                if (stripos($ciudad, 'BOGOTA') !== false) {
+                    return 'Bogotá';
+                }
+                
+                return $ciudad;
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Extraer/inferir departamento directamente del texto o desde ciudad
+     */
+    private function extractDepartamentoFromText(string $text, string $ciudad = ''): ?string
+    {
+        // Primero buscar departamento explícito en el texto
+        $patterns = [
+            '/Departamento:\s*([^\n\r\t]+)/i',
+            '/Depto:\s*([^\n\r\t]+)/i',
+        ];
+        
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                return trim($matches[1]);
+            }
+        }
+        
+        // Inferir departamento desde ciudad
+        $ciudadDepartamento = [
+            'Popayán' => 'Cauca',
+            'POPAYAN' => 'Cauca',
+            'Bogotá' => 'Cundinamarca',
+            'BOGOTA' => 'Cundinamarca',
+            'Medellín' => 'Antioquia',
+            'MEDELLIN' => 'Antioquia',
+            'Cali' => 'Valle del Cauca',
+            'CALI' => 'Valle del Cauca',
+            'Barranquilla' => 'Atlántico',
+            'BARRANQUILLA' => 'Atlántico',
+        ];
+        
+        if ($ciudad && isset($ciudadDepartamento[$ciudad])) {
+            return $ciudadDepartamento[$ciudad];
+        }
+        
+        return null;
+    }
+
+    /**
+     * Extraer institución remitente directamente del texto
+     */
+    private function extractInstitucionFromText(string $text): ?string
+    {
+        // Buscar patrones específicos de institución
+        $patterns = [
+            '/Hospital\s+([^\n\r\t]+)/i',
+            '/Clínica\s+([^\n\r\t]+)/i',
+            '/Centro\s+([^\n\r\t]+)/i',
+            '/IPS\s+([^\n\r\t]+)/i',
+            '/Remitente:\s*([^\n\r\t]+)/i',
+        ];
+        
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                return trim($matches[1]);
+            }
+        }
+        
+        return null;
     }
 
     /**
@@ -423,19 +648,35 @@ class OpenRouterAIService
         $prompt = "Eres un sistema experto de análisis de documentos médicos. Analiza el siguiente documento y extrae los datos del paciente.\n\n";
         $prompt .= "DOCUMENTO MÉDICO:\n";
         $prompt .= $text . "\n\n";
-        $prompt .= "Extrae la siguiente información y responde ÚNICAMENTE con un JSON válido (sin markdown):\n";
+        $prompt .= "⚠️ IMPORTANTE - SEPARACIÓN DE NOMBRES Y APELLIDOS:\n";
+        $prompt .= "- Separa correctamente el nombre completo en nombre(s) y apellido(s)\n";
+        $prompt .= "- En Colombia/América Latina: primeras 1-2 palabras = NOMBRES, últimas 1-2 = APELLIDOS\n";
+        $prompt .= "- Ejemplos: 'Juan Pérez' → nombre: 'Juan', apellidos: 'Pérez' | 'María García López' → nombre: 'María', apellidos: 'García López'\n";
+        $prompt .= "- NUNCA pongas el nombre completo en un solo campo\n\n";
+        $prompt .= "⚠️ EXTRACCIÓN DEL TIPO DE IDENTIFICACIÓN:\n";
+        $prompt .= "- Busca el tipo de documento: CC (Cédula), TI (Tarjeta Identidad), RC (Registro Civil), CE (Cédula Extranjería), PA (Pasaporte)\n";
+        $prompt .= "- Si no está explícito, infiere según edad: >= 18 años = CC, 7-17 = TI, < 7 = RC\n\n";
+        
+        $prompt .= "🚨 CAMPOS OBLIGATORIOS QUE DEBES EXTRAER SÍ O SÍ:\n";
+        $prompt .= "1. ASEGURADOR: Busca 'Entidad:', 'EPS:', 'NUEVA EMPRESA PROMOTORA', cualquier mención de seguro médico\n";
+        $prompt .= "2. CIUDAD: Busca 'Lugar Residencia:', 'POPAYAN', 'Procedencia:', cualquier mención de ciudad\n";
+        $prompt .= "3. DEPARTAMENTO: Si encuentras ciudad, infiere departamento (POPAYAN = Cauca)\n\n";
+        $prompt .= "🔥 RESPONDE ÚNICAMENTE CON JSON - INCLUYE TODOS LOS CAMPOS:\n";
         $prompt .= "{\n";
-        $prompt .= '  "nombre": "nombre completo del paciente",' . "\n";
-        $prompt .= '  "apellidos": "apellidos del paciente",' . "\n";
-        $prompt .= '  "tipo_identificacion": "CC/TI/RC/etc",' . "\n";
+        $prompt .= '  "asegurador": "OBLIGATORIO - busca EPS/entidad o usa null",' . "\n";
+        $prompt .= '  "departamento": "OBLIGATORIO - busca o infiere o usa null",' . "\n";
+        $prompt .= '  "ciudad": "OBLIGATORIO - busca residencia o usa null",' . "\n";
+        $prompt .= '  "nombre": "nombre(s) del paciente",' . "\n";
+        $prompt .= '  "apellidos": "apellido(s) del paciente",' . "\n";
+        $prompt .= '  "tipo_identificacion": "CC/TI/RC/CE/PA",' . "\n";
         $prompt .= '  "numero_identificacion": "número de documento",' . "\n";
         $prompt .= '  "fecha_nacimiento": "YYYY-MM-DD o null",' . "\n";
         $prompt .= '  "edad": número o null,' . "\n";
         $prompt .= '  "sexo": "masculino/femenino/otro",' . "\n";
         $prompt .= '  "diagnostico_principal": "diagnóstico principal",' . "\n";
-        $prompt .= '  "motivo_consulta": "motivo de consulta o ingreso"' . "\n";
+        $prompt .= '  "motivo_consulta": "motivo de consulta"' . "\n";
         $prompt .= "}\n";
-        $prompt .= "Si algún dato no está disponible en el documento, usa null.";
+        $prompt .= "⚠️ DEBES INCLUIR TODOS LOS CAMPOS, INCLUSO SI SON null.\n";
         
         return $prompt;
     }
@@ -477,7 +718,10 @@ class OpenRouterAIService
 
             $content = $data['choices'][0]['message']['content'];
             Log::info("Respuesta recibida de OpenRouter, longitud: " . strlen($content));
-            
+        
+            // 🔍 DEBUG: Mostrar respuesta RAW de la IA para depuración
+            Log::info("🔍 RESPUESTA RAW DE LA IA:", ['content' => $content]);
+
             return $content;
         } catch (\Exception $e) {
             Log::error("Error llamando a OpenRouter API: " . $e->getMessage());
@@ -491,18 +735,29 @@ class OpenRouterAIService
     private function parseAIResponse(string $response): array
     {
         try {
-            // Buscar JSON en la respuesta (puede venir con markdown o texto adicional)
-            $jsonStart = strpos($response, '{');
-            $jsonEnd = strrpos($response, '}');
+            // 🔧 MEJORADO: Manejar bloques markdown ```json ... ```
+            $jsonString = $response;
             
-            if ($jsonStart === false || $jsonEnd === false) {
-                throw new \Exception("No se encontró JSON en la respuesta de la IA");
+            // Si viene en bloque markdown, extraer solo el contenido JSON
+            if (strpos($response, '```json') !== false) {
+                preg_match('/```json\s*(.*?)\s*```/s', $response, $matches);
+                if (isset($matches[1])) {
+                    $jsonString = trim($matches[1]);
+                }
+            } else {
+                // Fallback: Buscar JSON en la respuesta (método anterior)
+                $jsonStart = strpos($response, '{');
+                $jsonEnd = strrpos($response, '}');
+                
+                if ($jsonStart !== false && $jsonEnd !== false) {
+                    $jsonString = substr($response, $jsonStart, $jsonEnd - $jsonStart + 1);
+                }
             }
             
-            $jsonString = substr($response, $jsonStart, $jsonEnd - $jsonStart + 1);
             $data = json_decode($jsonString, true);
             
             if (json_last_error() !== JSON_ERROR_NONE) {
+                Log::error("Error al parsear JSON de IA: " . json_last_error_msg() . " | JSON: " . $jsonString);
                 throw new \Exception("Error al parsear JSON: " . json_last_error_msg());
             }
             
@@ -520,6 +775,7 @@ class OpenRouterAIService
     {
         // Establecer valores por defecto para campos requeridos
         $cleanData = [
+            // ✅ CAMPOS PERSONALES
             'nombre' => $data['nombre'] ?? '',
             'apellidos' => $data['apellidos'] ?? '',
             'tipo_identificacion' => $data['tipo_identificacion'] ?? 'CC',
@@ -527,6 +783,14 @@ class OpenRouterAIService
             'fecha_nacimiento' => $data['fecha_nacimiento'] ?? null,
             'edad' => $data['edad'] ?? null,
             'sexo' => $data['sexo'] ?? 'otro',
+            
+            // ✅ CAMPOS SOCIODEMOGRÁFICOS (que estaban siendo filtrados)
+            'asegurador' => $data['asegurador'] ?? '',
+            'departamento' => $data['departamento'] ?? '',
+            'ciudad' => $data['ciudad'] ?? '',
+            'institucion_remitente' => $data['institucion_remitente'] ?? '',
+            
+            // ✅ CAMPOS MÉDICOS
             'diagnostico_principal' => $data['diagnostico_principal'] ?? '',
             'motivo_consulta' => $data['motivo_consulta'] ?? '',
         ];
