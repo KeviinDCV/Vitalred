@@ -2,18 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\GeminiAIService;
+// COMENTADO: Migrado de Gemini a OpenRouter con DeepSeek 3.1
+// use App\Services\GeminiAIService;
+use App\Services\OpenRouterAIService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class AIController extends Controller
 {
-    protected GeminiAIService $geminiService;
+    // COMENTADO: Ahora usando OpenRouterAIService
+    // protected GeminiAIService $geminiService;
+    protected OpenRouterAIService $aiService;
 
-    public function __construct(GeminiAIService $geminiService)
+    public function __construct(OpenRouterAIService $aiService)
     {
-        $this->geminiService = $geminiService;
+        $this->aiService = $aiService;
     }
 
     /**
@@ -34,8 +38,8 @@ class AIController extends Controller
             
             Log::info("Iniciando análisis de IA para archivo: " . $tempPath);
 
-            // Extraer texto del archivo
-            $extractedText = $this->geminiService->extractTextFromFile($tempPath);
+            // Extraer texto del archivo usando OpenRouter (DeepSeek 3.1)
+            $extractedText = $this->aiService->extractTextFromFile($tempPath);
             
             if (empty(trim($extractedText))) {
                 throw new \Exception("No se pudo extraer texto del archivo o el archivo está vacío");
@@ -43,8 +47,8 @@ class AIController extends Controller
 
             Log::info("Texto extraído exitosamente, longitud: " . strlen($extractedText));
 
-            // Analizar texto con IA
-            $patientData = $this->geminiService->analyzePatientDocument($extractedText);
+            // Analizar texto con IA (OpenRouter - DeepSeek 3.1)
+            $patientData = $this->aiService->analyzePatientDocument($extractedText);
 
             // Limpiar archivo temporal
             Storage::disk('public')->delete($tempPath);
@@ -127,7 +131,7 @@ class AIController extends Controller
             ]);
 
             $text = $request->input('text');
-            $patientData = $this->geminiService->analyzePatientDocument($text);
+            $patientData = $this->aiService->analyzePatientDocument($text);
 
             return response()->json([
                 'success' => true,
@@ -136,7 +140,7 @@ class AIController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error("Error probando API de Gemini: " . $e->getMessage());
+            Log::error("Error probando API de OpenRouter: " . $e->getMessage());
 
             return response()->json([
                 'success' => false,

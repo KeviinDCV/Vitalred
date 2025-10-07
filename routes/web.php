@@ -52,9 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('ai/test-gemini', [App\Http\Controllers\AIController::class, 'testGeminiAPI'])->name('ai.test-gemini');
 
         // Rutas para Priorización IA
-        Route::get('priorizacion/prueba', function () {
-            return Inertia::render('medico/analisis-priorizacion-campos');
-        })->name('priorizacion.prueba');
+        Route::get('priorizacion/prueba', [App\Http\Controllers\Medico\PriorizacionController::class, 'pruebaAlgoritmo'])->name('priorizacion.prueba');
         Route::post('priorizacion/prueba', [App\Http\Controllers\Medico\PriorizacionController::class, 'procesarArchivoPrueba'])->name('priorizacion.prueba.procesar');
         Route::get('priorizacion/carga-archivo', [App\Http\Controllers\Medico\PriorizacionController::class, 'mostrarCargaArchivo'])->name('priorizacion.carga-archivo');
         Route::get('priorizacion/analisis/{id}', [App\Http\Controllers\Medico\PriorizacionController::class, 'mostrarAnalisis'])->name('priorizacion.analisis');
@@ -65,6 +63,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('priorizacion/debug-analisis', [App\Http\Controllers\Medico\PriorizacionController::class, 'debugAnalisis'])->name('priorizacion.debug-analisis');
         Route::post('priorizacion/analizar-sin-ia', [App\Http\Controllers\Medico\PriorizacionController::class, 'analizarSinIA'])->name('priorizacion.analizar-sin-ia');
         Route::get('priorizacion/test-gemini', [App\Http\Controllers\Medico\PriorizacionController::class, 'testGeminiIA'])->name('priorizacion.test-gemini');
+        
+        // Rutas para análisis manual (pruebas)
+        Route::post('priorizacion/guardar-analisis-manual', [App\Http\Controllers\Medico\PriorizacionController::class, 'guardarAnalisisManual'])->name('priorizacion.guardar-analisis-manual');
+        Route::get('priorizacion/listar-analisis-guardados', [App\Http\Controllers\Medico\PriorizacionController::class, 'listarAnalisisGuardados'])->name('priorizacion.listar-analisis-guardados');
     });
 });
 

@@ -2,11 +2,33 @@
 
 namespace App\Services;
 
+/**
+ * =====================================================
+ * SERVICIO DEPRECADO - NO USAR EN NUEVOS DESARROLLOS
+ * =====================================================
+ * 
+ * Este servicio utilizaba Google Gemini AI y ha sido
+ * reemplazado por OpenRouterAIService que usa DeepSeek 3.1.
+ * 
+ * Se mantiene el archivo comentado para referencia histórica,
+ * pero todos los controladores ahora usan OpenRouterAIService.
+ * 
+ * Migración realizada: 2025-01-10
+ * Razón: Cambio a OpenRouter con DeepSeek 3.1 (free tier)
+ * 
+ * @deprecated Use OpenRouterAIService instead
+ * @see App\Services\OpenRouterAIService
+ * =====================================================
+ */
+
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Smalot\PdfParser\Parser;
 
+/**
+ * @deprecated This service is deprecated. Use OpenRouterAIService instead.
+ */
 class GeminiAIService
 {
     private array $apiKeys;

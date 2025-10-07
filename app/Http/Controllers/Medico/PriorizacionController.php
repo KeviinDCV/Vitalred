@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Medico;
 
 use App\Http\Controllers\Controller;
-use App\Services\GeminiAIService;
+// COMENTADO: Migrado de Gemini a OpenRouter con DeepSeek 3.1
+// use App\Services\GeminiAIService;
+use App\Services\OpenRouterAIService;
 use App\Models\RegistroMedico;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -11,11 +13,13 @@ use Inertia\Response;
 
 class PriorizacionController extends Controller
 {
-    protected $geminiService;
+    // COMENTADO: Ahora usando OpenRouterAIService
+    // protected $geminiService;
+    protected $aiService;
 
-    public function __construct(GeminiAIService $geminiService)
+    public function __construct(OpenRouterAIService $aiService)
     {
-        $this->geminiService = $geminiService;
+        $this->aiService = $aiService;
     }
 
     /**
@@ -253,7 +257,7 @@ class PriorizacionController extends Controller
      */
     public function pruebaAlgoritmo(Request $request)
     {
-        return Inertia::render('medico/analisis-priorizacion-nueva');
+        return Inertia::render('medico/analisis-priorizacion-campos');
     }
 
     /**
@@ -261,6 +265,9 @@ class PriorizacionController extends Controller
      */
     public function procesarArchivoPrueba(Request $request)
     {
+        // Aumentar tiempo de ejecución para OCR (puede tardar en PDFs grandes)
+        set_time_limit(180); // 3 minutos
+        
         try {
             $request->validate([
                 'historia_clinica' => 'required|file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx,txt'
@@ -278,16 +285,53 @@ class PriorizacionController extends Controller
             
             $archivo->move(dirname($rutaCompleta), basename($rutaCompleta));
             
-            // Extraer texto usando la lógica que YA funciona
-            $textoExtraido = $this->extraerTextoDelArchivo($rutaCompleta, $archivo->getClientOriginalExtension());
+            // Extraer texto usando OpenRouterAIService (con OCR automático para PDFs escaneados)
+            \Log::info('USANDO OPENROUTER SERVICE PARA EXTRACCIÓN', [
+                'archivo' => basename($rutaCompleta),
+                'ruta' => $rutaCompleta,
+                'existe' => file_exists($rutaCompleta)
+            ]);
             
-            // Limpiar archivo temporal
+            try {
+                // Copiar archivo al directorio public/temp para que el servicio pueda accederlo
+                $publicTempDir = storage_path('app/public/temp');
+                if (!file_exists($publicTempDir)) {
+                    mkdir($publicTempDir, 0755, true);
+                }
+                
+                $publicTempPath = $publicTempDir . '/' . basename($rutaCompleta);
+                copy($rutaCompleta, $publicTempPath);
+                
+                // Usar el servicio OpenRouter con OCR automático
+                $relativePath = 'temp/' . basename($rutaCompleta);
+                $textoExtraido = $this->aiService->extractTextFromFile($relativePath);
+                
+                // Limpiar archivo temporal público
+                if (file_exists($publicTempPath)) {
+                    unlink($publicTempPath);
+                }
+                
+                \Log::info('TEXTO EXTRAÍDO CON ÉXITO (OPENROUTER)', ['longitud' => strlen($textoExtraido)]);
+                
+            } catch (\Exception $e) {
+                \Log::error('Error extrayendo texto con OpenRouter: ' . $e->getMessage());
+                
+                // Limpiar archivos temporales en caso de error
+                $publicTempPath = storage_path('app/public/temp/' . basename($rutaCompleta));
+                if (file_exists($publicTempPath)) {
+                    unlink($publicTempPath);
+                }
+                
+                throw new \Exception('No se pudo extraer texto del documento: ' . $e->getMessage());
+            }
+            
+            // Limpiar archivo temporal principal
             if (file_exists($rutaCompleta)) {
                 unlink($rutaCompleta);
             }
             
-            // Análisis libre con IA
-            $analisisCompleto = $this->geminiService->analizarHistoriaClinicaLibre($textoExtraido);
+            // Análisis libre con IA (OpenRouter - DeepSeek 3.1)
+            $analisisCompleto = $this->aiService->analizarHistoriaClinicaLibre($textoExtraido);
             
             // Análisis de priorización con IA
             $razonamientoPriorizacion = $this->analizarPriorizacionConIA($textoExtraido);
@@ -295,6 +339,7 @@ class PriorizacionController extends Controller
             return response()->json([
                 'success' => true,
                 'archivo' => $archivo->getClientOriginalName(),
+                'nombre_archivo_original' => $archivo->getClientOriginalName(),
                 'texto_extraido' => $textoExtraido,
                 'longitud_texto' => strlen($textoExtraido),
                 'analisis_ia' => $analisisCompleto,
@@ -314,6 +359,79 @@ class PriorizacionController extends Controller
     }
 
     /**
+     * Guardar análisis manual con campos de comparación
+     */
+    public function guardarAnalisisManual(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'nombre_documento' => 'required|string|max:255',
+                'nombre_archivo_original' => 'nullable|string|max:255',
+                'analisis_precisa' => 'required|string',
+                'analisis_vital_red' => 'required|string',
+                'analisis_medico' => 'required|string',
+                'texto_extraido' => 'nullable|string',
+                'analisis_ia' => 'nullable|string',
+                'razonamiento_priorizacion' => 'nullable|array',
+            ]);
+
+            $analisis = \App\Models\AnalisisPruebaIA::create([
+                'nombre_documento' => $validated['nombre_documento'],
+                'nombre_archivo_original' => $validated['nombre_archivo_original'] ?? null,
+                'analisis_precisa' => $validated['analisis_precisa'],
+                'analisis_vital_red' => $validated['analisis_vital_red'],
+                'analisis_medico' => $validated['analisis_medico'],
+                'texto_extraido' => $validated['texto_extraido'] ?? null,
+                'analisis_ia' => $validated['analisis_ia'] ?? null,
+                'razonamiento_priorizacion' => $validated['razonamiento_priorizacion'] ?? null,
+                'user_id' => auth()->id(),
+            ]);
+
+            \Log::info('Análisis manual guardado exitosamente', ['id' => $analisis->id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Análisis guardado exitosamente',
+                'analisis_id' => $analisis->id,
+                'data' => $analisis
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error guardando análisis manual: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar el análisis: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Listar análisis guardados
+     */
+    public function listarAnalisisGuardados(Request $request)
+    {
+        try {
+            $analisis = \App\Models\AnalisisPruebaIA::with('user')
+                ->orderBy('created_at', 'desc')
+                ->paginate(20);
+
+            return response()->json([
+                'success' => true,
+                'data' => $analisis
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error listando análisis: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener los análisis'
+            ], 500);
+        }
+    }
+
+    /**
      * Analiza la priorización del paciente usando IA con criterios específicos
      */
     private function analizarPriorizacionConIA(string $textoExtraido): array
@@ -322,7 +440,8 @@ class PriorizacionController extends Controller
             \Log::info('INICIANDO ANÁLISIS DE PRIORIZACIÓN CON IA');
             
             $prompt = $this->buildPromptPriorizacion($textoExtraido);
-            $respuestaIA = $this->geminiService->analizarConPromptEspecifico($prompt);
+            // Usando OpenRouter - DeepSeek 3.1 para análisis de priorización
+            $respuestaIA = $this->aiService->analizarConPromptEspecifico($prompt);
             
             // Parsear la respuesta de la IA para extraer la decisión y el razonamiento
             $prioridad = $this->extraerPrioridadDeRespuesta($respuestaIA);
@@ -703,6 +822,9 @@ $textoCompleto
 
     public function extraerDatosPaciente(Request $request)
     {
+        // Aumentar tiempo de ejecución para OCR (puede tardar en PDFs grandes)
+        set_time_limit(180); // 3 minutos
+        
         try {
             $request->validate([
                 'historia_clinica' => 'required|file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx,txt'
@@ -710,52 +832,68 @@ $textoCompleto
 
             $archivo = $request->file('historia_clinica');
             
-            // Guardar archivo temporalmente para procesamiento
+            // Guardar archivo temporalmente
             $nombreArchivo = 'temp_' . uniqid() . '.' . $archivo->getClientOriginalExtension();
             $rutaCompleta = storage_path('app/temp/' . $nombreArchivo);
             
-            // Crear directorio si no existe
             if (!file_exists(dirname($rutaCompleta))) {
                 mkdir(dirname($rutaCompleta), 0755, true);
             }
             
             $archivo->move(dirname($rutaCompleta), basename($rutaCompleta));
             
-            // PASO 1: Extraer TODO el texto del archivo usando OCR
-            $textoCompleto = $this->extraerTextoCompleto($rutaCompleta, $archivo->getClientOriginalExtension());
+            \Log::info('EXTRAER DATOS PACIENTE - Archivo recibido', [
+                'nombre' => $archivo->getClientOriginalName(),
+                'ruta' => $rutaCompleta
+            ]);
             
-            \Log::info('TEXTO COMPLETO EXTRAÍDO:', ['longitud' => strlen($textoCompleto), 'preview' => substr($textoCompleto, 0, 300) . '...']);
+            // PASO 1: Extraer texto usando OpenRouterAIService con OCR automático
+            try {
+                // Copiar a directorio público temporal para el servicio
+                $publicTempDir = storage_path('app/public/temp');
+                if (!file_exists($publicTempDir)) {
+                    mkdir($publicTempDir, 0755, true);
+                }
+                
+                $publicTempPath = $publicTempDir . '/' . basename($rutaCompleta);
+                copy($rutaCompleta, $publicTempPath);
+                
+                // Usar OpenRouterAIService con OCR automático
+                $relativePath = 'temp/' . basename($rutaCompleta);
+                $textoCompleto = $this->aiService->extractTextFromFile($relativePath);
+                
+                \Log::info('TEXTO EXTRAÍDO CON OPENROUTER', ['longitud' => strlen($textoCompleto)]);
+                
+                // Limpiar archivo temporal público
+                if (file_exists($publicTempPath)) {
+                    unlink($publicTempPath);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error extrayendo texto con OpenRouter: ' . $e->getMessage());
+                throw $e;
+            }
             
-            // Limpiar archivo temporal
+            // Limpiar archivo temporal principal
             if (file_exists($rutaCompleta)) {
                 unlink($rutaCompleta);
             }
             
-            // PASO 2: Enviar el texto completo a la IA de Google Gemini para análisis libre
-            \Log::info('ENVIANDO TEXTO A LA IA', [
-                'longitud_texto' => strlen($textoCompleto),
-                'preview_texto' => substr($textoCompleto, 0, 200) . '...'
-            ]);
+            // PASO 2: Analizar con OpenRouter (DeepSeek 3.1)
+            \Log::info('ANALIZANDO CON OPENROUTER (DeepSeek 3.1)');
             
             try {
-                $analisisIA = $this->geminiService->analizarHistoriaClinicaLibre($textoCompleto);
-                \Log::info('ANÁLISIS DE LA IA COMPLETADO EXITOSAMENTE', [
-                    'longitud_respuesta' => strlen($analisisIA),
-                    'preview_respuesta' => substr($analisisIA, 0, 200) . '...'
-                ]);
+                $analisisIA = $this->aiService->analizarHistoriaClinicaLibre($textoCompleto);
+                \Log::info('ANÁLISIS COMPLETADO', ['longitud' => strlen($analisisIA)]);
             } catch (\Exception $e) {
-                \Log::error('ERROR EN LA LLAMADA A LA IA', [
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
-                ]);
+                \Log::error('ERROR EN ANÁLISIS CON IA: ' . $e->getMessage());
                 
-                // Si la IA falla, usar análisis fallback pero informativo
-                $analisisIA = "ANÁLISIS FALLBACK - La IA de Google no pudo procesar el documento.\n\n" .
-                            "TEXTO EXTRAÍDO DEL DOCUMENTO:\n" . $textoCompleto . "\n\n" .
+                // Fallback informativo
+                $analisisIA = "ANÁLISIS FALLBACK - Error en IA.\n\n" .
+                            "TEXTO EXTRAÍDO:\n" . $textoCompleto . "\n\n" .
                             "ERROR: " . $e->getMessage();
             }
 
-            // PASO 3: Convertir respuesta de IA a formato de datos estructurados que espera el frontend
+            // PASO 3: Convertir a formato estructurado
             $datosEstructurados = $this->convertirAnalisisIAaDatos($analisisIA, $textoCompleto);
 
             return response()->json([
@@ -763,7 +901,7 @@ $textoCompleto
                 'data' => $datosEstructurados,
                 'texto_extraido' => $textoCompleto,
                 'analisis_ia_completo' => $analisisIA,
-                'message' => 'Datos extraídos correctamente del documento'
+                'message' => 'Datos extraídos correctamente con OpenRouter + OCR'
             ]);
 
         } catch (\Exception $e) {
@@ -1270,11 +1408,16 @@ $textoCompleto
     }
 
     /**
-     * Extrae TODO el texto del archivo usando OCR - Método simplificado
+     * DEPRECADO - Extrae texto completo de un archivo (PDF, imagen, Word, etc.)
+     * AHORA SE USA: OpenRouterAIService->extractTextFromFile()
      */
     private function extraerTextoCompleto($rutaArchivo, $extension)
     {
-        \Log::info('INICIANDO EXTRACCIÓN COMPLETA DE TEXTO', ['archivo' => $rutaArchivo, 'extension' => $extension]);
+        \Log::error('MÉTODO DEPRECADO LLAMADO: extraerTextoCompleto - DEBE USAR OpenRouterAIService');
+        throw new \Exception('Método deprecado. Use OpenRouterAIService->extractTextFromFile() en su lugar.');
+        
+        // ANTIGUO CÓDIGO COMENTADO - NO USAR
+        /*\Log::info('INICIANDO EXTRACCIÓN COMPLETA DE TEXTO', ['archivo' => $rutaArchivo, 'extension' => $extension]);
         
         $textoCompleto = '';
         
@@ -1319,6 +1462,7 @@ $textoCompleto
             \Log::error('Error en extracción de texto: ' . $e->getMessage());
             throw $e;
         }
+        */ // FIN DEL CÓDIGO ANTIGUO COMENTADO
     }
 
     /**
@@ -1573,11 +1717,16 @@ $textoCompleto
     }
 
     /**
-     * Extrae texto usando OCR para PDFs escaneados e imágenes
+     * DEPRECADO - Extrae texto usando OCR para PDFs escaneados e imágenes  
+     * AHORA SE USA: OpenRouterAIService->extractTextFromFile()
      */
     private function extraerTextoConOCR($rutaArchivo, $tipo)
     {
-        \Log::info('INICIANDO OCR', ['archivo' => $rutaArchivo, 'tipo' => $tipo]);
+        \Log::error('MÉTODO DEPRECADO LLAMADO: extraerTextoConOCR - DEBE USAR OpenRouterAIService');
+        throw new \Exception('Método deprecado. Use OpenRouterAIService->extractTextFromFile() en su lugar.');
+        
+        // ANTIGUO CÓDIGO COMENTADO - NO USAR
+        /*\Log::info('INICIANDO OCR', ['archivo' => $rutaArchivo, 'tipo' => $tipo]);
         
         try {
             // Para PDFs: primero intentar extracción de texto digital, luego OCR DIRECTO
@@ -1646,6 +1795,7 @@ $textoCompleto
                    "\nTipo: $tipo" . 
                    "\nPara análisis médico, se requiere un documento con texto legible.";
         }
+        */ // FIN DEL CÓDIGO ANTIGUO COMENTADO
     }
 
     /**
@@ -2888,30 +3038,31 @@ $textoCompleto
     }
 
     /**
-     * Endpoint de prueba simple para verificar si Gemini AI funciona
+     * Endpoint de prueba simple para verificar si OpenRouter (DeepSeek 3.1) funciona
+     * ACTUALIZADO: Migrado de Gemini a OpenRouter
      */
     public function testGeminiIA(Request $request)
     {
         try {
-            \Log::info('INICIANDO PRUEBA SIMPLE DE GEMINI AI');
+            \Log::info('INICIANDO PRUEBA SIMPLE DE OPENROUTER (DeepSeek 3.1)');
             
             $textoSimple = "Paciente: Juan Pérez, 45 años, dolor abdominal agudo, presión arterial 140/90";
             
-            \Log::info('ENVIANDO TEXTO SIMPLE A GEMINI', ['texto' => $textoSimple]);
+            \Log::info('ENVIANDO TEXTO SIMPLE A OPENROUTER', ['texto' => $textoSimple]);
             
-            $resultado = $this->geminiService->analizarHistoriaClinicaLibre($textoSimple);
+            $resultado = $this->aiService->analizarHistoriaClinicaLibre($textoSimple);
             
-            \Log::info('PRUEBA GEMINI EXITOSA', ['resultado' => $resultado]);
+            \Log::info('PRUEBA OPENROUTER EXITOSA', ['resultado' => $resultado]);
             
             return response()->json([
                 'success' => true,
                 'texto_enviado' => $textoSimple,
                 'respuesta_ia' => $resultado,
-                'message' => 'Prueba de Gemini AI exitosa'
+                'message' => 'Prueba de OpenRouter (DeepSeek 3.1) exitosa'
             ]);
             
         } catch (\Exception $e) {
-            \Log::error('ERROR EN PRUEBA GEMINI', [
+            \Log::error('ERROR EN PRUEBA OPENROUTER', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -2919,7 +3070,7 @@ $textoCompleto
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),
-                'message' => 'Prueba de Gemini AI falló'
+                'message' => 'Prueba de OpenRouter falló'
             ], 500);
         }
     }

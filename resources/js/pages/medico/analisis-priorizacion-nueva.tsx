@@ -179,9 +179,9 @@ export default function AnalisisPriorizacion() {
             // ASEGURAR QUE NO SE MUESTREN DATOS CUANDO HAY ERROR
             setAnalisis(null);
             
-            // Manejo específico para errores de API de Google Gemini
+            // Manejo específico para errores de API de OpenRouter (DeepSeek 3.1)
             if (error.response?.status === 503 && error.response?.data?.error_type === 'api_overload') {
-                setError('⚠️ El servicio de IA de Google está temporalmente sobrecargado. Por favor intenta nuevamente en unos minutos. 🔄');
+                setError('⚠️ El servicio de IA está temporalmente sobrecargado. Por favor intenta nuevamente en unos minutos. 🔄');
             } else if (error.message.includes('🤖 La IA no pudo procesar')) {
                 setError(error.message);
             } else {
