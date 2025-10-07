@@ -29,6 +29,66 @@ const aseguradores = [
     { value: 'soat', label: 'SOAT' },
 ];
 
+// Selectores secundarios para aseguradores
+const arlOptions = [
+    { value: 'arl_positiva', label: 'ARL Positiva' },
+    { value: 'seguros_bolivar', label: 'Seguros Bolívar S.A' },
+    { value: 'seguros_vida_aurora', label: 'Seguros de Vida Aurora S.A' },
+    { value: 'liberty_seguros', label: 'Liberty Seguros de Vida' },
+    { value: 'mapfre_colombia_vida', label: 'Mapfre Colombia Vida Seguros S.A.' },
+    { value: 'riesgos_laborales_colmena', label: 'Riesgos Laborales Colmena' },
+    { value: 'seguros_vida_alfa', label: 'Seguros de Vida Alfa S.A' },
+    { value: 'seguros_vida_colpatria', label: 'Seguros de Vida Colpatria S.A' },
+    { value: 'seguros_vida_equidad', label: 'Seguros de Vida la Equidad Organismo C.' },
+    { value: 'sura_suramericana', label: 'Sura - Cia. Suramericana de Seguros de Vida' },
+];
+
+const epsOptions = [
+    { value: 'regional_aseguramiento_policia', label: 'REGIONAL DE ASEGURAMIENTO EN SALUD NO. 4 (POLICÍA)' },
+    { value: 'fomag', label: 'FONDO NACIONAL DE PRESTACIONES SOCIALES DEL MAGISTERIO (FOMAG)' },
+    { value: 'sanidad_emavi', label: 'SANIDAD ESCUELA MILITAR DE AVIACIÓN (EMAVI)' },
+    { value: 'coosalud_eps', label: 'COOSALUD EPS-S' },
+    { value: 'nueva_eps', label: 'NUEVA EPS' },
+    { value: 'mutual_ser', label: 'MUTUAL SER' },
+    { value: 'aliansalud_eps', label: 'ALIANSALUD EPS' },
+    { value: 'salud_total_eps', label: 'SALUD TOTAL EPS S.A.' },
+    { value: 'eps_sanitas', label: 'EPS SANITAS' },
+    { value: 'eps_sura', label: 'EPS SURA' },
+    { value: 'famisanar', label: 'FAMISANAR' },
+    { value: 'servicio_occidental_salud', label: 'SERVICIO OCCIDENTAL DE SALUD EPS SOS' },
+    { value: 'salud_mia', label: 'SALUD MIA' },
+    { value: 'comfenalco_valle', label: 'COMFENALCO VALLE' },
+    { value: 'compensar_eps', label: 'COMPENSAR EPS' },
+    { value: 'epm_medellin', label: 'EPM - EMPRESAS PUBLICAS DE MEDELLIN' },
+    { value: 'fondo_pasivo_ferrocarriles', label: 'FONDO DE PASIVO SOCIAL DE FERROCARRILES NACIONALES DE COLOMBIA' },
+    { value: 'cajacopi_atlantico', label: 'CAJACOPI ATLANTICO' },
+    { value: 'capresoca', label: 'CAPRESOCA' },
+    { value: 'comfachoco', label: 'COMFACHOCO' },
+    { value: 'comfaoriente', label: 'COMFAORIENTE' },
+    { value: 'eps_familiar', label: 'EPS FAMILIAR DE COLOMBIA' },
+    { value: 'asmet_salud', label: 'ASMET SALUD' },
+    { value: 'emssanar', label: 'EMSSANAR E.S.S.' },
+    { value: 'capital_salud', label: 'CAPITAL SALUD EPS-S' },
+    { value: 'savia_salud', label: 'SAVIA SALUD EPS' },
+    { value: 'dusakawi_epsi', label: 'DUSAKAWI EPSI' },
+    { value: 'asociacion_indigena_cauca', label: 'ASOCIACION INDIGENA DEL CAUCA EPSI' },
+    { value: 'anas_wayuu_epsi', label: 'ANAS WAYUU EPSI' },
+    { value: 'mallamas_epsi', label: 'MALLAMAS EPSI' },
+    { value: 'pijaos_salud_epsi', label: 'PIJAOS SALUD EPSI' },
+    { value: 'salud_bolivar_eps', label: 'SALUD BOLIVAR EPS SAS' },
+];
+
+const soatOptions = [
+    { value: 'aseguradora_solidaria', label: 'Aseguradora Solidaria de Colombia Ltda. Entidad Cooperativa' },
+    { value: 'axa_colpatria', label: 'Axa Colpatria Seguros S.A.' },
+    { value: 'hdi_seguros', label: 'HDI Seguros Colombia S.A.' },
+    { value: 'seguros_mundial', label: 'Seguros Mundial' },
+    { value: 'la_previsora', label: 'La Previsora S.A. Compañía de Seguros' },
+    { value: 'seguros_bolivar_soat', label: 'Seguros Bolívar S.A.' },
+    { value: 'seguros_estado', label: 'Seguros del Estado S.A.' },
+    { value: 'seguros_suramericana', label: 'Seguros Generales Suramericana S.A.' },
+];
+
 const departamentos = [
     { value: 'amazonas', label: 'Amazonas' },
     { value: 'antioquia', label: 'Antioquia' },
@@ -1462,9 +1522,46 @@ export default function IngresarRegistro() {
         return mapped || '';
     };
 
-    // Función para mapear ciudades extraídas por IA a valores del frontend
+    // Función INTELIGENTE para mapear ciudades extraídas por IA a valores del frontend
     const mapCiudad = (ciudadIA: string, departamento?: string): string => {
-        const mappings: Record<string, string> = {
+        if (!ciudadIA) return '';
+        
+        const ciudadUpper = ciudadIA.toUpperCase().trim();
+        
+        // Función auxiliar para normalizar texto (sin tildes, espacios, etc.)
+        const normalizar = (texto: string): string => {
+            return texto.toUpperCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "") // Quitar tildes/acentos
+                .trim();
+        };
+        
+        // Si tenemos departamento, buscar en las ciudades de ese departamento
+        if (departamento && ciudadesPorDepartamento[departamento]) {
+            const ciudadesDelDepartamento = ciudadesPorDepartamento[departamento];
+            
+            // 1. Búsqueda exacta (sin tildes)
+            for (const ciudad of ciudadesDelDepartamento) {
+                if (normalizar(ciudad.label) === normalizar(ciudadIA)) {
+                    console.log(`🎯 Ciudad encontrada (exacta): "${ciudadIA}" -> "${ciudad.value}"`);
+                    return ciudad.value;
+                }
+            }
+            
+            // 2. Búsqueda por palabras clave (contiene)
+            for (const ciudad of ciudadesDelDepartamento) {
+                const labelNormalizado = normalizar(ciudad.label);
+                const ciudadNormalizada = normalizar(ciudadIA);
+                
+                if (labelNormalizado.includes(ciudadNormalizada) || ciudadNormalizada.includes(labelNormalizado)) {
+                    console.log(`🔍 Ciudad encontrada (contiene): "${ciudadIA}" -> "${ciudad.value}"`);
+                    return ciudad.value;
+                }
+            }
+        }
+        
+        // 3. Fallback: Mapeo hardcodeado para casos especiales comunes
+        const mappingsFallback: Record<string, string> = {
             // Antioquia
             'MEDELLÍN': 'medellin',
             'MEDELLIN': 'medellin',
@@ -1485,7 +1582,7 @@ export default function IngresarRegistro() {
             'PALMIRA': 'palmira',
             'BUENAVENTURA': 'buenaventura',
             
-            // Cauca ✅ AGREGADO
+            // Cauca
             'POPAYÁN': 'popayan',
             'POPAYAN': 'popayan',
             'POP': 'popayan',
@@ -1495,13 +1592,21 @@ export default function IngresarRegistro() {
             'FACATATIVÁ': 'facatativa',
             'FACATATIVA': 'facatativa',
             'ZIPAQUIRÁ': 'zipaquira',
-            'ZIPAQUIRA': 'zipaquira'
+            'ZIPAQUIRA': 'zipaquira',
+            
+            // Risaralda - casos comunes
+            'APIA': 'apia',
+            'PEREIRA': 'pereira'
         };
         
-        const ciudadUpper = ciudadIA?.toUpperCase().trim();
-        const mapped = mappings[ciudadUpper];
-        console.log(`Mapeando ciudad: "${ciudadIA}" (dept: ${departamento}) -> "${mapped}"`);
-        return mapped || '';
+        const mappedFallback = mappingsFallback[ciudadUpper];
+        if (mappedFallback) {
+            console.log(`📋 Ciudad mapeada (fallback): "${ciudadIA}" -> "${mappedFallback}"`);
+            return mappedFallback;
+        }
+        
+        console.log(`❌ Ciudad NO encontrada: "${ciudadIA}" (dept: ${departamento})`);
+        return '';
     };
 
     // Función para mapear asegurador extraído por IA a valores del frontend
@@ -1600,6 +1705,7 @@ export default function IngresarRegistro() {
 
         // Paso 2: Datos Sociodemográficos
         asegurador: '',
+        asegurador_secundario: '', // Para EPS, ARL, SOAT específicos
         departamento: '',
         ciudad: '',
         institucion_remitente: '',
@@ -1729,6 +1835,115 @@ export default function IngresarRegistro() {
         setData('ciudad', ''); // Limpiar ciudad cuando cambia departamento
     };
 
+    // Handler para cambios en el asegurador principal
+    const handleAseguradorChange = (asegurador: string) => {
+        setData('asegurador', asegurador);
+        setData('asegurador_secundario', ''); // Limpiar selector secundario al cambiar principal
+    };
+
+    // Función para obtener las opciones del selector secundario según el asegurador principal
+    const getSecondaryOptions = () => {
+        switch (data.asegurador) {
+            case 'eps':
+                return epsOptions;
+            case 'arl':
+                return arlOptions;
+            case 'soat':
+                return soatOptions;
+            default:
+                return [];
+        }
+    };
+
+    // Función para verificar si debe mostrar el selector secundario
+    const shouldShowSecondarySelector = () => {
+        return ['eps', 'arl', 'soat'].includes(data.asegurador);
+    };
+
+    // Función para mapear nombre específico de asegurador al valor del selector secundario
+    const mapAseguradorSecundario = (nombreAsegurador: string, categoria: string): string => {
+        const nombreUpper = nombreAsegurador?.toUpperCase().trim();
+        
+        // Función auxiliar para búsqueda flexible (contiene palabras clave)
+        const contienePalabras = (texto: string, palabrasClave: string[]): boolean => {
+            return palabrasClave.some(palabra => texto.includes(palabra));
+        };
+        
+        let mapped = '';
+        
+        if (categoria === 'eps') {
+            // Mapeo INTELIGENTE para EPS - búsqueda por palabras clave
+            if (contienePalabras(nombreUpper, ['COOSALUD'])) {
+                mapped = 'coosalud_eps';
+            } else if (contienePalabras(nombreUpper, ['NUEVA EPS', 'NUEVA EMPRESA'])) {
+                mapped = 'nueva_eps';
+            } else if (contienePalabras(nombreUpper, ['SURA', 'SURAMERICANA']) && contienePalabras(nombreUpper, ['EPS'])) {
+                mapped = 'eps_sura';
+            } else if (contienePalabras(nombreUpper, ['SANITAS'])) {
+                mapped = 'eps_sanitas';
+            } else if (contienePalabras(nombreUpper, ['COMPENSAR'])) {
+                mapped = 'compensar_eps';
+            } else if (contienePalabras(nombreUpper, ['SALUD TOTAL'])) {
+                mapped = 'salud_total_eps';
+            } else if (contienePalabras(nombreUpper, ['FAMISANAR'])) {
+                mapped = 'famisanar';
+            } else if (contienePalabras(nombreUpper, ['ALIANSALUD'])) {
+                mapped = 'aliansalud_eps';
+            } else if (contienePalabras(nombreUpper, ['MUTUAL SER'])) {
+                mapped = 'mutual_ser';
+            } else if (contienePalabras(nombreUpper, ['CAPRESOCA'])) {
+                mapped = 'capresoca';
+            } else if (contienePalabras(nombreUpper, ['COMFENALCO'])) {
+                mapped = 'comfenalco_valle';
+            } else if (contienePalabras(nombreUpper, ['ASMET'])) {
+                mapped = 'asmet_salud';
+            } else if (contienePalabras(nombreUpper, ['EMSSANAR'])) {
+                mapped = 'emssanar';
+            } else if (contienePalabras(nombreUpper, ['SAVIA SALUD'])) {
+                mapped = 'savia_salud';
+            }
+        } else if (categoria === 'arl') {
+            // Mapeo INTELIGENTE para ARL
+            if (contienePalabras(nombreUpper, ['POSITIVA'])) {
+                mapped = 'arl_positiva';
+            } else if (contienePalabras(nombreUpper, ['SURA', 'SURAMERICANA'])) {
+                mapped = 'sura_suramericana';
+            } else if (contienePalabras(nombreUpper, ['BOLIVAR', 'BOLÍVAR'])) {
+                mapped = 'seguros_bolivar';
+            } else if (contienePalabras(nombreUpper, ['COLMENA'])) {
+                mapped = 'riesgos_laborales_colmena';
+            } else if (contienePalabras(nombreUpper, ['AXA', 'COLPATRIA'])) {
+                mapped = 'seguros_vida_colpatria';
+            } else if (contienePalabras(nombreUpper, ['MAPFRE'])) {
+                mapped = 'mapfre_colombia_vida';
+            } else if (contienePalabras(nombreUpper, ['LIBERTY'])) {
+                mapped = 'liberty_seguros';
+            }
+        } else if (categoria === 'soat') {
+            // Mapeo INTELIGENTE para SOAT
+            if (contienePalabras(nombreUpper, ['SURA', 'SURAMERICANA'])) {
+                mapped = 'seguros_suramericana';
+            } else if (contienePalabras(nombreUpper, ['SOLIDARIA'])) {
+                mapped = 'aseguradora_solidaria';
+            } else if (contienePalabras(nombreUpper, ['AXA', 'COLPATRIA'])) {
+                mapped = 'axa_colpatria';
+            } else if (contienePalabras(nombreUpper, ['HDI'])) {
+                mapped = 'hdi_seguros';
+            } else if (contienePalabras(nombreUpper, ['PREVISORA'])) {
+                mapped = 'la_previsora';
+            } else if (contienePalabras(nombreUpper, ['BOLIVAR', 'BOLÍVAR'])) {
+                mapped = 'seguros_bolivar_soat';
+            } else if (contienePalabras(nombreUpper, ['ESTADO'])) {
+                mapped = 'seguros_estado';
+            } else if (contienePalabras(nombreUpper, ['MUNDIAL'])) {
+                mapped = 'seguros_mundial';
+            }
+        }
+        
+        console.log(`🔍 Mapeo inteligente: "${nombreAsegurador}" (${categoria}) -> "${mapped}"`);
+        return mapped;
+    };
+
     const getCiudadesDisponibles = () => {
         return ciudadesPorDepartamento[data.departamento] || [];
     };
@@ -1817,9 +2032,10 @@ export default function IngresarRegistro() {
                 
                 // 🔍 DEBUG: Mostrar específicamente campos sociodemográficos
                 console.log('🔍 CAMPOS SOCIODEMOGRÁFICOS EXTRAÍDOS POR IA:');
-                console.log('   📍 Asegurador:', extractedData.asegurador || 'NO_ENCONTRADO');
-                console.log('   🏛️ Departamento:', extractedData.departamento || 'NO_ENCONTRADO');
-                console.log('   🏙️ Ciudad:', extractedData.ciudad || 'NO_ENCONTRADO');
+                console.log('   📍 Asegurador (categoría):', extractedData.asegurador || 'NO_ENCONTRADO');
+                console.log('   🏢 Asegurador (nombre específico):', extractedData.asegurador_nombre || 'NO_ENCONTRADO');
+                console.log('   🏦 Departamento:', extractedData.departamento || 'NO_ENCONTRADO');
+                console.log('   🏦️ Ciudad:', extractedData.ciudad || 'NO_ENCONTRADO');
                 console.log('   🏥 Institución Remitente:', extractedData.institucion_remitente || 'NO_ENCONTRADO');
 
                 if (extractedData.tipo_identificacion) {
@@ -1900,7 +2116,18 @@ export default function IngresarRegistro() {
                     const aseguradorMapeado = mapAsegurador(extractedData.asegurador);
                     if (aseguradorMapeado) {
                         setData('asegurador', aseguradorMapeado);
-                        console.log('Asegurador llenado:', extractedData.asegurador, '-> mapeado a:', aseguradorMapeado);
+                        console.log('Asegurador principal llenado:', extractedData.asegurador, '-> mapeado a:', aseguradorMapeado);
+                        
+                        // Mapear y llenar asegurador secundario automáticamente
+                        if (extractedData.asegurador_nombre && ['eps', 'arl', 'soat'].includes(aseguradorMapeado)) {
+                            const aseguradorSecundarioMapeado = mapAseguradorSecundario(extractedData.asegurador_nombre, aseguradorMapeado);
+                            if (aseguradorSecundarioMapeado) {
+                                setData('asegurador_secundario', aseguradorSecundarioMapeado);
+                                console.log('🎯 Asegurador secundario llenado automáticamente:', extractedData.asegurador_nombre, '-> mapeado a:', aseguradorSecundarioMapeado);
+                            } else {
+                                console.log('⚠️ Asegurador secundario extraído pero no se pudo mapear:', extractedData.asegurador_nombre, 'para categoría:', aseguradorMapeado);
+                            }
+                        }
                     } else {
                         console.log('Asegurador extraído pero no se pudo mapear:', extractedData.asegurador);
                     }
@@ -2427,7 +2654,7 @@ export default function IngresarRegistro() {
                                                 {/* Asegurador */}
                                                 <div className="space-y-2">
                                                     <Label htmlFor="asegurador">Asegurador *</Label>
-                                                    <Select value={data.asegurador} onValueChange={(value) => setData('asegurador', value)}>
+                                                    <Select value={data.asegurador} onValueChange={handleAseguradorChange}>
                                                         <SelectTrigger>
                                                             <SelectValue placeholder="Seleccione" />
                                                         </SelectTrigger>
@@ -2440,6 +2667,32 @@ export default function IngresarRegistro() {
                                                         </SelectContent>
                                                     </Select>
                                                 </div>
+
+                                                {/* Selector Secundario Condicional - EPS, ARL, SOAT */}
+                                                {shouldShowSecondarySelector() && (
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="asegurador_secundario">
+                                                            {data.asegurador === 'eps' && 'Entidad Promotora de Salud *'}
+                                                            {data.asegurador === 'arl' && 'Administradora de Riesgos Laborales *'}
+                                                            {data.asegurador === 'soat' && 'Aseguradora SOAT *'}
+                                                        </Label>
+                                                        <Select 
+                                                            value={data.asegurador_secundario} 
+                                                            onValueChange={(value) => setData('asegurador_secundario', value)}
+                                                        >
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Seleccione" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {getSecondaryOptions().map((option) => (
+                                                                    <SelectItem key={option.value} value={option.value}>
+                                                                        {option.label}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                )}
 
                                                 {/* Departamento */}
                                                 <div className="space-y-2">

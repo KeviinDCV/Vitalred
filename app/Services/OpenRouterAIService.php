@@ -659,11 +659,14 @@ class OpenRouterAIService
         
         $prompt .= "🚨 CAMPOS OBLIGATORIOS QUE DEBES EXTRAER SÍ O SÍ:\n";
         $prompt .= "1. ASEGURADOR: Busca 'Entidad:', 'EPS:', 'NUEVA EMPRESA PROMOTORA', cualquier mención de seguro médico\n";
+        $prompt .= "   - Extrae NOMBRE EXACTO del asegurador (ej: 'Nueva EPS', 'Sura EPS', 'Colmédica')\n";
+        $prompt .= "   - Categoría: EPS/ARL/SOAT/ADRES/PARTICULAR/SECRETARIA_SALUD\n";
         $prompt .= "2. CIUDAD: Busca 'Lugar Residencia:', 'POPAYAN', 'Procedencia:', cualquier mención de ciudad\n";
         $prompt .= "3. DEPARTAMENTO: Si encuentras ciudad, infiere departamento (POPAYAN = Cauca)\n\n";
         $prompt .= "🔥 RESPONDE ÚNICAMENTE CON JSON - INCLUYE TODOS LOS CAMPOS:\n";
         $prompt .= "{\n";
-        $prompt .= '  "asegurador": "OBLIGATORIO - busca EPS/entidad o usa null",' . "\n";
+        $prompt .= '  "asegurador": "OBLIGATORIO - categoría: eps/arl/soat/adres/particular/secretaria_salud_departamental/secretaria_salud_distrital o null",' . "\n";
+        $prompt .= '  "asegurador_nombre": "OBLIGATORIO - nombre exacto del asegurador (ej: Nueva EPS, Sura EPS) o null",' . "\n";
         $prompt .= '  "departamento": "OBLIGATORIO - busca o infiere o usa null",' . "\n";
         $prompt .= '  "ciudad": "OBLIGATORIO - busca residencia o usa null",' . "\n";
         $prompt .= '  "nombre": "nombre(s) del paciente",' . "\n";
@@ -786,6 +789,7 @@ class OpenRouterAIService
             
             // ✅ CAMPOS SOCIODEMOGRÁFICOS (que estaban siendo filtrados)
             'asegurador' => $data['asegurador'] ?? '',
+            'asegurador_nombre' => $data['asegurador_nombre'] ?? '', // Nombre específico del asegurador
             'departamento' => $data['departamento'] ?? '',
             'ciudad' => $data['ciudad'] ?? '',
             'institucion_remitente' => $data['institucion_remitente'] ?? '',
