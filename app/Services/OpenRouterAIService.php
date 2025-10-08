@@ -11,7 +11,7 @@ class OpenRouterAIService
 {
     private string $apiKey;
     private string $baseUrl = 'https://openrouter.ai/api/v1/chat/completions';
-    private string $model = 'deepseek/deepseek-chat-v3.1:free';
+    private string $model = 'qwen/qwen-2.5-72b-instruct:free';
 
     public function __construct()
     {
@@ -393,6 +393,16 @@ class OpenRouterAIService
         $prompt .= "- BUSCA nombres de hospitales, clínicas, centros de salud, IPS\n";
         $prompt .= "- Palabras clave: 'Hospital', 'Clínica', 'Centro', 'IPS', 'Remite', 'Referido por', 'Enviado desde'\n";
         $prompt .= "- SIEMPRE incluye el campo 'institucion_remitente' en el JSON, aunque sea null\n\n";
+
+        $prompt .= "⚠️ CRÍTICO - FECHA DE INGRESO (OBLIGATORIO):\n";
+        $prompt .= "- BUSCA exactamente: 'Fecha de ingreso:', 'Fecha:', 'Ingreso:', 'Fecha de hospitalización:', 'Fecha de consulta:', 'Fecha de atención:'\n";
+        $prompt .= "- También busca en la parte superior del documento donde suelen aparecer las fechas\n";
+        $prompt .= "- Formatos comunes: DD/MM/YYYY, DD-MM-YYYY, YYYY-MM-DD, DD/MM/YY\n";
+        $prompt .= "- Si encuentras texto como 'Fecha 2012' o similar, puede ser la fecha de ingreso\n";
+        $prompt .= "- Si hay múltiples fechas, usa la más relevante al ingreso o consulta actual\n";
+        $prompt .= "- Convierte SIEMPRE al formato YYYY-MM-DD en el JSON\n";
+        $prompt .= "- Si no encuentras fecha explícita de ingreso, usa null\n";
+        $prompt .= "- OBLIGATORIO: SIEMPRE incluye el campo 'fecha_ingreso' en el JSON, aunque sea null\n\n";
         $prompt .= "Responde ÚNICAMENTE con un JSON válido (sin markdown, sin explicaciones adicionales) con esta estructura:\n";
         $prompt .= "{\n";
         $prompt .= '  "asegurador": "nombre EPS/asegurador",' . "\n";
@@ -459,8 +469,14 @@ class OpenRouterAIService
                 throw new \Exception("Error al decodificar JSON: " . json_last_error_msg());
             }
             
+            Log::info("🔍 JSON DECODIFICADO EXITOSAMENTE, campos actuales: " . json_encode(array_keys($data)));
+            Log::info("🔍 VERIFICANDO SI TIENE fecha_ingreso: " . ($data['fecha_ingreso'] ?? 'NO_EXISTE'));
+            
             // ✅ FALLBACK: Si la IA no devolvió campos sociodemográficos, extraerlos directamente del texto
+            Log::info("🔍 EJECUTANDO FALLBACK PARA CAMPOS FALTANTES");
             $data = $this->addMissingSociodemographicData($data, $originalText);
+            Log::info("🔍 FALLBACK COMPLETADO, campos finales: " . json_encode(array_keys($data)));
+            Log::info("🔍 fecha_ingreso después del fallback: " . ($data['fecha_ingreso'] ?? 'SIGUE_SIN_EXISTIR'));
             
             return $data;
         } catch (\Exception $e) {
@@ -510,6 +526,21 @@ class OpenRouterAIService
                 $data['institucion_remitente'] = $institucion;
                 Log::info("✅ FALLBACK: Institución extraída del texto: {$institucion}");
             }
+        }
+        
+        // 🔥 NUEVO: Si no hay fecha_ingreso, buscarla en el texto
+        Log::info("🔍 FALLBACK: Verificando fecha_ingreso, valor actual: " . ($data['fecha_ingreso'] ?? 'null'));
+        if (empty($data['fecha_ingreso'])) {
+            Log::info("🔍 FALLBACK: Intentando extraer fecha_ingreso del texto...");
+            $fechaIngreso = $this->extractFechaIngresoFromText($text);
+            if ($fechaIngreso) {
+                $data['fecha_ingreso'] = $fechaIngreso;
+                Log::info("✅ FALLBACK: Fecha de ingreso extraída del texto: {$fechaIngreso}");
+            } else {
+                Log::info("❌ FALLBACK: No se pudo extraer fecha_ingreso del texto");
+            }
+        } else {
+            Log::info("✅ FALLBACK: fecha_ingreso ya existe, no es necesario extraer");
         }
         
         return $data;
@@ -713,8 +744,24 @@ class OpenRouterAIService
 
             if (!$response->successful()) {
                 $errorBody = $response->body();
-                Log::error("Error en llamada a OpenRouter API: " . $errorBody);
-                throw new \Exception("Error en la API de OpenRouter: " . $response->status());
+                $statusCode = $response->status();
+                
+                // Logging detallado para diagnóstico
+                Log::error("❌ Error en llamada a OpenRouter API", [
+                    'status_code' => $statusCode,
+                    'error_body' => $errorBody,
+                    'api_key_presente' => !empty($this->apiKey),
+                    'api_key_length' => strlen($this->apiKey),
+                    'model' => $this->model,
+                    'url' => $this->baseUrl
+                ]);
+                
+                // Mensaje específico para error 401
+                if ($statusCode === 401) {
+                    throw new \Exception("Error de autenticación con OpenRouter (401): Verifica tu API key. Detalles: " . $errorBody);
+                }
+                
+                throw new \Exception("Error en la API de OpenRouter: " . $statusCode . " - " . $errorBody);
             }
 
             $data = $response->json();
@@ -942,6 +989,101 @@ class OpenRouterAIService
                 'recomendaciones' => ['Consultar con médico especialista'],
                 'conclusion_tecnica' => 'Análisis no completado por error técnico'
             ];
+        }
+    }
+
+    /**
+     * 🔥 NUEVO: Extraer fecha de ingreso directamente del texto
+     */
+    private function extractFechaIngresoFromText(string $text): ?string
+    {
+        // Patrones para buscar fecha de ingreso
+        $patterns = [
+            // 🎯 CRÍTICO: Buscar en sección DATOS DEL INGRESO - Formato específico "Fecha: DD/MM/YYYY HH:MM:SS a/p. m."
+            '/DATOS\s+DEL\s+INGRESO.*?Fecha\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})/is',
+            
+            // Buscar "Fecha:" seguido de fecha con hora - formato específico del documento
+            '/Fecha\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})\s+\d{1,2}:\d{2}:\d{2}/i',
+            
+            // Buscar "Fecha de ingreso: DD/MM/YYYY"
+            '/Fecha\s*de\s*ingreso\s*:?\s*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})/i',
+            
+            // Buscar "Ingreso: DD/MM/YYYY" 
+            '/Ingreso\s*:?\s*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})/i',
+            
+            // Buscar "Fecha:" en contexto de ingreso
+            '/(?:ingreso|hospitalización).*?Fecha\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})/is',
+            
+            // Buscar después de "Nº Ingreso:" - contexto específico
+            '/Nº\s+Ingreso:.*?Fecha\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})/is',
+            
+            // Buscar "Fecha de hospitalización: DD/MM/YYYY"
+            '/Fecha\s*de\s*hospitalización\s*:?\s*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})/i',
+            
+            // Buscar "Fecha de consulta: DD/MM/YYYY"
+            '/Fecha\s*de\s*consulta\s*:?\s*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})/i',
+            
+            // Buscar cualquier fecha cerca de la palabra "Fecha" en las primeras líneas
+            '/Fecha\s+(\d{4})/i'
+        ];
+        
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                $fechaRaw = trim($matches[1]);
+                
+                // Convertir fecha al formato YYYY-MM-DD
+                $fechaFormateada = $this->formatearFechaIngreso($fechaRaw);
+                if ($fechaFormateada) {
+                    Log::info("🔍 FALLBACK: Fecha encontrada con patrón '{$pattern}': {$fechaRaw} -> {$fechaFormateada}");
+                    return $fechaFormateada;
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Formatear fecha de ingreso al formato estándar YYYY-MM-DD
+     */
+    private function formatearFechaIngreso(string $fecha): ?string
+    {
+        try {
+            Log::info("🔍 FALLBACK: Intentando formatear fecha: '{$fecha}'");
+            
+            // Limpiar la fecha de espacios y caracteres extraños
+            $fechaLimpia = trim($fecha);
+            
+            // Intentar diferentes formatos comunes
+            $formatos = [
+                'd/m/Y',     // 13/08/2025 - FORMATO ESPECÍFICO DEL DOCUMENTO
+                'd-m-Y',     // 13-08-2025
+                'Y-m-d',     // 2025-08-13
+                'd/m/y',     // 13/08/25
+                'd-m-y',     // 13-08-25
+                'Y'          // Solo año (2024) - usar 1 de enero
+            ];
+            
+            foreach ($formatos as $formato) {
+                $fechaObj = \DateTime::createFromFormat($formato, $fechaLimpia);
+                if ($fechaObj && $fechaObj->format($formato) === $fechaLimpia) {
+                    // Si solo es año, usar 1 de enero de ese año
+                    if ($formato === 'Y') {
+                        $resultado = $fechaObj->format('Y-01-01');
+                        Log::info("✅ FALLBACK: Fecha formateada (año solo): '{$fecha}' -> '{$resultado}'");
+                        return $resultado;
+                    }
+                    $resultado = $fechaObj->format('Y-m-d');
+                    Log::info("✅ FALLBACK: Fecha formateada correctamente: '{$fecha}' -> '{$resultado}'");
+                    return $resultado;
+                }
+            }
+            
+            Log::warning("❌ FALLBACK: No se pudo formatear la fecha: '{$fecha}'");
+            return null;
+        } catch (\Exception $e) {
+            Log::error("❌ FALLBACK: Error formateando fecha de ingreso: {$fecha} - " . $e->getMessage());
+            return null;
         }
     }
 }

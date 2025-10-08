@@ -678,7 +678,45 @@ $textoCompleto
     }
 
     private function procesarDatosExtraidos(array $datosExtraidos): array
-    {
+{
+    // 🔧 COMPATIBILIDAD: Detectar si los datos vienen planos (IA) o agrupados (legacy)
+    $esEstructuraPlana = isset($datosExtraidos['nombre']) || isset($datosExtraidos['asegurador']) || isset($datosExtraidos['diagnostico_principal']);
+    
+    if ($esEstructuraPlana) {
+        // ✅ ESTRUCTURA PLANA (datos directos de IA - OpenRouter/Qwen2.5)
+        \Log::info('🔧 PROCESANDO DATOS PLANOS DE IA:', array_keys($datosExtraidos));
+        
+        return [
+            'id' => 0,
+            'nombre' => $datosExtraidos['nombre'] ?? 'Paciente',
+            'apellidos' => $datosExtraidos['apellidos'] ?? 'Desconocido',
+            'numero_identificacion' => $datosExtraidos['numero_identificacion'] ?? '00000000',
+            'edad' => $datosExtraidos['edad'] ?? 0,
+            'tipo_paciente' => $datosExtraidos['tipo_paciente'] ?? 'Adulto',
+            'institucion_remitente' => $datosExtraidos['institucion_remitente'] ?? '',
+            'asegurador' => $datosExtraidos['asegurador'] ?? '',
+            'fecha_ingreso' => $datosExtraidos['fecha_ingreso'] ?? now()->toISOString(),
+            'diagnostico_principal' => $datosExtraidos['diagnostico_principal'] ?? '',
+            'enfermedad_actual' => $datosExtraidos['enfermedad_actual'] ?? '',
+            'antecedentes' => $datosExtraidos['antecedentes'] ?? '',
+            'frecuencia_cardiaca' => $datosExtraidos['frecuencia_cardiaca'] ?? null,
+            'frecuencia_respiratoria' => $datosExtraidos['frecuencia_respiratoria'] ?? null,
+            'tension_sistolica' => $datosExtraidos['tension_sistolica'] ?? null,
+            'tension_diastolica' => $datosExtraidos['tension_diastolica'] ?? null,
+            'temperatura' => $datosExtraidos['temperatura'] ?? null,
+            'saturacion_oxigeno' => $datosExtraidos['saturacion_oxigeno'] ?? null,
+            'escala_glasgow' => $datosExtraidos['escala_glasgow'] ?? null,
+            'sintomas' => $this->procesarSintomasExtraidos($datosExtraidos['sintomas'] ?? []),
+            'servicios' => $this->procesarServiciosExtraidos($datosExtraidos['servicios'] ?? []),
+            'especialidades' => $this->procesarEspecialidadesExtraidas($datosExtraidos['especialidades'] ?? []),
+            'apoyo_diagnostico' => $this->procesarApoyoExtraido($datosExtraidos['apoyo_diagnostico'] ?? []),
+            'texto_completo_extraido' => $datosExtraidos['texto_completo_extraido'] ?? '',
+            'longitud_documento' => $datosExtraidos['longitud_documento'] ?? 0,
+        ];
+    } else {
+        // ⚙️ ESTRUCTURA AGRUPADA LEGACY (compatibilidad hacia atrás)
+        \Log::info('🔧 PROCESANDO DATOS AGRUPADOS LEGACY:', array_keys($datosExtraidos));
+        
         $datos = $datosExtraidos['datos_generales'] ?? [];
         $clinicos = $datosExtraidos['datos_clinicos'] ?? [];
         $vitales = $datosExtraidos['signos_vitales'] ?? [];
@@ -716,6 +754,7 @@ $textoCompleto
             'longitud_documento' => $datosExtraidos['longitud_documento'] ?? 0,
         ];
     }
+}
 
     /**
      * Procesa los síntomas extraídos y los convierte a array
@@ -872,56 +911,63 @@ $textoCompleto
                 \Log::error('Error extrayendo texto con OpenRouter: ' . $e->getMessage());
                 throw $e;
             }
-            
+        
             // Limpiar archivo temporal principal
             if (file_exists($rutaCompleta)) {
                 unlink($rutaCompleta);
             }
+        
+        // PASO 2: Analizar con OpenRouter (DeepSeek 3.1) - CON FALLBACK SOCIODEMOGRÁFICO
+        \Log::info('ANALIZANDO CON OPENROUTER (DeepSeek 3.1) + FALLBACK');
+        
+        try {
+            // ✅ USAR EL MÉTODO CORRECTO CON FALLBACK
+            $datosEstructurados = $this->aiService->analizarHistoriaClinicaCompleta($textoCompleto);
+            \Log::info('ANÁLISIS COMPLETADO CON FALLBACK', ['campos' => array_keys($datosEstructurados)]);
             
-            // PASO 2: Analizar con OpenRouter (DeepSeek 3.1) - CON FALLBACK SOCIODEMOGRÁFICO
-            \Log::info('ANALIZANDO CON OPENROUTER (DeepSeek 3.1) + FALLBACK');
-            
-            try {
-                // ✅ USAR EL MÉTODO CORRECTO CON FALLBACK
-                $datosEstructurados = $this->aiService->analizarHistoriaClinicaCompleta($textoCompleto);
-                \Log::info('ANÁLISIS COMPLETADO CON FALLBACK', ['campos' => array_keys($datosEstructurados)]);
-                
-                // Convertir directamente a la respuesta final
-                return response()->json([
-                    'success' => true,
-                    'data' => $datosEstructurados,
-                    'extracted_text_preview' => substr($textoCompleto, 0, 200) . '...',
-                    'message' => 'Datos extraídos exitosamente del documento'
-                ]);
-                
-            } catch (\Exception $e) {
-                \Log::error('ERROR EN ANÁLISIS CON IA: ' . $e->getMessage());
-                
-                // Fallback informativo
-                $analisisIA = "ANÁLISIS FALLBACK - Error en IA.\n\n" .
-                            "TEXTO EXTRAÍDO:\n" . $textoCompleto . "\n\n" .
-                            "ERROR: " . $e->getMessage();
-            }
-
-            // PASO 3: Convertir a formato estructurado
-            $datosEstructurados = $this->convertirAnalisisIAaDatos($analisisIA, $textoCompleto);
-
+            // ✅ Convertir directamente a la respuesta final CON TEXTO EXTRAÍDO
             return response()->json([
                 'success' => true,
-                'data' => $datosEstructurados,
-                'texto_extraido' => $textoCompleto,
-                'analisis_ia_completo' => $analisisIA,
-                'message' => 'Datos extraídos correctamente con OpenRouter + OCR'
+                'data' => [
+                    ...$datosEstructurados,
+                    'texto_extraido' => $textoCompleto  // ✅ INCLUIR EN DATA TAMBIÉN
+                ],
+                'texto_extraido' => $textoCompleto,  // ✅ A NIVEL RAÍZ PARA FRONTEND
+                'extracted_text_preview' => substr($textoCompleto, 0, 5000) . '...',  // ✅ AUMENTADO DE 200 A 5000 CARACTERES
+                'message' => 'Datos extraídos exitosamente del documento'
             ]);
-
+            
         } catch (\Exception $e) {
-            \Log::error('Error en extracción y análisis: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al procesar el archivo: ' . $e->getMessage()
-            ], 500);
+            \Log::error('ERROR EN ANÁLISIS CON IA: ' . $e->getMessage());
+            
+            // Fallback informativo
+            $analisisIA = "ANÁLISIS FALLBACK - Error en IA.\n\n" .
+                        "TEXTO EXTRAÍDO:\n" . $textoCompleto . "\n\n" .
+                        "ERROR: " . $e->getMessage();
         }
+
+        // PASO 3: Convertir a formato estructurado (solo si hubo error en IA)
+        $datosEstructurados = $this->convertirAnalisisIAaDatos($analisisIA, $textoCompleto);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                ...$datosEstructurados,
+                'texto_extraido' => $textoCompleto
+            ],
+            'texto_extraido' => $textoCompleto,
+            'analisis_ia_completo' => $analisisIA,
+            'message' => 'Datos extraídos correctamente con OpenRouter + OCR'
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Error en extracción y análisis: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al procesar el archivo: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     /**
      * Extrae datos reales del documento médico usando procesamiento de texto profesional

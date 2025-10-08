@@ -61,7 +61,7 @@ class AIController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $patientData,
-                'extracted_text_preview' => substr($extractedText, 0, 500) . '...',
+                'extracted_text_preview' => substr($extractedText, 0, 5000) . '...',  // ✅ AUMENTADO DE 500 A 5000 CARACTERES
                 'message' => 'Datos extraídos exitosamente del documento'
             ]);
 

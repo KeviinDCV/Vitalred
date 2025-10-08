@@ -119,7 +119,7 @@ const departamentos = [
     { value: 'santander', label: 'Santander' },
     { value: 'sucre', label: 'Sucre' },
     { value: 'tolima', label: 'Tolima' },
-    { value: 'valle', label: 'Valle del Cauca' },
+    { value: 'valle_del_cauca', label: 'Valle del Cauca' },
     { value: 'vaupes', label: 'Vaupés' },
     { value: 'vichada', label: 'Vichada' },
 ];
@@ -1314,12 +1314,27 @@ const ciudadesPorDepartamento: Record<string, Array<{value: string, label: strin
 };
 
 const tiposPaciente = [
-    { value: 'ambulatorio', label: 'Ambulatorio' },
-    { value: 'hospitalizado', label: 'Hospitalizado' },
-    { value: 'urgencias', label: 'Urgencias' },
-    { value: 'uci', label: 'UCI' },
-    { value: 'consulta_externa', label: 'Consulta Externa' },
+    { value: 'menor_de_edad', label: 'Menor de edad' },
+    { value: 'adulto', label: 'Adulto' },
+    { value: 'gestante', label: 'Gestante' },
 ];
+
+// 🎯 Función para determinar tipo de paciente basado en edad y sexo
+const determinarTipoPaciente = (edad: number, sexo?: string): string => {
+    // Menor de edad: < 18 años
+    if (edad < 18) {
+        return 'menor_de_edad';
+    }
+    
+    // Gestante: mujer adulta (por defecto, se puede cambiar manualmente si no es gestante)
+    if (sexo && (sexo.toLowerCase() === 'femenino' || sexo.toLowerCase() === 'mujer')) {
+        // Por defecto gestante para mujeres adultas - el médico puede cambiar si no aplica
+        return 'gestante';
+    }
+    
+    // Adulto: ≥ 18 años (hombres o cuando no se especifica sexo)
+    return 'adulto';
+};
 
 const clasificacionesTriage = [
     { value: 'triage_1', label: 'Triage I - Resucitación (Rojo)' },
@@ -1475,8 +1490,8 @@ export default function IngresarRegistro() {
             'SANTANDER': 'santander',
             'SUCRE': 'sucre',
             'TOLIMA': 'tolima',
-            'VALLE DEL CAUCA': 'valle',
-            'VALLE': 'valle',
+            'VALLE DEL CAUCA': 'valle_del_cauca',
+            'VALLE': 'valle_del_cauca',
             'VAUPÉS': 'vaupes',
             'VAUPES': 'vaupes',
             'VICHADA': 'vichada',
@@ -1959,6 +1974,135 @@ export default function IngresarRegistro() {
         return diffDays;
     };
 
+    // 🔥 NUEVA FUNCIÓN: Extraer fecha de ingreso del texto en el frontend
+    const extractFechaIngresoFromText = (text: string): string | null => {
+        try {
+            console.log('🔍 FALLBACK: Buscando fechas de ingreso con CONTEXTO inteligente...');
+            console.log('🔍 FALLBACK: Longitud del texto:', text.length);
+            console.log('🔍 FALLBACK: Fecha actual para comparación:', new Date().toISOString().split('T')[0]);
+            
+            // 🎯 NUEVO ENFOQUE: Buscar fechas CON CONTEXTO DE INGRESO
+            const contextualDates: Array<{
+                original: string, 
+                formatted: string, 
+                date: Date, 
+                context: string,
+                priority: number
+            }> = [];
+            
+            // 🏆 PRIORIDAD 1: Fechas en sección "DATOS DEL INGRESO" con "Nº Ingreso"
+            const ingresoPattern = /DATOS\s+DEL\s+INGRESO[\s\S]*?Nº\s+Ingreso:[\s\S]*?Fecha\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})/gi;
+            let match;
+            while ((match = ingresoPattern.exec(text)) !== null) {
+                const fechaRaw = match[1].trim();
+                const fechaFormateada = formatearFecha(fechaRaw);
+                if (fechaFormateada) {
+                    contextualDates.push({
+                        original: fechaRaw,
+                        formatted: fechaFormateada,
+                        date: new Date(fechaFormateada),
+                        context: 'DATOS DEL INGRESO + Nº Ingreso',
+                        priority: 1
+                    });
+                    console.log(`🏆 PRIORIDAD 1: Fecha en DATOS DEL INGRESO: ${fechaRaw}`);
+                }
+            }
+            
+            // 🥈 PRIORIDAD 2: Fechas después de "Nº Ingreso:"
+            const numeroIngresoPattern = /Nº\s+Ingreso:\s*\d+[\s\S]*?Fecha\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})/gi;
+            while ((match = numeroIngresoPattern.exec(text)) !== null) {
+                const fechaRaw = match[1].trim();
+                const fechaFormateada = formatearFecha(fechaRaw);
+                if (fechaFormateada && !contextualDates.find(d => d.original === fechaRaw)) {
+                    contextualDates.push({
+                        original: fechaRaw,
+                        formatted: fechaFormateada,
+                        date: new Date(fechaFormateada),
+                        context: 'Después de Nº Ingreso',
+                        priority: 2
+                    });
+                    console.log(`🥈 PRIORIDAD 2: Fecha después de Nº Ingreso: ${fechaRaw}`);
+                }
+            }
+            
+            // 🥉 PRIORIDAD 3: Fechas con "Fecha de ingreso" explícito
+            const fechaIngresoPattern = /fecha\s*de\s*ingreso[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi;
+            while ((match = fechaIngresoPattern.exec(text)) !== null) {
+                const fechaRaw = match[1].trim();
+                const fechaFormateada = formatearFecha(fechaRaw);
+                if (fechaFormateada && !contextualDates.find(d => d.original === fechaRaw)) {
+                    contextualDates.push({
+                        original: fechaRaw,
+                        formatted: fechaFormateada,
+                        date: new Date(fechaFormateada),
+                        context: 'Fecha de ingreso explícito',
+                        priority: 3
+                    });
+                    console.log(`🥉 PRIORIDAD 3: Fecha de ingreso explícito: ${fechaRaw}`);
+                }
+            }
+            
+            // ❌ EXCLUIR fechas de impresión (entre paréntesis)
+            console.log('❌ EXCLUYENDO fechas de impresión/documento...');
+            
+            if (contextualDates.length === 0) {
+                console.log('❌ FALLBACK: No se encontraron fechas en contexto de ingreso');
+                return null;
+            }
+            
+            // Ordenar por prioridad (menor número = mayor prioridad) y luego por recencia
+            contextualDates.sort((a, b) => {
+                if (a.priority !== b.priority) return a.priority - b.priority;
+                return b.date.getTime() - a.date.getTime();
+            });
+            
+            console.log('📊 FALLBACK: Fechas encontradas CON CONTEXTO (ordenadas por prioridad):');
+            contextualDates.forEach((dateInfo, index) => {
+                const diasDiferencia = Math.ceil((new Date().getTime() - dateInfo.date.getTime()) / (1000 * 60 * 60 * 24));
+                console.log(`   ${index + 1}. ${dateInfo.original} - Contexto: "${dateInfo.context}" (hace ${diasDiferencia} días)`);
+            });
+            
+            // Tomar la fecha con mayor prioridad de contexto
+            const fechaSeleccionada = contextualDates[0];
+            const diasDiferencia = Math.ceil((new Date().getTime() - fechaSeleccionada.date.getTime()) / (1000 * 60 * 60 * 24));
+            
+            console.log(`✅ FALLBACK: Fecha SELECCIONADA por contexto: ${fechaSeleccionada.original}`);
+            console.log(`✅ FALLBACK: Contexto: "${fechaSeleccionada.context}"`);
+            console.log(`✅ FALLBACK: Hace ${diasDiferencia} días`);
+            console.log(`✅ FALLBACK: Fecha formateada final: ${fechaSeleccionada.formatted}`);
+            
+            return fechaSeleccionada.formatted;
+        } catch (error) {
+            console.error('❌ FALLBACK: Error extrayendo fecha:', error);
+            return null;
+        }
+    };
+
+    // Función auxiliar para formatear fecha DD/MM/YYYY a YYYY-MM-DD
+    const formatearFecha = (fecha: string): string | null => {
+        try {
+            // Formato DD/MM/YYYY
+            if (fecha.includes('/')) {
+                const parts = fecha.split('/');
+                if (parts.length === 3) {
+                    const day = parts[0].padStart(2, '0');
+                    const month = parts[1].padStart(2, '0');
+                    const year = parts[2];
+                    
+                    // Validar que sea una fecha válida
+                    const fechaObj = new Date(`${year}-${month}-${day}`);
+                    if (!isNaN(fechaObj.getTime())) {
+                        return `${year}-${month}-${day}`;
+                    }
+                }
+            }
+            return null;
+        } catch (error) {
+            console.error('Error formateando fecha:', error);
+            return null;
+        }
+    };
+
     const handleFechaIngresoChange = (fecha: string) => {
         setData('fecha_ingreso', fecha);
         setData('dias_hospitalizados', calculateDiasHospitalizados(fecha));
@@ -2030,6 +2174,12 @@ export default function IngresarRegistro() {
                 console.log('🤖 RESPUESTA COMPLETA DE IA:', response.data);
                 console.log('📊 Datos extraídos por IA:', extractedData);
                 
+                // 🔍 DEBUG: Mostrar TODOS los campos extraídos para diagnóstico
+                console.log('🔍 TODOS LOS CAMPOS DISPONIBLES EN extractedData:');
+                Object.keys(extractedData).forEach(key => {
+                    console.log(`   ${key}:`, extractedData[key]);
+                });
+                
                 // 🔍 DEBUG: Mostrar específicamente campos sociodemográficos
                 console.log('🔍 CAMPOS SOCIODEMOGRÁFICOS EXTRAÍDOS POR IA:');
                 console.log('   📍 Asegurador (categoría):', extractedData.asegurador || 'NO_ENCONTRADO');
@@ -2065,14 +2215,32 @@ export default function IngresarRegistro() {
                     if (extractedData.edad) {
                         setData('edad', extractedData.edad);
                         console.log('Edad de IA usada:', extractedData.edad);
+                        
+                        // 🎯 ASIGNAR TIPO DE PACIENTE AUTOMÁTICAMENTE
+                        const tipoPacienteAuto = determinarTipoPaciente(extractedData.edad, extractedData.sexo);
+                        setData('tipo_paciente', tipoPacienteAuto);
+                        console.log(`🎯 Tipo de paciente asignado: ${tipoPacienteAuto} (edad: ${extractedData.edad}, sexo: ${extractedData.sexo})`);
                     } else {
                         console.log('Edad calculada desde fecha');
+                        
+                        // 🎯 ASIGNAR TIPO DE PACIENTE CON EDAD CALCULADA
+                        const edadCalculada = calculateAge(extractedData.fecha_nacimiento);
+                        if (edadCalculada !== null) {
+                            const tipoPacienteAuto = determinarTipoPaciente(edadCalculada, extractedData.sexo);
+                            setData('tipo_paciente', tipoPacienteAuto);
+                            console.log(`🎯 Tipo de paciente asignado: ${tipoPacienteAuto} (edad calculada: ${edadCalculada}, sexo: ${extractedData.sexo})`);
+                        }
                     }
                 } else if (extractedData.edad) {
                     // Si no hay fecha pero sí edad, llenar la edad
                     setData('edad', extractedData.edad);
                     console.log('Edad llenada desde IA:', extractedData.edad);
                     console.log('Fecha de nacimiento no disponible - usuario deberá ingresarla manualmente');
+                    
+                    // 🎯 ASIGNAR TIPO DE PACIENTE SOLO CON EDAD
+                    const tipoPacienteAuto = determinarTipoPaciente(extractedData.edad, extractedData.sexo);
+                    setData('tipo_paciente', tipoPacienteAuto);
+                    console.log(`🎯 Tipo de paciente asignado: ${tipoPacienteAuto} (solo edad: ${extractedData.edad}, sexo: ${extractedData.sexo})`);
                 } else {
                     console.log('No se encontró fecha_nacimiento ni edad en los datos extraídos');
                 }
@@ -2138,9 +2306,69 @@ export default function IngresarRegistro() {
                     console.log('Institución remitente llenada:', extractedData.institucion_remitente);
                 }
 
+                // 🔥 NUEVOS CAMPOS CLÍNICOS - SECCIÓN 3 "DATOS CLÍNICOS"
+                console.log('🔍 CAMPOS CLÍNICOS EXTRAÍDOS POR IA:');
+                
+                // Fecha de ingreso y cálculo automático de días hospitalizados
+                // 🔍 Buscar fecha_ingreso con múltiples variaciones de nombres
+                let fechaIngreso = extractedData.fecha_ingreso || 
+                                   extractedData.fechaIngreso || 
+                                   extractedData.fecha_de_ingreso ||
+                                   extractedData.fechaDeIngreso ||
+                                   extractedData.ingreso_fecha ||
+                                   null;
+                
+                // 🔥 FALLBACK FRONTEND: Si no encuentra fecha_ingreso, extraerla del texto
+                if (!fechaIngreso && result.extracted_text_preview) {
+                    console.log('   🔍 FALLBACK FRONTEND: Intentando extraer fecha_ingreso del texto...');
+                    fechaIngreso = extractFechaIngresoFromText(result.extracted_text_preview);
+                    if (fechaIngreso) {
+                        console.log('   ✅ FALLBACK FRONTEND: Fecha extraída del texto:', fechaIngreso);
+                    }
+                }
+                
+                if (fechaIngreso) {
+                    setData('fecha_ingreso', fechaIngreso);
+                    // Usar la función existente que también calcula días hospitalizados
+                    handleFechaIngresoChange(fechaIngreso);
+                    console.log('   📅 Fecha de ingreso llenada:', fechaIngreso);
+                    console.log('   🏥 Días hospitalizados calculados automáticamente');
+                } else {
+                    console.log('   📅 Fecha de ingreso: NO_ENCONTRADA en ninguna variación');
+                    console.log('   🔍 Campos buscados: fecha_ingreso, fechaIngreso, fecha_de_ingreso, fechaDeIngreso, ingreso_fecha');
+                }
+
+                // 🚫 DIAGNÓSTICO PRINCIPAL NO SE LLENA AUTOMÁTICAMENTE - Responsabilidad del médico
+                if (extractedData.diagnostico_principal) {
+                    console.log('   🩺 Diagnóstico extraído por IA (NO LLENADO):', extractedData.diagnostico_principal);
+                    console.log('   ⚠️ El diagnóstico principal debe ser verificado y llenado manualmente por el médico');
+                }
+                if (extractedData.diagnostico_1) {
+                    setData('diagnostico_1', extractedData.diagnostico_1);
+                    console.log('   🩺 Diagnóstico 1 llenado:', extractedData.diagnostico_1);
+                }
+                if (extractedData.diagnostico_2) {
+                    setData('diagnostico_2', extractedData.diagnostico_2);
+                    console.log('   🩺 Diagnóstico 2 llenado:', extractedData.diagnostico_2);
+                }
+
+                // Información clínica
+                if (extractedData.motivo_consulta) {
+                    setData('motivo_consulta', extractedData.motivo_consulta);
+                    console.log('   💬 Motivo consulta llenado:', extractedData.motivo_consulta);
+                }
+                if (extractedData.enfermedad_actual) {
+                    setData('enfermedad_actual', extractedData.enfermedad_actual);
+                    console.log('   📝 Enfermedad actual llenada:', extractedData.enfermedad_actual);
+                }
+                if (extractedData.antecedentes) {
+                    setData('antecedentes', extractedData.antecedentes);
+                    console.log('   📋 Antecedentes llenados:', extractedData.antecedentes);
+                }
+
                 toast.success("🤖 ¡Datos extraídos automáticamente!", {
-                    description: "Los campos se han llenado con IA. Revisa los datos y haz clic en 'Siguiente' para continuar.",
-                    duration: 6000,
+                    description: "Los campos sociodemográficos Y clínicos se han llenado con IA. Revisa los datos y navega por los pasos para validar la información.",
+                    duration: 8000,
                 });
             } else {
                 throw new Error(result.message || 'Error desconocido');
