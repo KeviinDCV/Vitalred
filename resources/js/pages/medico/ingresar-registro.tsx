@@ -7,7 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, useForm, router } from '@inertiajs/react';
 import { Edit, Calendar, Upload, ChevronRight } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
@@ -17,6 +17,8 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/medico/ingresar-registro',
     },
 ];
+
+// Códigos CIE-10 - se cargan dinámicamente desde JSON
 
 // Datos para los selects - Sistema de Salud Colombiano
 const aseguradores = [
@@ -1361,55 +1363,136 @@ const escalasGlasgow = [
 ];
 
 const tiposSolicitud = [
-    { value: 'interconsulta', label: 'Interconsulta' },
-    { value: 'remision', label: 'Remisión' },
-    { value: 'contraremision', label: 'Contraremisión' },
-    { value: 'segunda_opinion', label: 'Segunda Opinión' },
-    { value: 'procedimiento', label: 'Procedimiento' },
+    { value: 'solicitud_remision', label: 'Solicitud de remisión' },
+    { value: 'solicitud_traslado_redondo', label: 'Solicitud traslado redondo' },
 ];
 
 const especialidades = [
-    { value: 'medicina_interna', label: 'Medicina Interna' },
+    { value: 'anestesia', label: 'Anestesia' },
     { value: 'cardiologia', label: 'Cardiología' },
-    { value: 'neurologia', label: 'Neurología' },
+    { value: 'cardiologia_pediatrica', label: 'Cardiología Pediátrica' },
+    { value: 'cirugia_bariatrica', label: 'Cirugía Bariátrica' },
+    { value: 'cirugia_cardiovascular', label: 'Cirugía Cardiovascular' },
+    { value: 'cirugia_cabeza_cuello', label: 'Cirugía De Cabeza Y Cuello' },
+    { value: 'cirugia_epilepsia', label: 'Cirugía de Epilepsia' },
+    { value: 'cirugia_mano', label: 'Cirugía De La Mano' },
+    { value: 'cirugia_mama_tumores', label: 'Cirugía De Mama Y Tumores Tejidos Blandos' },
+    { value: 'cirugia_mano_alt', label: 'Cirugía De Mano' },
+    { value: 'cirugia_torax', label: 'Cirugía De Tórax' },
+    { value: 'cirugia_trauma', label: 'Cirugía de Trauma' },
+    { value: 'cirugia_dermatologica', label: 'Cirugía Dermatológica' },
+    { value: 'cirugia_gastrointestinal', label: 'Cirugía Gastrointestinal' },
     { value: 'cirugia_general', label: 'Cirugía General' },
-    { value: 'ortopedia', label: 'Ortopedia y Traumatología' },
-    { value: 'ginecologia', label: 'Ginecología y Obstetricia' },
-    { value: 'pediatria', label: 'Pediatría' },
-    { value: 'psiquiatria', label: 'Psiquiatría' },
+    { value: 'cirugia_ginecologica', label: 'Cirugía Ginecológica' },
+    { value: 'cirugia_ginecologica_laparoscopica', label: 'Cirugía Ginecológica Laparoscópica' },
+    { value: 'cirugia_maxilofacial', label: 'Cirugía Maxilofacial' },
+    { value: 'cirugia_oftalmologica', label: 'Cirugía Oftalmológica' },
+    { value: 'cirugia_oncologica', label: 'Cirugía Oncológica' },
+    { value: 'cirugia_oncologica_pediatrica', label: 'Cirugía Oncológica Pediátrica' },
+    { value: 'cirugia_oral', label: 'Cirugía Oral' },
+    { value: 'cirugia_ortopedica', label: 'Cirugía Ortopédica' },
+    { value: 'cirugia_otorrinolaringologia', label: 'Cirugía Otorrinolaringología' },
+    { value: 'cirugia_pediatrica', label: 'Cirugía Pediátrica' },
+    { value: 'cirugia_plastica_estetica', label: 'Cirugía Plástica Y Estética' },
+    { value: 'cirugia_urologica', label: 'Cirugía Urológica' },
+    { value: 'cirugia_vascular_periferica', label: 'Cirugía Vascular Periférica' },
     { value: 'dermatologia', label: 'Dermatología' },
-    { value: 'oftalmologia', label: 'Oftalmología' },
-    { value: 'otorrinolaringologia', label: 'Otorrinolaringología' },
-    { value: 'urologia', label: 'Urología' },
+    { value: 'dolor_cuidados_paliativos', label: 'Dolor Y Cuidados Paliativos' },
     { value: 'endocrinologia', label: 'Endocrinología' },
+    { value: 'endodoncia', label: 'Endodoncia' },
     { value: 'gastroenterologia', label: 'Gastroenterología' },
-    { value: 'neumologia', label: 'Neumología' },
-    { value: 'nefrologia', label: 'Nefrología' },
-    { value: 'oncologia', label: 'Oncología' },
+    { value: 'genetica', label: 'Genética' },
+    { value: 'geriatria', label: 'Geriatría' },
+    { value: 'ginecobstetricia', label: 'Ginecobstetricia' },
+    { value: 'ginecologia_oncologica', label: 'Ginecología Oncológica' },
     { value: 'hematologia', label: 'Hematología' },
-    { value: 'reumatologia', label: 'Reumatología' },
+    { value: 'hematologia_oncologica', label: 'Hematología Oncológica' },
     { value: 'infectologia', label: 'Infectología' },
+    { value: 'inmunologia', label: 'Inmunología' },
+    { value: 'medicina_emergencias', label: 'Medicina de Emergencias' },
+    { value: 'medicina_fisica_rehabilitacion', label: 'Medicina Física Y Rehabilitación' },
+    { value: 'medicina_interna', label: 'Medicina Interna' },
+    { value: 'medicina_nuclear', label: 'Medicina nuclear' },
+    { value: 'nefrologia', label: 'Nefrología' },
+    { value: 'nefrologia_pediatrica', label: 'Nefrología Pediátrica' },
+    { value: 'neonatologia', label: 'Neonatología' },
+    { value: 'neumologia', label: 'Neumología' },
+    { value: 'neumologia_pediatrica', label: 'Neumología Pediátrica' },
+    { value: 'neurocirugia', label: 'Neurocirugía' },
+    { value: 'neurologia', label: 'Neurología' },
+    { value: 'neurologia_pediatrica', label: 'Neurología pediátrica' },
+    { value: 'neuroradiologia_intervencionista', label: 'Neurorradiología intervencionista' },
+    { value: 'odontopediatria', label: 'Odontopediatría' },
+    { value: 'oftalmologia', label: 'Oftalmología' },
+    { value: 'oftalmologia_pediatrica', label: 'Oftalmología pediátrica' },
+    { value: 'oncologia_clinica', label: 'Oncología Clínica' },
+    { value: 'oncologia_hematologia_pediatrica', label: 'Oncología Y Hematología Pediátrica' },
+    { value: 'ortopedia_oncologica', label: 'Ortopedia Oncológica' },
+    { value: 'ortopedia_pediatrica', label: 'Ortopedia Pediátrica' },
+    { value: 'ortopedia_traumatologia', label: 'Ortopedia Y/O Traumatología' },
+    { value: 'otoneurologia', label: 'Otoneurología' },
+    { value: 'otorrinolaringologia', label: 'Otorrinolaringología' },
+    { value: 'patologia', label: 'Patología' },
+    { value: 'pediatria', label: 'Pediatría' },
+    { value: 'periodoncia', label: 'Periodoncia' },
+    { value: 'psiquiatria', label: 'Psiquiatría' },
+    { value: 'radiologia_intervencionista', label: 'Radiología intervencionista' },
+    { value: 'radioterapia', label: 'Radioterapia' },
+    { value: 'reumatologia', label: 'Reumatología' },
+    { value: 'toxicologia', label: 'Toxicología' },
+    { value: 'urologia', label: 'Urología' },
+    { value: 'cirugia_hepatobilliar', label: 'Cirugía hepatobilliar' },
+    { value: 'cirugia_cabeza_cuello_alt', label: 'Cirugía de cabeza y cuello' },
+    { value: 'infectologia_pediatrica', label: 'Infectología pediátrica' },
+    { value: 'neurologia_pediatrica_alt', label: 'Neurología pediátrica' },
+    { value: 'nefrologia_pediatrica_alt', label: 'Nefrología pediátrica' },
+    { value: 'cardiologia_pediatrica_alt', label: 'Cardiología pediátrica' },
+    { value: 'reumatologia_pediatrica', label: 'Reumatología pediátrica' },
+    { value: 'neumologia_pediatrica_alt', label: 'Neumología pediátrica' },
+    { value: 'gastroenterologia_pediatrica', label: 'Gastroenterología pediátrica' },
+    { value: 'hematooncologia_pediatrica', label: 'Hematooncología pediátrica' },
 ];
 
 const tiposServicio = [
-    { value: 'ambulatorio', label: 'Ambulatorio' },
-    { value: 'hospitalizacion', label: 'Hospitalización' },
-    { value: 'urgencias', label: 'Urgencias' },
-    { value: 'uci', label: 'UCI' },
-    { value: 'cirugia', label: 'Cirugía' },
-    { value: 'consulta_externa', label: 'Consulta Externa' },
+    { value: 'atencion_parto', label: 'Atención Del Parto' },
+    { value: 'cuidado_intermedio_neonatal', label: 'Cuidado Intermedio Neonatal' },
+    { value: 'cuidado_intermedio_pediatrico', label: 'Cuidado Intermedio Pediátrico' },
+    { value: 'cuidado_intermedio_adultos', label: 'Cuidado Intermedio Adultos' },
+    { value: 'cuidado_intensivo_neonatal', label: 'Cuidado Intensivo Neonatal' },
+    { value: 'cuidado_intensivo_pediatrico', label: 'Cuidado Intensivo Pediátrico' },
+    { value: 'cuidado_intensivo_adultos', label: 'Cuidado Intensivo Adultos' },
+    { value: 'cuidado_intensivo_cardiovascular', label: 'Cuidado Intensivo Cardiovascular' },
+    { value: 'cuidado_intensivo_oncologico', label: 'Cuidado Intensivo Oncológico' },
+    { value: 'cuidado_intensivo_trasplantes', label: 'Cuidado Intensivo Trasplantes' },
+    { value: 'cuidado_intensivo_infecciosos', label: 'Cuidado Intensivo Infecciosos' },
+    { value: 'hospitalizacion_neonatal', label: 'Hospitalización Neonatal' },
+    { value: 'hospitalizacion_adultos', label: 'Hospitalización Adultos' },
+    { value: 'hospitalizacion_pediatrica', label: 'Hospitalización Pediátrica' },
+    { value: 'hospitalizacion_salud_mental', label: 'Hospitalización En Salud Mental' },
+    { value: 'hospitalizacion_cuidado_especial_adulto', label: 'Hospitalización de Cuidado Especial Adulto (Infectados)' },
+    { value: 'hospitalizacion_cuidado_especial_pediatrico', label: 'Hospitalización de Cuidado Especial Pediátrico (Respiratorios, Infectados)' },
+    { value: 'unidad_hemodinamia', label: 'Unidad de Hemodinamia' },
+    { value: 'cardiologia_no_invasiva', label: 'Cardiología no invasiva' },
+    { value: 'quimioterapia', label: 'Quimioterapia' },
+    { value: 'radioterapia', label: 'Radioterapia' },
+    { value: 'banco_sangre', label: 'Banco de Sangre' },
+    { value: 'servicio_quirurgico', label: 'Servicio Quirúrgico' },
+    { value: 'unidad_endoscopia', label: 'Unidad de Endoscopia' },
+    { value: 'patologia', label: 'Patología' },
+    { value: 'unidad_trasplante', label: 'Unidad de Trasplante (Riñón, cornea, hueso)' },
+    { value: 'unidad_quemados', label: 'Unidad de Quemados' },
+    { value: 'enfermedades_huerfanas', label: 'Enfermedades Huérfanas' },
+    { value: 'unidad_cuidado_paliativo', label: 'Unidad de Cuidado Paliativo' },
+    { value: 'consultorio_rosa', label: 'Consultorio Rosa' },
+    { value: 'medicina_general', label: 'Medicina General' },
+    { value: 'hospitalizacion_general', label: 'Hospitalización General' },
 ];
 
 const tiposApoyo = [
-    { value: 'diagnostico', label: 'Apoyo Diagnóstico' },
-    { value: 'terapeutico', label: 'Apoyo Terapéutico' },
-    { value: 'laboratorio', label: 'Laboratorio Clínico' },
-    { value: 'imagenes', label: 'Imágenes Diagnósticas' },
-    { value: 'patologia', label: 'Patología' },
-    { value: 'rehabilitacion', label: 'Rehabilitación' },
-    { value: 'nutricion', label: 'Nutrición' },
-    { value: 'psicologia', label: 'Psicología' },
-    { value: 'trabajo_social', label: 'Trabajo Social' },
+    { value: 'apoyo_diagnostico_imagenologico', label: 'Apoyo Diagnóstico Imagenológico' },
+    { value: 'apoyo_diagnostico_quirurgico', label: 'Apoyo Diagnóstico Quirúrgico' },
+    { value: 'apoyos_diagnosticos', label: 'Apoyos Diagnósticos' },
+    { value: 'otro', label: 'Otro' },
 ];
 
 export default function IngresarRegistro() {
@@ -1418,6 +1501,92 @@ export default function IngresarRegistro() {
     const [validationErrors, setValidationErrors] = useState<string[]>([]);
     const [isAnalyzingWithAI, setIsAnalyzingWithAI] = useState(false);
     const [aiAnalysisResult, setAiAnalysisResult] = useState<any>(null);
+    const [searchCIE10, setSearchCIE10] = useState('');
+    const [debouncedSearchCIE10, setDebouncedSearchCIE10] = useState('');
+    const [searchCIE10_1, setSearchCIE10_1] = useState('');
+    const [debouncedSearchCIE10_1, setDebouncedSearchCIE10_1] = useState('');
+    const [searchCIE10_2, setSearchCIE10_2] = useState('');
+    const [debouncedSearchCIE10_2, setDebouncedSearchCIE10_2] = useState('');
+    const [codigosCIE10, setCodigosCIE10] = useState<Array<{value: string, label: string}>>([]);
+    const [loadingCIE10, setLoadingCIE10] = useState(true);
+
+    // 📥 Cargar códigos CIE-10 desde JSON
+    useEffect(() => {
+        const cargarCodigosCIE10 = async () => {
+            try {
+                setLoadingCIE10(true);
+                console.log('🔄 Cargando códigos CIE-10 desde /TablaCIE10.json...');
+                
+                const response = await fetch('/TablaCIE10.json');
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const datos = await response.json();
+                console.log(`✅ ${datos.length} códigos CIE-10 cargados exitosamente`);
+                
+                // Transformar datos del JSON al formato requerido
+                const codigosFormateados = datos.map((item: any) => ({
+                    value: item.Codigo,
+                    label: `${item.Codigo} - ${item.Nombre}`
+                }));
+                
+                setCodigosCIE10(codigosFormateados);
+                
+            } catch (error) {
+                console.error('❌ Error cargando códigos CIE-10:', error);
+                toast.error('Error al cargar códigos CIE-10. Por favor recarga la página.');
+                
+                // Códigos de respaldo en caso de error
+                setCodigosCIE10([
+                    { value: 'A000', label: 'A000 - COLERA DEBIDO A VIBRIO CHOLERAE 01, BIOTIPO CHOLERAE' },
+                    { value: 'I10X', label: 'I10X - HIPERTENSION ESENCIAL (PRIMARIA)' },
+                    { value: 'E119', label: 'E119 - DIABETES MELLITUS NO INSULINODEPENDIENTE' }
+                ]);
+            } finally {
+                setLoadingCIE10(false);
+            }
+        };
+        
+        cargarCodigosCIE10();
+    }, []);
+
+    // 🔄 Debounce para búsquedas CIE-10 (mejor rendimiento)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchCIE10(searchCIE10);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchCIE10]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchCIE10_1(searchCIE10_1);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchCIE10_1]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchCIE10_2(searchCIE10_2);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchCIE10_2]);
+
+    // 📱 Cerrar dropdowns al hacer clic fuera
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Element;
+            if (!target.closest('[data-cie10-dropdown]')) {
+                setSearchCIE10('');
+                setSearchCIE10_1('');
+                setSearchCIE10_2('');
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     // Función para mapear tipos de identificación de IA a valores del frontend
     const mapTipoIdentificacion = (tipoIA: string): string => {
@@ -1706,6 +1875,35 @@ export default function IngresarRegistro() {
         
         return ciudadDepartamento[ciudad] || '';
     };
+
+    // Filtrado de códigos CIE-10 con búsqueda OPTIMIZADO y DEBOUNCED
+    const createCIE10Filter = (debouncedSearch: string) => {
+        return useMemo(() => {
+            // Si no hay búsqueda, mostrar solo los primeros 50 códigos más comunes
+            if (!debouncedSearch) {
+                return codigosCIE10.slice(0, 50);
+            }
+            
+            // Si hay búsqueda, filtrar y limitar a 100 resultados máximo
+            const searchLower = debouncedSearch.toLowerCase().trim();
+            if (searchLower.length < 2) {
+                // Si la búsqueda es muy corta, mostrar solo algunos resultados
+                return codigosCIE10.slice(0, 20);
+            }
+            
+            const filtered = codigosCIE10.filter(codigo => 
+                codigo.label.toLowerCase().includes(searchLower) ||
+                codigo.value.toLowerCase().includes(searchLower)
+            );
+            
+            // Limitar a máximo 100 resultados para mantener fluidez
+            return filtered.slice(0, 100);
+        }, [debouncedSearch, codigosCIE10]);
+    };
+
+    const filteredCIE10 = createCIE10Filter(debouncedSearchCIE10);
+    const filteredCIE10_1 = createCIE10Filter(debouncedSearchCIE10_1);
+    const filteredCIE10_2 = createCIE10Filter(debouncedSearchCIE10_2);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         // Paso 1: Información Personal
@@ -2352,10 +2550,10 @@ export default function IngresarRegistro() {
                     console.log('   🩺 Diagnóstico 2 llenado:', extractedData.diagnostico_2);
                 }
 
-                // Información clínica
+                // 🚫 MOTIVO DE CONSULTA NO SE LLENA AUTOMÁTICAMENTE - Responsabilidad del médico
                 if (extractedData.motivo_consulta) {
-                    setData('motivo_consulta', extractedData.motivo_consulta);
-                    console.log('   💬 Motivo consulta llenado:', extractedData.motivo_consulta);
+                    console.log('   💬 Motivo extraído por IA (NO LLENADO):', extractedData.motivo_consulta);
+                    console.log('   ⚠️ El motivo de consulta debe ser llenado manualmente por el médico');
                 }
                 if (extractedData.enfermedad_actual) {
                     setData('enfermedad_actual', extractedData.enfermedad_actual);
@@ -3079,33 +3277,199 @@ export default function IngresarRegistro() {
                                                 <div className="grid gap-4">
                                                     <div className="space-y-2">
                                                         <Label htmlFor="diagnostico_principal">Diagnóstico principal (CIE-10) *</Label>
-                                                        <Input
-                                                            id="diagnostico_principal"
-                                                            value={data.diagnostico_principal}
-                                                            onChange={(e) => setData('diagnostico_principal', e.target.value)}
-                                                            placeholder="Código CIE-10 y descripción"
-                                                        />
+                                                        <div className="relative" data-cie10-dropdown>
+                                                            {/* Campo unificado: búsqueda + selección */}
+                                                            <div className="space-y-2">
+                                                                <Input
+                                                                    id="diagnostico_principal"
+                                                                    type="text"
+                                                                    placeholder={loadingCIE10 ? "Cargando códigos..." : "Busque y seleccione un código CIE-10..."}
+                                                                    value={searchCIE10}
+                                                                    onChange={(e) => setSearchCIE10(e.target.value)}
+                                                                    disabled={loadingCIE10}
+                                                                    className="pr-10"
+                                                                />
+                                                                
+                                                                {/* Dropdown de resultados (solo si hay búsqueda) */}
+                                                                {(searchCIE10.length >= 2 || loadingCIE10) && (
+                                                                    <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-lg">
+                                                                        {loadingCIE10 ? (
+                                                                            <div className="p-3 flex items-center text-sm text-gray-500">
+                                                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                                                                                Cargando códigos CIE-10...
+                                                                            </div>
+                                                                        ) : debouncedSearchCIE10 && filteredCIE10.length > 0 ? (
+                                                                            <>
+                                                                                {filteredCIE10.map((codigo) => (
+                                                                                    <div
+                                                                                        key={codigo.value}
+                                                                                        className="px-3 py-2 cursor-pointer hover:bg-blue-50 text-sm border-b border-gray-100 last:border-b-0"
+                                                                                        onClick={() => {
+                                                                                            setData('diagnostico_principal', codigo.value);
+                                                                                            setSearchCIE10('');
+                                                                                        }}
+                                                                                    >
+                                                                                        {codigo.label}
+                                                                                    </div>
+                                                                                ))}
+                                                                                {filteredCIE10.length === 100 && (
+                                                                                    <div className="px-3 py-2 text-xs text-amber-600 bg-amber-50 border-t">
+                                                                                        ⚠️ Hay más resultados. Refine su búsqueda.
+                                                                                    </div>
+                                                                                )}
+                                                                            </>
+                                                                        ) : (
+                                                                            <div className="px-3 py-2 text-sm text-gray-500">
+                                                                                No se encontraron códigos que coincidan
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            
+                                                            {/* Mostrar código seleccionado */}
+                                                            {data.diagnostico_principal && (
+                                                                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                                                                    <p className="text-sm font-medium text-green-800">
+                                                                        Código seleccionado: {data.diagnostico_principal}
+                                                                    </p>
+                                                                    <p className="text-xs text-green-600">
+                                                                        {codigosCIE10.find(c => c.value === data.diagnostico_principal)?.label}
+                                                                    </p>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
 
                                                     <div className="grid gap-4 md:grid-cols-2">
                                                         <div className="space-y-2">
                                                             <Label htmlFor="diagnostico_1">Diagnóstico No. 1</Label>
-                                                            <Input
-                                                                id="diagnostico_1"
-                                                                value={data.diagnostico_1}
-                                                                onChange={(e) => setData('diagnostico_1', e.target.value)}
-                                                                placeholder="Código CIE-10 y descripción"
-                                                            />
+                                                            <div className="relative" data-cie10-dropdown>
+                                                                <div className="space-y-2">
+                                                                    <Input
+                                                                        id="diagnostico_1"
+                                                                        type="text"
+                                                                        placeholder={loadingCIE10 ? "Cargando códigos..." : "Busque y seleccione un código CIE-10..."}
+                                                                        value={searchCIE10_1}
+                                                                        onChange={(e) => setSearchCIE10_1(e.target.value)}
+                                                                        disabled={loadingCIE10}
+                                                                        className="pr-10"
+                                                                    />
+                                                                    
+                                                                    {/* Dropdown de resultados */}
+                                                                    {(searchCIE10_1.length >= 2 || loadingCIE10) && (
+                                                                        <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-lg">
+                                                                            {loadingCIE10 ? (
+                                                                                <div className="p-3 flex items-center text-sm text-gray-500">
+                                                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                                                                                    Cargando códigos CIE-10...
+                                                                                </div>
+                                                                            ) : debouncedSearchCIE10_1 && filteredCIE10_1.length > 0 ? (
+                                                                                <>
+                                                                                    {filteredCIE10_1.map((codigo) => (
+                                                                                        <div
+                                                                                            key={codigo.value}
+                                                                                            className="px-3 py-2 cursor-pointer hover:bg-blue-50 text-sm border-b border-gray-100 last:border-b-0"
+                                                                                            onClick={() => {
+                                                                                                setData('diagnostico_1', codigo.value);
+                                                                                                setSearchCIE10_1('');
+                                                                                            }}
+                                                                                        >
+                                                                                            {codigo.label}
+                                                                                        </div>
+                                                                                    ))}
+                                                                                    {filteredCIE10_1.length === 100 && (
+                                                                                        <div className="px-3 py-2 text-xs text-amber-600 bg-amber-50 border-t">
+                                                                                            ⚠️ Hay más resultados. Refine su búsqueda.
+                                                                                        </div>
+                                                                                    )}
+                                                                                </>
+                                                                            ) : (
+                                                                                <div className="px-3 py-2 text-sm text-gray-500">
+                                                                                    No se encontraron códigos que coincidan
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                
+                                                                {/* Mostrar código seleccionado */}
+                                                                {data.diagnostico_1 && (
+                                                                    <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                                                                        <p className="text-sm font-medium text-green-800">
+                                                                            Código seleccionado: {data.diagnostico_1}
+                                                                        </p>
+                                                                        <p className="text-xs text-green-600">
+                                                                            {codigosCIE10.find(c => c.value === data.diagnostico_1)?.label}
+                                                                        </p>
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
 
                                                         <div className="space-y-2">
                                                             <Label htmlFor="diagnostico_2">Diagnóstico No. 2</Label>
-                                                            <Input
-                                                                id="diagnostico_2"
-                                                                value={data.diagnostico_2}
-                                                                onChange={(e) => setData('diagnostico_2', e.target.value)}
-                                                                placeholder="Código CIE-10 y descripción"
-                                                            />
+                                                            <div className="relative" data-cie10-dropdown>
+                                                                <div className="space-y-2">
+                                                                    <Input
+                                                                        id="diagnostico_2"
+                                                                        type="text"
+                                                                        placeholder={loadingCIE10 ? "Cargando códigos..." : "Busque y seleccione un código CIE-10..."}
+                                                                        value={searchCIE10_2}
+                                                                        onChange={(e) => setSearchCIE10_2(e.target.value)}
+                                                                        disabled={loadingCIE10}
+                                                                        className="pr-10"
+                                                                    />
+                                                                    
+                                                                    {/* Dropdown de resultados */}
+                                                                    {(searchCIE10_2.length >= 2 || loadingCIE10) && (
+                                                                        <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-lg">
+                                                                            {loadingCIE10 ? (
+                                                                                <div className="p-3 flex items-center text-sm text-gray-500">
+                                                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                                                                                    Cargando códigos CIE-10...
+                                                                                </div>
+                                                                            ) : debouncedSearchCIE10_2 && filteredCIE10_2.length > 0 ? (
+                                                                                <>
+                                                                                    {filteredCIE10_2.map((codigo) => (
+                                                                                        <div
+                                                                                            key={codigo.value}
+                                                                                            className="px-3 py-2 cursor-pointer hover:bg-blue-50 text-sm border-b border-gray-100 last:border-b-0"
+                                                                                            onClick={() => {
+                                                                                                setData('diagnostico_2', codigo.value);
+                                                                                                setSearchCIE10_2('');
+                                                                                            }}
+                                                                                        >
+                                                                                            {codigo.label}
+                                                                                        </div>
+                                                                                    ))}
+                                                                                    {filteredCIE10_2.length === 100 && (
+                                                                                        <div className="px-3 py-2 text-xs text-amber-600 bg-amber-50 border-t">
+                                                                                            ⚠️ Hay más resultados. Refine su búsqueda.
+                                                                                        </div>
+                                                                                    )}
+                                                                                </>
+                                                                            ) : (
+                                                                                <div className="px-3 py-2 text-sm text-gray-500">
+                                                                                    No se encontraron códigos que coincidan
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                
+                                                                {/* Mostrar código seleccionado */}
+                                                                {data.diagnostico_2 && (
+                                                                    <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                                                                        <p className="text-sm font-medium text-green-800">
+                                                                            Código seleccionado: {data.diagnostico_2}
+                                                                        </p>
+                                                                        <p className="text-xs text-green-600">
+                                                                            {codigosCIE10.find(c => c.value === data.diagnostico_2)?.label}
+                                                                        </p>
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -3116,12 +3480,12 @@ export default function IngresarRegistro() {
                                                 <h3 className="text-lg font-medium">Información Clínica</h3>
                                                 <div className="grid gap-4">
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="motivo_consulta">Motivo consulta *</Label>
+                                                        <Label htmlFor="motivo_consulta">Motivo consulta * (Campo manual)</Label>
                                                         <textarea
                                                             id="motivo_consulta"
                                                             value={data.motivo_consulta}
                                                             onChange={(e) => setData('motivo_consulta', e.target.value)}
-                                                            placeholder="Describa el motivo de la consulta"
+                                                            placeholder="Escriba aquí el motivo por el cual el paciente consulta (campo obligatorio para el médico)"
                                                             className="w-full min-h-[80px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
                                                         />
                                                     </div>
