@@ -1949,7 +1949,7 @@ export default function IngresarRegistro() {
         // Paso 4: Datos De Remisión
         motivo_remision: '',
         tipo_solicitud: '',
-        especialidad_solicitada: '',
+        especialidad_solicitada: [] as string[],
         requerimiento_oxigeno: 'NO',
         tipo_servicio: '',
         tipo_apoyo: '',
@@ -2172,14 +2172,14 @@ export default function IngresarRegistro() {
         return diffDays;
     };
 
-    // 🔥 NUEVA FUNCIÓN: Extraer fecha de ingreso del texto en el frontend
+    // 🔥 FUNCIÓN MEJORADA: Extracción AGRESIVA de fecha de ingreso 
     const extractFechaIngresoFromText = (text: string): string | null => {
         try {
-            console.log('🔍 FALLBACK: Buscando fechas de ingreso con CONTEXTO inteligente...');
+            console.log('🔍 FALLBACK MEJORADO: Búsqueda AGRESIVA de fechas de ingreso...');
             console.log('🔍 FALLBACK: Longitud del texto:', text.length);
             console.log('🔍 FALLBACK: Fecha actual para comparación:', new Date().toISOString().split('T')[0]);
             
-            // 🎯 NUEVO ENFOQUE: Buscar fechas CON CONTEXTO DE INGRESO
+            // 🎯 ENFOQUE AGRESIVO: Múltiples patrones de búsqueda
             const contextualDates: Array<{
                 original: string, 
                 formatted: string, 
@@ -2187,61 +2187,176 @@ export default function IngresarRegistro() {
                 context: string,
                 priority: number
             }> = [];
-            
-            // 🏆 PRIORIDAD 1: Fechas en sección "DATOS DEL INGRESO" con "Nº Ingreso"
-            const ingresoPattern = /DATOS\s+DEL\s+INGRESO[\s\S]*?Nº\s+Ingreso:[\s\S]*?Fecha\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})/gi;
+
+            // Función helper para agregar fecha si no existe
+            const addFechaIfNew = (fechaRaw: string, context: string, priority: number) => {
+                const fechaFormateada = formatearFecha(fechaRaw);
+                if (fechaFormateada && !contextualDates.find(d => d.original === fechaRaw)) {
+                    contextualDates.push({
+                        original: fechaRaw,
+                        formatted: fechaFormateada,
+                        date: new Date(fechaFormateada),
+                        context,
+                        priority
+                    });
+                    console.log(`🎯 P${priority}: ${context}: ${fechaRaw}`);
+                    return true;
+                }
+                return false;
+            };
+
+            // 🏆 PRIORIDAD 1: Patrones específicos de ingreso
+            const patterns1 = [
+                /DATOS\s+DEL\s+INGRESO[\s\S]*?Fecha\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /Nº\s+Ingreso[\s\S]*?Fecha\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /N°\s+Ingreso[\s\S]*?Fecha\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /Número\s+Ingreso[\s\S]*?Fecha\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /INGRESO[\s\S]*?Fecha\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})/gi
+            ];
+
+            patterns1.forEach((pattern, i) => {
+                let match;
+                while ((match = pattern.exec(text)) !== null) {
+                    addFechaIfNew(match[1].trim(), `Patrón Ingreso ${i+1}`, 1);
+                }
+            });
+
+            // 🥈 PRIORIDAD 2: Fechas explícitas de ingreso
+            const patterns2 = [
+                /fecha\s*de\s*ingreso[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /fecha\s*ingreso[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /f\.\s*ingreso[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /ingresa[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /hospitalización[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /hospitalizacion[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi
+            ];
+
+            patterns2.forEach((pattern, i) => {
+                let match;
+                while ((match = pattern.exec(text)) !== null) {
+                    addFechaIfNew(match[1].trim(), `Fecha Ingreso Explícita ${i+1}`, 2);
+                }
+            });
+
+            // 🥉 PRIORIDAD 3: Fechas en contexto médico
+            const patterns3 = [
+                /admitido[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /admisión[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /admision[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /consulta[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /atención[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /atencion[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi
+            ];
+
+            patterns3.forEach((pattern, i) => {
+                let match;
+                while ((match = pattern.exec(text)) !== null) {
+                    addFechaIfNew(match[1].trim(), `Contexto Médico ${i+1}`, 3);
+                }
+            });
+
+            // 🔄 PRIORIDAD 4: Fechas cerca de palabras clave (búsqueda más amplia)
+            const patterns4 = [
+                /emergencia[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /urgencia[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /paciente[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                /servicio[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi
+            ];
+
+            patterns4.forEach((pattern, i) => {
+                let match;
+                while ((match = pattern.exec(text)) !== null) {
+                    addFechaIfNew(match[1].trim(), `Palabra Clave ${i+1}`, 4);
+                }
+            });
+
+            // 🔥 PRIORIDAD 5: Patrones MUY FLEXIBLES (palabras clave cercanas)
+            const flexiblePatterns = [
+                /\b(\d{1,2}\/\d{1,2}\/\d{4})\b[\s\S]{0,50}(?:ingreso|admis|hospital|emergencia|urgencia)/gi,
+                /(?:ingreso|admis|hospital|emergencia|urgencia)[\s\S]{0,50}\b(\d{1,2}\/\d{1,2}\/\d{4})\b/gi,
+                /\b(\d{1,2}\/\d{1,2}\/\d{4})\b[\s\S]{0,100}(?:servicio|UCI|sala|piso)/gi,
+                /(?:servicio|UCI|sala|piso)[\s\S]{0,100}\b(\d{1,2}\/\d{1,2}\/\d{4})\b/gi
+            ];
+
+            flexiblePatterns.forEach((pattern, i) => {
+                let match;
+                while ((match = pattern.exec(text)) !== null) {
+                    addFechaIfNew(match[1].trim(), `Patrón Flexible ${i+1}`, 5);
+                }
+            });
+
+            // 🎯 PRIORIDAD 6: SUPER AGRESIVO - Todas las fechas válidas de últimos 60 días
+            console.log('🔥 BÚSQUEDA SUPER AGRESIVA: Todas las fechas de últimos 60 días...');
+            const allDatesPattern = /\b(\d{1,2}\/\d{1,2}\/\d{4})\b/g;
             let match;
-            while ((match = ingresoPattern.exec(text)) !== null) {
+            while ((match = allDatesPattern.exec(text)) !== null) {
                 const fechaRaw = match[1].trim();
-                const fechaFormateada = formatearFecha(fechaRaw);
-                if (fechaFormateada) {
-                    contextualDates.push({
-                        original: fechaRaw,
-                        formatted: fechaFormateada,
-                        date: new Date(fechaFormateada),
-                        context: 'DATOS DEL INGRESO + Nº Ingreso',
-                        priority: 1
-                    });
-                    console.log(`🏆 PRIORIDAD 1: Fecha en DATOS DEL INGRESO: ${fechaRaw}`);
+                
+                // ❌ EXCLUIR fechas que están claramente en contexto de impresión
+                const contextBefore = text.substring(Math.max(0, match.index - 100), match.index);
+                const contextAfter = text.substring(match.index, Math.min(text.length, match.index + 100));
+                const fullContext = contextBefore + fechaRaw + contextAfter;
+                
+                const excludePatterns = [
+                    /\(.*fecha.*\)/gi,
+                    /impres[ióo]n/gi,
+                    /documento/gi,
+                    /generado/gi,
+                    /sistema/gi
+                ];
+                
+                const shouldExclude = excludePatterns.some(pattern => pattern.test(fullContext));
+                
+                if (!shouldExclude) {
+                    const fechaFormateada = formatearFecha(fechaRaw);
+                    if (fechaFormateada) {
+                        const fechaObj = new Date(fechaFormateada);
+                        const now = new Date();
+                        const diffDays = (now.getTime() - fechaObj.getTime()) / (1000 * 60 * 60 * 24);
+                        
+                        // Ampliado a 60 días atrás y 14 días hacia adelante
+                        if (diffDays >= -14 && diffDays <= 60 && !contextualDates.find(d => d.original === fechaRaw)) {
+                            contextualDates.push({
+                                original: fechaRaw,
+                                formatted: fechaFormateada,
+                                date: fechaObj,
+                                context: `Fecha válida (${Math.round(diffDays)} días)`,
+                                priority: 6
+                            });
+                            console.log(`🎯 P6: Fecha válida: ${fechaRaw} (${Math.round(diffDays)} días)`);
+                        }
+                    }
                 }
             }
-            
-            // 🥈 PRIORIDAD 2: Fechas después de "Nº Ingreso:"
-            const numeroIngresoPattern = /Nº\s+Ingreso:\s*\d+[\s\S]*?Fecha\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})/gi;
-            while ((match = numeroIngresoPattern.exec(text)) !== null) {
-                const fechaRaw = match[1].trim();
-                const fechaFormateada = formatearFecha(fechaRaw);
-                if (fechaFormateada && !contextualDates.find(d => d.original === fechaRaw)) {
-                    contextualDates.push({
-                        original: fechaRaw,
-                        formatted: fechaFormateada,
-                        date: new Date(fechaFormateada),
-                        context: 'Después de Nº Ingreso',
-                        priority: 2
-                    });
-                    console.log(`🥈 PRIORIDAD 2: Fecha después de Nº Ingreso: ${fechaRaw}`);
+
+            // 🚨 PRIORIDAD 7: ÚLTIMO RECURSO - Cualquier fecha razonable
+            if (contextualDates.length === 0) {
+                console.log('🚨 ÚLTIMO RECURSO: Buscando CUALQUIER fecha razonable...');
+                const desperatePattern = /\b(\d{1,2}\/\d{1,2}\/\d{4})\b/g;
+                while ((match = desperatePattern.exec(text)) !== null) {
+                    const fechaRaw = match[1].trim();
+                    const fechaFormateada = formatearFecha(fechaRaw);
+                    if (fechaFormateada) {
+                        const fechaObj = new Date(fechaFormateada);
+                        const now = new Date();
+                        const diffDays = (now.getTime() - fechaObj.getTime()) / (1000 * 60 * 60 * 24);
+                        
+                        // Aún más flexible: 6 meses atrás
+                        if (diffDays >= -30 && diffDays <= 180) {
+                            contextualDates.push({
+                                original: fechaRaw,
+                                formatted: fechaFormateada,
+                                date: fechaObj,
+                                context: `Último recurso (${Math.round(diffDays)} días)`,
+                                priority: 7
+                            });
+                            console.log(`🚨 P7: Último recurso: ${fechaRaw} (${Math.round(diffDays)} días)`);
+                        }
+                    }
                 }
             }
-            
-            // 🥉 PRIORIDAD 3: Fechas con "Fecha de ingreso" explícito
-            const fechaIngresoPattern = /fecha\s*de\s*ingreso[\s\S]*?(\d{1,2}\/\d{1,2}\/\d{4})/gi;
-            while ((match = fechaIngresoPattern.exec(text)) !== null) {
-                const fechaRaw = match[1].trim();
-                const fechaFormateada = formatearFecha(fechaRaw);
-                if (fechaFormateada && !contextualDates.find(d => d.original === fechaRaw)) {
-                    contextualDates.push({
-                        original: fechaRaw,
-                        formatted: fechaFormateada,
-                        date: new Date(fechaFormateada),
-                        context: 'Fecha de ingreso explícito',
-                        priority: 3
-                    });
-                    console.log(`🥉 PRIORIDAD 3: Fecha de ingreso explícito: ${fechaRaw}`);
-                }
-            }
-            
-            // ❌ EXCLUIR fechas de impresión (entre paréntesis)
-            console.log('❌ EXCLUYENDO fechas de impresión/documento...');
+
+            console.log(`📊 TOTAL FECHAS ENCONTRADAS: ${contextualDates.length}`);
             
             if (contextualDates.length === 0) {
                 console.log('❌ FALLBACK: No se encontraron fechas en contexto de ingreso');
@@ -2550,10 +2665,10 @@ export default function IngresarRegistro() {
                     console.log('   🩺 Diagnóstico 2 llenado:', extractedData.diagnostico_2);
                 }
 
-                // 🚫 MOTIVO DE CONSULTA NO SE LLENA AUTOMÁTICAMENTE - Responsabilidad del médico
+                // Información clínica
                 if (extractedData.motivo_consulta) {
-                    console.log('   💬 Motivo extraído por IA (NO LLENADO):', extractedData.motivo_consulta);
-                    console.log('   ⚠️ El motivo de consulta debe ser llenado manualmente por el médico');
+                    setData('motivo_consulta', extractedData.motivo_consulta);
+                    console.log('   💬 Motivo consulta llenado:', extractedData.motivo_consulta);
                 }
                 if (extractedData.enfermedad_actual) {
                     setData('enfermedad_actual', extractedData.enfermedad_actual);
@@ -2695,7 +2810,15 @@ export default function IngresarRegistro() {
             'tipo_servicio'
         ];
 
-        const missingFields = requiredFields.filter(field => !data[field as keyof typeof data]);
+        const missingFields = requiredFields.filter(field => {
+            const value = data[field as keyof typeof data];
+            // Para especialidad_solicitada (array), verificar si está vacío
+            if (field === 'especialidad_solicitada') {
+                return !Array.isArray(value) || value.length === 0;
+            }
+            // Para otros campos (string), verificar si están vacíos
+            return !value;
+        });
 
         if (missingFields.length > 0) {
             const fieldNames: Record<string, string> = {
@@ -3480,12 +3603,12 @@ export default function IngresarRegistro() {
                                                 <h3 className="text-lg font-medium">Información Clínica</h3>
                                                 <div className="grid gap-4">
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="motivo_consulta">Motivo consulta * (Campo manual)</Label>
+                                                        <Label htmlFor="motivo_consulta">Motivo consulta *</Label>
                                                         <textarea
                                                             id="motivo_consulta"
                                                             value={data.motivo_consulta}
                                                             onChange={(e) => setData('motivo_consulta', e.target.value)}
-                                                            placeholder="Escriba aquí el motivo por el cual el paciente consulta (campo obligatorio para el médico)"
+                                                            placeholder="Describa el motivo de la consulta"
                                                             className="w-full min-h-[80px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
                                                         />
                                                     </div>
@@ -3761,19 +3884,86 @@ export default function IngresarRegistro() {
                                                 </div>
 
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="especialidad_solicitada">Especialidad solicitada *</Label>
-                                                    <Select value={data.especialidad_solicitada} onValueChange={(value) => setData('especialidad_solicitada', value)}>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Seleccione" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {especialidades.map((especialidad) => (
-                                                                <SelectItem key={especialidad.value} value={especialidad.value}>
-                                                                    {especialidad.label}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
+                                                    <Label htmlFor="especialidad_solicitada">Especialidad solicitada * (Selección múltiple)</Label>
+                                                    <div className="relative">
+                                                        <Select>
+                                                            <SelectTrigger>
+                                                                <SelectValue 
+                                                                    placeholder={
+                                                                        data.especialidad_solicitada.length === 0 
+                                                                            ? "Seleccione una o más especialidades..." 
+                                                                            : `${data.especialidad_solicitada.length} especialidad${data.especialidad_solicitada.length > 1 ? 'es' : ''} seleccionada${data.especialidad_solicitada.length > 1 ? 's' : ''}`
+                                                                    }
+                                                                />
+                                                            </SelectTrigger>
+                                                            <SelectContent className="max-h-60 overflow-y-auto">
+                                                                {especialidades.map((especialidad) => (
+                                                                    <div
+                                                                        key={especialidad.value}
+                                                                        className="flex items-center space-x-2 px-3 py-2 cursor-pointer hover:bg-blue-50"
+                                                                        onClick={(e) => {
+                                                                            e.preventDefault();
+                                                                            const currentValues = data.especialidad_solicitada;
+                                                                            const isSelected = currentValues.includes(especialidad.value);
+                                                                            
+                                                                            if (isSelected) {
+                                                                                // Remover si ya está seleccionado
+                                                                                setData('especialidad_solicitada', 
+                                                                                    currentValues.filter(val => val !== especialidad.value)
+                                                                                );
+                                                                            } else {
+                                                                                // Agregar si no está seleccionado
+                                                                                setData('especialidad_solicitada', 
+                                                                                    [...currentValues, especialidad.value]
+                                                                                );
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={data.especialidad_solicitada.includes(especialidad.value)}
+                                                                            onChange={() => {}} // Manejado por el onClick del div
+                                                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                                                        />
+                                                                        <span className="text-sm">{especialidad.label}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        
+                                                        {/* Mostrar especialidades seleccionadas */}
+                                                        {data.especialidad_solicitada.length > 0 && (
+                                                            <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                                                                <p className="text-sm font-medium text-blue-800 mb-1">
+                                                                    Especialidades seleccionadas:
+                                                                </p>
+                                                                <div className="flex flex-wrap gap-1">
+                                                                    {data.especialidad_solicitada.map((value) => {
+                                                                        const especialidad = especialidades.find(e => e.value === value);
+                                                                        return (
+                                                                            <span 
+                                                                                key={value}
+                                                                                className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
+                                                                            >
+                                                                                {especialidad?.label}
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => {
+                                                                                        setData('especialidad_solicitada', 
+                                                                                            data.especialidad_solicitada.filter(val => val !== value)
+                                                                                        );
+                                                                                    }}
+                                                                                    className="ml-1 h-3 w-3 text-blue-600 hover:text-blue-800"
+                                                                                >
+                                                                                    ×
+                                                                                </button>
+                                                                            </span>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
 
