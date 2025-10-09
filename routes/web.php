@@ -12,6 +12,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $user = auth()->user();
         if ($user->role === 'administrador') {
             return app(App\Http\Controllers\Admin\DashboardController::class)->index(request());
+        } elseif ($user->role === 'ips') {
+            return redirect()->route('ips.dashboard');
         } else {
             return redirect()->route('medico.ingresar-registro');
         }
@@ -70,9 +72,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Admin puede acceder a todas las rutas de IPS bajo /admin/ips/*
         Route::prefix('ips')->name('ips.')->group(function () {
-            Route::get('dashboard', fn() => Inertia::render('ips/ips-dashboard'))->name('dashboard');
-            Route::get('solicitudes', fn() => Inertia::render('ips/solicitudes'))->name('solicitudes');
-            Route::get('seguimiento', fn() => Inertia::render('ips/seguimiento-ips'))->name('seguimiento');
+            Route::get('dashboard', [App\Http\Controllers\Ips\IpsController::class, 'dashboard'])->name('dashboard');
+            Route::get('ingresar-registro', [App\Http\Controllers\Ips\IpsController::class, 'ingresarRegistro'])->name('ingresar-registro');
+            Route::get('solicitudes', [App\Http\Controllers\Ips\IpsController::class, 'solicitudes'])->name('solicitudes');
+            Route::get('seguimiento', [App\Http\Controllers\Ips\IpsController::class, 'seguimiento'])->name('seguimiento');
         });
     });
 
@@ -110,9 +113,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rutas para IPS (solo IPS, admin ya tiene acceso arriba)
     Route::middleware('ips')->prefix('ips')->name('ips.')->group(function () {
-        Route::get('dashboard', fn() => Inertia::render('ips/ips-dashboard'))->name('dashboard');
-        Route::get('solicitudes', fn() => Inertia::render('ips/solicitudes'))->name('solicitudes');
-        Route::get('seguimiento', fn() => Inertia::render('ips/seguimiento-ips'))->name('seguimiento');
+        Route::get('dashboard', [App\Http\Controllers\Ips\IpsController::class, 'dashboard'])->name('dashboard');
+        Route::get('ingresar-registro', [App\Http\Controllers\Ips\IpsController::class, 'ingresarRegistro'])->name('ingresar-registro');
+        Route::get('solicitudes', [App\Http\Controllers\Ips\IpsController::class, 'solicitudes'])->name('solicitudes');
+        Route::get('seguimiento', [App\Http\Controllers\Ips\IpsController::class, 'seguimiento'])->name('seguimiento');
     });
     
     // Rutas compartidas

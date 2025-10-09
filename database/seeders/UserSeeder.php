@@ -33,5 +33,15 @@ class UserSeeder extends Seeder
             'is_active' => true,
             'email_verified_at' => now(),
         ]);
+
+        // Crear usuario IPS de ejemplo
+        User::create([
+            'name' => 'IPS Hospital Central',
+            'email' => 'ips@vitalred.com',
+            'password' => Hash::make('ips123'),
+            'role' => 'ips',
+            'is_active' => true,
+            'email_verified_at' => now(),
+        ]);
     }
 }

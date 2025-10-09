@@ -1,11 +1,12 @@
-import { usePage } from '@inertiajs/react';
+import { usePage, router } from '@inertiajs/react';
 import { MetricCard } from "@/components/metric-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/status-badge";
 import { MOCK_REFERENCIAS } from "@/lib/mock-data";
-import { Send, CheckCircle, Clock, TrendingUp, Plus, BarChart3, Download } from "lucide-react";
+import { Send, CheckCircle, Clock, TrendingUp, Plus, BarChart3, Download, Eye, FileText, Calendar } from "lucide-react";
 import AppLayoutInertia from '@/layouts/app-layout-inertia';
 import { type BreadcrumbItem } from '@/types';
 
@@ -26,7 +27,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function IPSDashboard() {
-  const { auth } = usePage<{ auth: { user: { nombre: string, role: string } } }>().props;
+  const { user } = usePage<{ user: { name: string, role: string } }>().props;
   const totalEnviadas = MOCK_REFERENCIAS.length
   const aceptadas = MOCK_REFERENCIAS.filter((r) => r.estado === "aceptada").length
   const pendientes = MOCK_REFERENCIAS.filter((r) => r.estado === "pendiente").length
@@ -36,7 +37,7 @@ export default function IPSDashboard() {
     <AppLayoutInertia 
       title="Panel IPS - Vital Red" 
       breadcrumbs={breadcrumbs}
-      user={auth.user}
+      user={user}
     >
       <div className="flex h-full flex-1 flex-col gap-6 p-6">
       <div className="flex items-center justify-between">
@@ -44,7 +45,10 @@ export default function IPSDashboard() {
           <h1 className="text-3xl font-bold text-foreground">Panel IPS</h1>
           <p className="text-muted-foreground">Gestiona las solicitudes de tu institución</p>
         </div>
-        <Button className="gap-2">
+        <Button 
+          className="gap-2"
+          onClick={() => router.visit('/ips/ingresar-registro')}
+        >
           <Plus className="h-4 w-4" />
           Nueva Solicitud
         </Button>
@@ -109,9 +113,43 @@ export default function IPSDashboard() {
                   </TableCell>
                   <TableCell className="text-muted-foreground">{ref.fechaCreacion.toLocaleDateString()}</TableCell>
                   <TableCell>
-                    <Button variant="outline" size="sm">
-                      Ver Detalle
-                    </Button>
+                    <div className="flex gap-1">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" title="Ver detalles">
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>Detalle de Solicitud - {ref.id}</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div><strong>Paciente:</strong> {ref.paciente.nombre}</div>
+                              <div><strong>Edad:</strong> {ref.paciente.edad} años</div>
+                              <div><strong>Especialidad:</strong> {ref.especialidad}</div>
+                              <div><strong>Prioridad:</strong> <StatusBadge prioridad={ref.prioridad} /></div>
+                              <div><strong>Estado:</strong> <StatusBadge estado={ref.estado} /></div>
+                              <div><strong>Fecha:</strong> {ref.fechaCreacion.toLocaleDateString()}</div>
+                            </div>
+                            <div>
+                              <strong>Motivo:</strong>
+                              <p className="mt-1 text-sm text-muted-foreground">{ref.motivo}</p>
+                            </div>
+                            {ref.observaciones && (
+                              <div>
+                                <strong>Observaciones:</strong>
+                                <p className="mt-1 text-sm text-muted-foreground">{ref.observaciones}</p>
+                              </div>
+                            )}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      <Button variant="outline" size="sm" title="Ver documentos">
+                        <FileText className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -126,18 +164,56 @@ export default function IPSDashboard() {
             <CardTitle className="text-foreground">Accesos Rápidos</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Button variant="outline" className="w-full justify-start gap-2 bg-transparent">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start gap-2 bg-transparent"
+              onClick={() => router.visit('/ips/ingresar-registro')}
+            >
               <Plus className="h-4 w-4" />
               Nueva Solicitud de Referencia
             </Button>
-            <Button variant="outline" className="w-full justify-start gap-2 bg-transparent">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start gap-2 bg-transparent"
+              onClick={() => router.visit('/ips/seguimiento')}
+            >
               <BarChart3 className="h-4 w-4" />
               Ver Estadísticas Completas
             </Button>
-            <Button variant="outline" className="w-full justify-start gap-2 bg-transparent">
-              <Download className="h-4 w-4" />
-              Descargar Reporte Mensual
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full justify-start gap-2 bg-transparent">
+                  <Download className="h-4 w-4" />
+                  Descargar Reporte Mensual
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Descargar Reporte</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <p>Selecciona el tipo de reporte que deseas descargar:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Reporte PDF
+                    </Button>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <BarChart3 className="h-4 w-4" />
+                      Reporte Excel
+                    </Button>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Reporte Mensual
+                    </Button>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      Análisis Completo
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
 

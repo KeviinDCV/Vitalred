@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import AppLayout from '@/layouts/app-layout';
+import AppLayoutInertia from '@/layouts/app-layout-inertia';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { Search, Users, FileText, Calendar, Filter, Eye, ChevronLeft, ChevronRight, Download, Brain } from 'lucide-react';
@@ -55,7 +55,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function ConsultaPacientes({ registros, filters }: Props) {
+export default function ConsultaPacientes({ registros, filters, auth }: Props & { auth: { user: { nombre: string; role: string } } }) {
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [isSearching, setIsSearching] = useState(false);
 
@@ -125,7 +125,7 @@ export default function ConsultaPacientes({ registros, filters }: Props) {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayoutInertia breadcrumbs={breadcrumbs} user={auth.user}>
             <Head title="Consulta Pacientes - Vital Red" />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
@@ -385,6 +385,6 @@ export default function ConsultaPacientes({ registros, filters }: Props) {
                     </Card>
                 )}
             </div>
-        </AppLayout>
+        </AppLayoutInertia>
     );
 }

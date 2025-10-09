@@ -8,7 +8,7 @@ interface AppLayoutProps {
   title?: string
   breadcrumbs?: BreadcrumbItem[]
   user: {
-    nombre: string
+    name: string
     role: string
   }
 }
@@ -26,7 +26,7 @@ export default function AppLayoutInertia({
       <div className="flex h-screen bg-background">
         <AppSidebarInertia user={user} />
         
-        <main className="flex-1 md:ml-64 overflow-y-auto">
+        <main className="flex-1 md:ml-[276px] overflow-y-auto">
           <div className="container mx-auto p-6 md:p-8">
             {breadcrumbs && breadcrumbs.length > 0 && (
               <div className="mb-6">

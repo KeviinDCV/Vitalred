@@ -66,6 +66,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user is IPS
+     */
+    public function isIps(): bool
+    {
+        return $this->role === 'ips';
+    }
+
+    /**
      * Check if user is active
      */
     public function isActive(): bool

@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/status-badge";
 import { MOCK_REFERENCIAS } from "@/lib/mock-data";
-import { FileText, AlertCircle, CheckCircle, Clock, Timer } from "lucide-react";
+import { FileText, AlertCircle, CheckCircle, Clock, Timer, Activity, Users, TrendingUp, Calendar, Stethoscope, Heart, Brain, UserCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import AppLayoutInertia from '@/layouts/app-layout-inertia';
 import { type BreadcrumbItem } from '@/types';
+import { Progress } from "@/components/ui/progress";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -21,6 +22,10 @@ export default function MedicoDashboard() {
   const { auth } = usePage<{ auth: { user: { nombre: string, role: string } } }>().props;
   const casosPendientes = MOCK_REFERENCIAS.filter((r) => r.estado === "pendiente")
   const casosCriticos = MOCK_REFERENCIAS.filter((r) => r.prioridad === "critica")
+  const casosAceptados = MOCK_REFERENCIAS.filter((r) => r.estado === "aceptada")
+  const pacientesHoy = 12
+  const tiempoPromedioAtencion = "2.4 horas"
+  const eficienciaAtencion = 94
 
   return (
     <AppLayoutInertia 
@@ -49,8 +54,59 @@ export default function MedicoDashboard() {
           cambio={1}
           tendencia="up"
         />
-        <MetricCard titulo="Referencias Hoy" valor={8} icono={FileText} cambio={3} tendencia="up" />
-        <MetricCard titulo="Pacientes Atendidos" valor={47} icono={CheckCircle} cambio={5} tendencia="up" />
+        <MetricCard titulo="Pacientes Hoy" valor={pacientesHoy} icono={Users} cambio={3} tendencia="up" />
+        <MetricCard titulo="Casos Aceptados" valor={casosAceptados.length} icono={CheckCircle} cambio={5} tendencia="up" />
+      </div>
+
+      {/* Métricas adicionales específicas para médicos */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="bg-card border-border">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Tiempo Promedio Atención</p>
+                <p className="text-2xl font-bold text-foreground">{tiempoPromedioAtencion}</p>
+              </div>
+              <Activity className="h-8 w-8 text-primary" />
+            </div>
+            <div className="mt-4">
+              <Progress value={75} className="h-2" />
+              <p className="text-xs text-muted-foreground mt-2">Meta: 2 horas</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border-border">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Eficiencia Atención</p>
+                <p className="text-2xl font-bold text-foreground">{eficienciaAtencion}%</p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-success" />
+            </div>
+            <div className="mt-4">
+              <Progress value={eficienciaAtencion} className="h-2" />
+              <p className="text-xs text-muted-foreground mt-2">Excelente rendimiento</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border-border">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Especialidad</p>
+                <p className="text-lg font-bold text-foreground">Medicina Interna</p>
+              </div>
+              <Stethoscope className="h-8 w-8 text-primary" />
+            </div>
+            <div className="mt-4">
+              <p className="text-xs text-muted-foreground">Certificación vigente</p>
+              <p className="text-xs text-success">✓ Activo hasta 2025</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Card className="bg-card border-border">

@@ -1,18 +1,32 @@
 import { useState } from "react"
+import { usePage } from '@inertiajs/react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { MOCK_REFERENCIAS } from "@/lib/mock-data"
 import { Calendar, FileText, MessageSquare, Pill, CheckCircle, ArrowLeft } from "lucide-react"
+import AppLayoutInertia from '@/layouts/app-layout-inertia'
+import { type BreadcrumbItem } from '@/types'
 
-export function Seguimiento() {
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Dashboard', href: '/medico/dashboard' },
+    { title: 'Seguimiento', href: '/medico/seguimiento' },
+]
+
+export default function Seguimiento() {
+  const { auth } = usePage<{ auth: { user: { nombre: string, role: string } } }>().props
   const [notaEvolucion, setNotaEvolucion] = useState("")
 
   const pacientesEnSeguimiento = MOCK_REFERENCIAS.filter((r) => r.estado === "aceptada" || r.estado === "en_proceso")
 
   return (
-    <div className="space-y-6">
+    <AppLayoutInertia 
+      title="Seguimiento - Vital Red" 
+      breadcrumbs={breadcrumbs}
+      user={auth.user}
+    >
+      <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Seguimiento de Pacientes</h1>
         <p className="text-muted-foreground">Gestiona la evolución de tus pacientes</p>
@@ -130,6 +144,7 @@ export function Seguimiento() {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </AppLayoutInertia>
   )
 }

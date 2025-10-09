@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { usePage } from '@inertiajs/react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -6,6 +7,13 @@ import { StatusBadge } from "@/components/status-badge"
 import { MOCK_REFERENCIAS } from "@/lib/mock-data"
 import { AlertCircle, Clock, Phone, Ambulance, ArrowUp } from "lucide-react"
 import { cn } from "@/lib/utils"
+import AppLayoutInertia from '@/layouts/app-layout-inertia'
+import { type BreadcrumbItem } from '@/types'
+
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Dashboard', href: '/medico/dashboard' },
+    { title: 'Casos Críticos', href: '/medico/casos-criticos' },
+]
 
 export default function CasosCriticos() {
   const { auth } = usePage<{ auth: { user: { nombre: string, role: string } } }>().props
