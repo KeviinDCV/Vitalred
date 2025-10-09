@@ -38,7 +38,7 @@ interface AnalisisPriorizacion {
         porcentaje: number;
         nivel_prioridad: 'ALTA' | 'MEDIA' | 'BAJA';
     };
-    criterios: any;
+    criterios: unknown;
     razonamiento: string;
     fecha_analisis: string;
     texto_extraido?: string;
@@ -48,7 +48,7 @@ interface AnalisisPriorizacion {
         color: 'verde' | 'rojo';
         razonamiento: string;
         puntaje_total: number;
-        criterios_evaluados: any[];
+        criterios_evaluados: unknown[];
     };
 }
 
@@ -174,9 +174,8 @@ export default function AnalisisPriorizacion() {
                 throw new Error(extractResponse.data.message || 'Error al procesar el archivo');
             }
 
-        } catch (error: any) {
-            console.error('Error en el análisis:', error);
-            setAnalisis(null);
+        } catch (error: unknown) {
+                        setAnalisis(null);
             
             if (error.response?.status === 503 && error.response?.data?.error_type === 'api_overload') {
                 setError('⚠️ El servicio de IA está temporalmente sobrecargado. Por favor intenta nuevamente en unos minutos. 🔄');
@@ -239,8 +238,7 @@ export default function AnalisisPriorizacion() {
 
             if (response.data.success) {
                 setGuardadoExitoso(true);
-                console.log('Análisis guardado exitosamente:', response.data);
-                
+                                
                 // Limpiar campos después de guardar
                 setTimeout(() => {
                     setNombreDocumento('');
@@ -250,9 +248,8 @@ export default function AnalisisPriorizacion() {
                     setGuardadoExitoso(false);
                 }, 3000);
             }
-        } catch (error: any) {
-            console.error('Error guardando análisis:', error);
-            setError(error.response?.data?.message || 'Error al guardar el análisis');
+        } catch (error: unknown) {
+                        setError(error.response?.data?.message || 'Error al guardar el análisis');
         } finally {
             setGuardando(false);
         }

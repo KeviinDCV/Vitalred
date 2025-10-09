@@ -1515,18 +1515,16 @@ export default function IngresarRegistro() {
         const cargarCodigosCIE10 = async () => {
             try {
                 setLoadingCIE10(true);
-                console.log('🔄 Cargando códigos CIE-10 desde /TablaCIE10.json...');
-                
+                                
                 const response = await fetch('/TablaCIE10.json');
                 if (!response.ok) {
                     throw new Error(`Error HTTP: ${response.status}`);
                 }
                 
                 const datos = await response.json();
-                console.log(`✅ ${datos.length} códigos CIE-10 cargados exitosamente`);
-                
+                                
                 // Transformar datos del JSON al formato requerido
-                const codigosFormateados = datos.map((item: any) => ({
+                const codigosFormateados = datos.map((item: unknown) => ({
                     value: item.Codigo,
                     label: `${item.Codigo} - ${item.Nombre}`
                 }));
@@ -1534,8 +1532,7 @@ export default function IngresarRegistro() {
                 setCodigosCIE10(codigosFormateados);
                 
             } catch (error) {
-                console.error('❌ Error cargando códigos CIE-10:', error);
-                toast.error('Error al cargar códigos CIE-10. Por favor recarga la página.');
+                                toast.error('Error al cargar códigos CIE-10. Por favor recarga la página.');
                 
                 // Códigos de respaldo en caso de error
                 setCodigosCIE10([
@@ -1607,8 +1604,7 @@ export default function IngresarRegistro() {
         };
         
         const mapped = mappings[tipoIA?.toUpperCase()] || mappings[tipoIA?.toLowerCase()];
-        console.log(`Mapeando tipo identificación: "${tipoIA}" -> "${mapped}"`);
-        return mapped || '';
+                return mapped || '';
     };
 
     // Función para mapear departamentos extraídos por IA a valores del frontend
@@ -1702,8 +1698,7 @@ export default function IngresarRegistro() {
         
         const departamentoUpper = departamentoIA?.toUpperCase().trim();
         const mapped = mappings[departamentoUpper];
-        console.log(`Mapeando departamento: "${departamentoIA}" -> "${mapped}"`);
-        return mapped || '';
+                return mapped || '';
     };
 
     // Función INTELIGENTE para mapear ciudades extraídas por IA a valores del frontend
@@ -1727,7 +1722,7 @@ export default function IngresarRegistro() {
             // 1. Búsqueda exacta (sin tildes)
             for (const ciudad of ciudadesDelDepartamento) {
                 if (normalizar(ciudad.label) === normalizar(ciudadIA)) {
-                    console.log(`🎯 Ciudad encontrada (exacta): "${ciudadIA}" -> "${ciudad.value}"`);
+                    console.log(`Mapeo exacto: "${ciudadIA}" -> "${ciudad.value}"`);
                     return ciudad.value;
                 }
             }
@@ -1738,7 +1733,7 @@ export default function IngresarRegistro() {
                 const ciudadNormalizada = normalizar(ciudadIA);
                 
                 if (labelNormalizado.includes(ciudadNormalizada) || ciudadNormalizada.includes(labelNormalizado)) {
-                    console.log(`🔍 Ciudad encontrada (contiene): "${ciudadIA}" -> "${ciudad.value}"`);
+                    console.log(`Mapeo por palabras clave: "${ciudadIA}" -> "${ciudad.value}"`);
                     return ciudad.value;
                 }
             }
@@ -1785,11 +1780,11 @@ export default function IngresarRegistro() {
         
         const mappedFallback = mappingsFallback[ciudadUpper];
         if (mappedFallback) {
-            console.log(`📋 Ciudad mapeada (fallback): "${ciudadIA}" -> "${mappedFallback}"`);
+            console.log(`Mapeo fallback: "${ciudadIA}" -> "${mappedFallback}"`);
             return mappedFallback;
         }
         
-        console.log(`❌ Ciudad NO encontrada: "${ciudadIA}" (dept: ${departamento})`);
+        console.log(`No se pudo mapear ciudad: "${ciudadIA}"`);
         return '';
     };
 
@@ -1853,8 +1848,7 @@ export default function IngresarRegistro() {
         
         const aseguradorUpper = aseguradorIA?.toUpperCase().trim();
         const mapped = mappings[aseguradorUpper];
-        console.log(`Mapeando asegurador: "${aseguradorIA}" -> "${mapped}"`);
-        return mapped || '';
+                return mapped || '';
     };
 
     // Función para inferir departamento basado en ciudad conocida
@@ -1958,14 +1952,7 @@ export default function IngresarRegistro() {
     // Debug: Loggar cuando cambia el paso para verificar persistencia de datos
     useEffect(() => {
         if (currentStep === 2) {
-            console.log('🔍 Navegando al Paso 2 - Estado de datos sociodemográficos:', {
-                asegurador: data.asegurador,
-                departamento: data.departamento,
-                ciudad: data.ciudad, 
-                institucion_remitente: data.institucion_remitente,
-                todoElFormulario: data
-            });
-        }
+                    }
     }, [currentStep, data.asegurador, data.departamento, data.ciudad]);
 
     const steps = [
@@ -1985,13 +1972,7 @@ export default function IngresarRegistro() {
                     isValid = validateStep1();
                     // Debug: mostrar datos antes de navegar al paso 2
                     if (isValid) {
-                        console.log('🔍 Datos antes de ir al paso 2:', {
-                            asegurador: data.asegurador,
-                            departamento: data.departamento,
-                            ciudad: data.ciudad,
-                            institucion_remitente: data.institucion_remitente
-                        });
-                    }
+                                            }
                     break;
                 case 2:
                     isValid = validateStep2();
@@ -2153,7 +2134,7 @@ export default function IngresarRegistro() {
             }
         }
         
-        console.log(`🔍 Mapeo inteligente: "${nombreAsegurador}" (${categoria}) -> "${mapped}"`);
+        console.log(`Mapeo asegurador secundario: "${nombreAsegurador}" -> "${mapped}"`);
         return mapped;
     };
 
@@ -2175,9 +2156,7 @@ export default function IngresarRegistro() {
     // 🔥 FUNCIÓN MEJORADA: Extracción AGRESIVA de fecha de ingreso 
     const extractFechaIngresoFromText = (text: string): string | null => {
         try {
-            console.log('🔍 FALLBACK MEJORADO: Búsqueda AGRESIVA de fechas de ingreso...');
-            console.log('🔍 FALLBACK: Longitud del texto:', text.length);
-            console.log('🔍 FALLBACK: Fecha actual para comparación:', new Date().toISOString().split('T')[0]);
+            console.log(`Extrayendo fecha de ingreso del texto. Fecha actual: ${new Date().toISOString().split('T')[0]}`);
             
             // 🎯 ENFOQUE AGRESIVO: Múltiples patrones de búsqueda
             const contextualDates: Array<{
@@ -2199,7 +2178,7 @@ export default function IngresarRegistro() {
                         context,
                         priority
                     });
-                    console.log(`🎯 P${priority}: ${context}: ${fechaRaw}`);
+                    console.log(`Fecha agregada: ${fechaRaw} -> ${fechaFormateada}`);
                     return true;
                 }
                 return false;
@@ -2286,8 +2265,7 @@ export default function IngresarRegistro() {
             });
 
             // 🎯 PRIORIDAD 6: SUPER AGRESIVO - Todas las fechas válidas de últimos 60 días
-            console.log('🔥 BÚSQUEDA SUPER AGRESIVA: Todas las fechas de últimos 60 días...');
-            const allDatesPattern = /\b(\d{1,2}\/\d{1,2}\/\d{4})\b/g;
+                        const allDatesPattern = /\b(\d{1,2}\/\d{1,2}\/\d{4})\b/g;
             let match;
             while ((match = allDatesPattern.exec(text)) !== null) {
                 const fechaRaw = match[1].trim();
@@ -2323,7 +2301,6 @@ export default function IngresarRegistro() {
                                 context: `Fecha válida (${Math.round(diffDays)} días)`,
                                 priority: 6
                             });
-                            console.log(`🎯 P6: Fecha válida: ${fechaRaw} (${Math.round(diffDays)} días)`);
                         }
                     }
                 }
@@ -2331,8 +2308,7 @@ export default function IngresarRegistro() {
 
             // 🚨 PRIORIDAD 7: ÚLTIMO RECURSO - Cualquier fecha razonable
             if (contextualDates.length === 0) {
-                console.log('🚨 ÚLTIMO RECURSO: Buscando CUALQUIER fecha razonable...');
-                const desperatePattern = /\b(\d{1,2}\/\d{1,2}\/\d{4})\b/g;
+                                const desperatePattern = /\b(\d{1,2}\/\d{1,2}\/\d{4})\b/g;
                 while ((match = desperatePattern.exec(text)) !== null) {
                     const fechaRaw = match[1].trim();
                     const fechaFormateada = formatearFecha(fechaRaw);
@@ -2350,17 +2326,14 @@ export default function IngresarRegistro() {
                                 context: `Último recurso (${Math.round(diffDays)} días)`,
                                 priority: 7
                             });
-                            console.log(`🚨 P7: Último recurso: ${fechaRaw} (${Math.round(diffDays)} días)`);
                         }
                     }
                 }
             }
 
-            console.log(`📊 TOTAL FECHAS ENCONTRADAS: ${contextualDates.length}`);
-            
+                        
             if (contextualDates.length === 0) {
-                console.log('❌ FALLBACK: No se encontraron fechas en contexto de ingreso');
-                return null;
+                                return null;
             }
             
             // Ordenar por prioridad (menor número = mayor prioridad) y luego por recencia
@@ -2369,25 +2342,20 @@ export default function IngresarRegistro() {
                 return b.date.getTime() - a.date.getTime();
             });
             
-            console.log('📊 FALLBACK: Fechas encontradas CON CONTEXTO (ordenadas por prioridad):');
+            console.log('Fechas encontradas ordenadas por prioridad:');
             contextualDates.forEach((dateInfo, index) => {
                 const diasDiferencia = Math.ceil((new Date().getTime() - dateInfo.date.getTime()) / (1000 * 60 * 60 * 24));
-                console.log(`   ${index + 1}. ${dateInfo.original} - Contexto: "${dateInfo.context}" (hace ${diasDiferencia} días)`);
+                console.log(`${index + 1}. ${dateInfo.original} -> ${dateInfo.formatted} (${dateInfo.context}, ${diasDiferencia} días)`);
             });
             
             // Tomar la fecha con mayor prioridad de contexto
             const fechaSeleccionada = contextualDates[0];
             const diasDiferencia = Math.ceil((new Date().getTime() - fechaSeleccionada.date.getTime()) / (1000 * 60 * 60 * 24));
             
-            console.log(`✅ FALLBACK: Fecha SELECCIONADA por contexto: ${fechaSeleccionada.original}`);
-            console.log(`✅ FALLBACK: Contexto: "${fechaSeleccionada.context}"`);
-            console.log(`✅ FALLBACK: Hace ${diasDiferencia} días`);
-            console.log(`✅ FALLBACK: Fecha formateada final: ${fechaSeleccionada.formatted}`);
-            
+                                                            
             return fechaSeleccionada.formatted;
         } catch (error) {
-            console.error('❌ FALLBACK: Error extrayendo fecha:', error);
-            return null;
+                        return null;
         }
     };
 
@@ -2411,8 +2379,7 @@ export default function IngresarRegistro() {
             }
             return null;
         } catch (error) {
-            console.error('Error formateando fecha:', error);
-            return null;
+                        return null;
         }
     };
 
@@ -2484,84 +2451,67 @@ export default function IngresarRegistro() {
                 // Llenar automáticamente los campos con los datos extraídos
                 const extractedData = result.data;
 
-                console.log('🤖 RESPUESTA COMPLETA DE IA:', response.data);
-                console.log('📊 Datos extraídos por IA:', extractedData);
-                
+                                                
                 // 🔍 DEBUG: Mostrar TODOS los campos extraídos para diagnóstico
-                console.log('🔍 TODOS LOS CAMPOS DISPONIBLES EN extractedData:');
+                console.log('Datos extraídos por IA:', extractedData);
                 Object.keys(extractedData).forEach(key => {
-                    console.log(`   ${key}:`, extractedData[key]);
+                    console.log(`${key}:`, extractedData[key]);
                 });
                 
                 // 🔍 DEBUG: Mostrar específicamente campos sociodemográficos
-                console.log('🔍 CAMPOS SOCIODEMOGRÁFICOS EXTRAÍDOS POR IA:');
-                console.log('   📍 Asegurador (categoría):', extractedData.asegurador || 'NO_ENCONTRADO');
-                console.log('   🏢 Asegurador (nombre específico):', extractedData.asegurador_nombre || 'NO_ENCONTRADO');
-                console.log('   🏦 Departamento:', extractedData.departamento || 'NO_ENCONTRADO');
-                console.log('   🏦️ Ciudad:', extractedData.ciudad || 'NO_ENCONTRADO');
-                console.log('   🏥 Institución Remitente:', extractedData.institucion_remitente || 'NO_ENCONTRADO');
-
+                console.log('Asegurador extraído:', extractedData.asegurador || 'NO_ENCONTRADO');
+                console.log('Nombre asegurador:', extractedData.asegurador_nombre || 'NO_ENCONTRADO');
+                                                
                 if (extractedData.tipo_identificacion) {
                     const mappedTipo = mapTipoIdentificacion(extractedData.tipo_identificacion);
                     setData('tipo_identificacion', mappedTipo);
-                    console.log('Tipo identificación llenado:', extractedData.tipo_identificacion, '-> mapeado a:', mappedTipo);
-                }
+                                    }
                 if (extractedData.numero_identificacion) {
                     setData('numero_identificacion', extractedData.numero_identificacion);
-                    console.log('Número identificación llenado:', extractedData.numero_identificacion);
-                }
+                                    }
                 if (extractedData.nombre) {
                     setData('nombre', extractedData.nombre);
-                    console.log('Nombre llenado:', extractedData.nombre);
-                }
+                                    }
                 if (extractedData.apellidos) {
                     setData('apellidos', extractedData.apellidos);
-                    console.log('Apellidos llenado:', extractedData.apellidos);
-                }
+                                    }
                 // Manejar fecha de nacimiento y edad
                 if (extractedData.fecha_nacimiento) {
                     // Usar handleDateChange para que también calcule la edad
                     handleDateChange(extractedData.fecha_nacimiento);
-                    console.log('Fecha nacimiento llenada:', extractedData.fecha_nacimiento);
-
+                    
                     // Si también hay edad de la IA, usarla en lugar de la calculada
                     if (extractedData.edad) {
                         setData('edad', extractedData.edad);
-                        console.log('Edad de IA usada:', extractedData.edad);
-                        
+                                                
                         // 🎯 ASIGNAR TIPO DE PACIENTE AUTOMÁTICAMENTE
                         const tipoPacienteAuto = determinarTipoPaciente(extractedData.edad, extractedData.sexo);
                         setData('tipo_paciente', tipoPacienteAuto);
-                        console.log(`🎯 Tipo de paciente asignado: ${tipoPacienteAuto} (edad: ${extractedData.edad}, sexo: ${extractedData.sexo})`);
+                        `);
                     } else {
-                        console.log('Edad calculada desde fecha');
-                        
+                                                
                         // 🎯 ASIGNAR TIPO DE PACIENTE CON EDAD CALCULADA
                         const edadCalculada = calculateAge(extractedData.fecha_nacimiento);
                         if (edadCalculada !== null) {
                             const tipoPacienteAuto = determinarTipoPaciente(edadCalculada, extractedData.sexo);
                             setData('tipo_paciente', tipoPacienteAuto);
-                            console.log(`🎯 Tipo de paciente asignado: ${tipoPacienteAuto} (edad calculada: ${edadCalculada}, sexo: ${extractedData.sexo})`);
+                            `);
                         }
                     }
                 } else if (extractedData.edad) {
                     // Si no hay fecha pero sí edad, llenar la edad
                     setData('edad', extractedData.edad);
-                    console.log('Edad llenada desde IA:', extractedData.edad);
-                    console.log('Fecha de nacimiento no disponible - usuario deberá ingresarla manualmente');
-                    
+                                                            
                     // 🎯 ASIGNAR TIPO DE PACIENTE SOLO CON EDAD
                     const tipoPacienteAuto = determinarTipoPaciente(extractedData.edad, extractedData.sexo);
                     setData('tipo_paciente', tipoPacienteAuto);
-                    console.log(`🎯 Tipo de paciente asignado: ${tipoPacienteAuto} (solo edad: ${extractedData.edad}, sexo: ${extractedData.sexo})`);
+                    `);
                 } else {
-                    console.log('No se encontró fecha_nacimiento ni edad en los datos extraídos');
-                }
+                                    }
 
                 if (extractedData.sexo) {
                     setData('sexo', extractedData.sexo);
-                    console.log('Sexo llenado:', extractedData.sexo);
-                }
+                                    }
 
                 // Procesar datos geográficos (departamento y ciudad)
                 let departamentoMapeado = '';
@@ -2571,23 +2521,20 @@ export default function IngresarRegistro() {
                     departamentoMapeado = mapDepartamento(extractedData.departamento);
                     if (departamentoMapeado) {
                         setData('departamento', departamentoMapeado);
-                        console.log('Departamento llenado:', extractedData.departamento, '-> mapeado a:', departamentoMapeado);
-                    }
+                                            }
                 }
 
                 if (extractedData.ciudad) {
                     ciudadMapeada = mapCiudad(extractedData.ciudad, departamentoMapeado);
                     if (ciudadMapeada) {
                         setData('ciudad', ciudadMapeada);
-                        console.log('Ciudad llenada:', extractedData.ciudad, '-> mapeada a:', ciudadMapeada);
-                        
+                                                
                         // Si no se pudo mapear el departamento pero sí la ciudad, intentar inferir el departamento
                         if (!departamentoMapeado) {
                             const departamentoInferido = inferirDepartamentoPorCiudad(ciudadMapeada);
                             if (departamentoInferido) {
                                 setData('departamento', departamentoInferido);
-                                console.log('Departamento inferido desde ciudad:', ciudadMapeada, '-> departamento:', departamentoInferido);
-                            }
+                                                            }
                         }
                     }
                 }
@@ -2597,31 +2544,25 @@ export default function IngresarRegistro() {
                     const aseguradorMapeado = mapAsegurador(extractedData.asegurador);
                     if (aseguradorMapeado) {
                         setData('asegurador', aseguradorMapeado);
-                        console.log('Asegurador principal llenado:', extractedData.asegurador, '-> mapeado a:', aseguradorMapeado);
-                        
+                                                
                         // Mapear y llenar asegurador secundario automáticamente
                         if (extractedData.asegurador_nombre && ['eps', 'arl', 'soat'].includes(aseguradorMapeado)) {
                             const aseguradorSecundarioMapeado = mapAseguradorSecundario(extractedData.asegurador_nombre, aseguradorMapeado);
                             if (aseguradorSecundarioMapeado) {
                                 setData('asegurador_secundario', aseguradorSecundarioMapeado);
-                                console.log('🎯 Asegurador secundario llenado automáticamente:', extractedData.asegurador_nombre, '-> mapeado a:', aseguradorSecundarioMapeado);
-                            } else {
-                                console.log('⚠️ Asegurador secundario extraído pero no se pudo mapear:', extractedData.asegurador_nombre, 'para categoría:', aseguradorMapeado);
-                            }
+                                                            } else {
+                                                            }
                         }
                     } else {
-                        console.log('Asegurador extraído pero no se pudo mapear:', extractedData.asegurador);
-                    }
+                                            }
                 }
 
                 if (extractedData.institucion_remitente) {
                     setData('institucion_remitente', extractedData.institucion_remitente);
-                    console.log('Institución remitente llenada:', extractedData.institucion_remitente);
-                }
+                                    }
 
                 // 🔥 NUEVOS CAMPOS CLÍNICOS - SECCIÓN 3 "DATOS CLÍNICOS"
-                console.log('🔍 CAMPOS CLÍNICOS EXTRAÍDOS POR IA:');
-                
+                                
                 // Fecha de ingreso y cálculo automático de días hospitalizados
                 // 🔍 Buscar fecha_ingreso con múltiples variaciones de nombres
                 let fechaIngreso = extractedData.fecha_ingreso || 
@@ -2633,51 +2574,39 @@ export default function IngresarRegistro() {
                 
                 // 🔥 FALLBACK FRONTEND: Si no encuentra fecha_ingreso, extraerla del texto
                 if (!fechaIngreso && result.extracted_text_preview) {
-                    console.log('   🔍 FALLBACK FRONTEND: Intentando extraer fecha_ingreso del texto...');
-                    fechaIngreso = extractFechaIngresoFromText(result.extracted_text_preview);
+                                        fechaIngreso = extractFechaIngresoFromText(result.extracted_text_preview);
                     if (fechaIngreso) {
-                        console.log('   ✅ FALLBACK FRONTEND: Fecha extraída del texto:', fechaIngreso);
-                    }
+                                            }
                 }
                 
                 if (fechaIngreso) {
                     setData('fecha_ingreso', fechaIngreso);
                     // Usar la función existente que también calcula días hospitalizados
                     handleFechaIngresoChange(fechaIngreso);
-                    console.log('   📅 Fecha de ingreso llenada:', fechaIngreso);
-                    console.log('   🏥 Días hospitalizados calculados automáticamente');
-                } else {
-                    console.log('   📅 Fecha de ingreso: NO_ENCONTRADA en ninguna variación');
-                    console.log('   🔍 Campos buscados: fecha_ingreso, fechaIngreso, fecha_de_ingreso, fechaDeIngreso, ingreso_fecha');
-                }
+                                                        } else {
+                                                        }
 
                 // 🚫 DIAGNÓSTICO PRINCIPAL NO SE LLENA AUTOMÁTICAMENTE - Responsabilidad del médico
                 if (extractedData.diagnostico_principal) {
-                    console.log('   🩺 Diagnóstico extraído por IA (NO LLENADO):', extractedData.diagnostico_principal);
-                    console.log('   ⚠️ El diagnóstico principal debe ser verificado y llenado manualmente por el médico');
-                }
+                    :', extractedData.diagnostico_principal);
+                                    }
                 if (extractedData.diagnostico_1) {
                     setData('diagnostico_1', extractedData.diagnostico_1);
-                    console.log('   🩺 Diagnóstico 1 llenado:', extractedData.diagnostico_1);
-                }
+                                    }
                 if (extractedData.diagnostico_2) {
                     setData('diagnostico_2', extractedData.diagnostico_2);
-                    console.log('   🩺 Diagnóstico 2 llenado:', extractedData.diagnostico_2);
-                }
+                                    }
 
                 // Información clínica
                 if (extractedData.motivo_consulta) {
                     setData('motivo_consulta', extractedData.motivo_consulta);
-                    console.log('   💬 Motivo consulta llenado:', extractedData.motivo_consulta);
-                }
+                                    }
                 if (extractedData.enfermedad_actual) {
                     setData('enfermedad_actual', extractedData.enfermedad_actual);
-                    console.log('   📝 Enfermedad actual llenada:', extractedData.enfermedad_actual);
-                }
+                                    }
                 if (extractedData.antecedentes) {
                     setData('antecedentes', extractedData.antecedentes);
-                    console.log('   📋 Antecedentes llenados:', extractedData.antecedentes);
-                }
+                                    }
 
                 toast.success("🤖 ¡Datos extraídos automáticamente!", {
                     description: "Los campos sociodemográficos Y clínicos se han llenado con IA. Revisa los datos y navega por los pasos para validar la información.",
@@ -2686,9 +2615,8 @@ export default function IngresarRegistro() {
             } else {
                 throw new Error(result.message || 'Error desconocido');
             }
-        } catch (error: any) {
-            console.error('Error analizando archivo con IA:', error);
-
+        } catch (error: unknown) {
+            
             let errorMessage = "No se pudieron extraer los datos del documento.";
             if (error.response?.data?.message) {
                 errorMessage = error.response.data.message;
@@ -4029,16 +3957,13 @@ export default function IngresarRegistro() {
                                                     onClick={() => {
                                                         // Validar paso 4 antes de finalizar
                                                         if (validateStep4()) {
-                                                            console.log('Datos a enviar:', data);
-
+                                                            
                                                             // Enviar formulario al servidor
                                                             post(route('medico.ingresar-registro.store'), {
                                                                 onStart: () => {
-                                                                    console.log('Iniciando envío...');
-                                                                },
+                                                                                                                                    },
                                                                 onSuccess: (response) => {
-                                                                    console.log('Éxito:', response);
-                                                                    toast.success("¡Registro médico guardado exitosamente!", {
+                                                                                                                                        toast.success("¡Registro médico guardado exitosamente!", {
                                                                         description: "Los datos del paciente han sido registrados en el sistema.",
                                                                         duration: 4000,
                                                                     });
@@ -4048,15 +3973,13 @@ export default function IngresarRegistro() {
                                                                     setValidationErrors([]);
                                                                 },
                                                                 onError: (errors) => {
-                                                                    console.error('Errores de validación:', errors);
-                                                                    toast.error("Error al guardar el registro", {
+                                                                                                                                        toast.error("Error al guardar el registro", {
                                                                         description: "Por favor revise los datos e intente nuevamente.",
                                                                         duration: 5000,
                                                                     });
                                                                 },
                                                                 onFinish: () => {
-                                                                    console.log('Envío finalizado');
-                                                                }
+                                                                                                                                    }
                                                             });
                                                         }
                                                     }}

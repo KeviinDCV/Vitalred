@@ -1,0 +1,140 @@
+import type { User, Referencia, Notificacion, ChartData } from "./types"
+
+export const MOCK_USUARIOS: User[] = [
+  {
+    id: "1",
+    nombre: "Dr. Admin Sistema",
+    email: "admin@hospital.com",
+    rol: "admin",
+    activo: true,
+    ultimaConexion: new Date(),
+  },
+  {
+    id: "2",
+    nombre: "Dr. Juan Pérez",
+    email: "medico@hospital.com",
+    rol: "medico",
+    especialidad: "Cardiología",
+    activo: true,
+    ultimaConexion: new Date(),
+  },
+  {
+    id: "3",
+    nombre: "IPS Central",
+    email: "ips@hospital.com",
+    rol: "ips",
+    institucion: "IPS Central",
+    activo: true,
+    ultimaConexion: new Date(),
+  },
+  {
+    id: "4",
+    nombre: "Dra. María González",
+    email: "maria@hospital.com",
+    rol: "medico",
+    especialidad: "Neurología",
+    activo: true,
+    ultimaConexion: new Date(Date.now() - 3600000),
+  },
+  {
+    id: "5",
+    nombre: "IPS Norte",
+    email: "ipsnorte@hospital.com",
+    rol: "ips",
+    institucion: "IPS Norte",
+    activo: true,
+    ultimaConexion: new Date(Date.now() - 7200000),
+  },
+]
+
+export const MOCK_REFERENCIAS: Referencia[] = [
+  {
+    id: "REF001",
+    paciente: {
+      nombre: "Carlos Rodríguez",
+      identificacion: "1234567890",
+      edad: 45,
+      genero: "Masculino",
+    },
+    ipsOrigen: "IPS Central",
+    medicoAsignado: "Dr. Juan Pérez",
+    especialidad: "Cardiología",
+    motivo: "Dolor torácico agudo",
+    estado: "pendiente",
+    prioridad: "critica",
+    fechaCreacion: new Date(),
+    observaciones: "Paciente con antecedentes de hipertensión",
+  },
+  {
+    id: "REF002",
+    paciente: {
+      nombre: "Ana Martínez",
+      identificacion: "0987654321",
+      edad: 32,
+      genero: "Femenino",
+    },
+    ipsOrigen: "IPS Norte",
+    medicoAsignado: "Dra. María González",
+    especialidad: "Neurología",
+    motivo: "Cefalea persistente",
+    estado: "aceptada",
+    prioridad: "urgente",
+    fechaCreacion: new Date(Date.now() - 86400000),
+    fechaRespuesta: new Date(Date.now() - 43200000),
+  },
+  {
+    id: "REF003",
+    paciente: {
+      nombre: "Luis Fernández",
+      identificacion: "1122334455",
+      edad: 58,
+      genero: "Masculino",
+    },
+    ipsOrigen: "IPS Central",
+    especialidad: "Cardiología",
+    motivo: "Control post-operatorio",
+    estado: "completada",
+    prioridad: "normal",
+    fechaCreacion: new Date(Date.now() - 172800000),
+    fechaRespuesta: new Date(Date.now() - 86400000),
+  },
+]
+
+export const MOCK_NOTIFICACIONES: Notificacion[] = [
+  {
+    id: "NOT001",
+    tipo: "critica",
+    titulo: "Caso crítico asignado",
+    mensaje: "Se ha asignado un nuevo caso crítico que requiere atención inmediata",
+    fecha: new Date(),
+    leida: false,
+    usuarioId: "2",
+  },
+  {
+    id: "NOT002",
+    tipo: "importante",
+    titulo: "Referencia aceptada",
+    mensaje: "La referencia REF002 ha sido aceptada por el especialista",
+    fecha: new Date(Date.now() - 3600000),
+    leida: false,
+    usuarioId: "3",
+  },
+  {
+    id: "NOT003",
+    tipo: "informativa",
+    titulo: "Actualización del sistema",
+    mensaje: "El sistema estará en mantenimiento el próximo domingo",
+    fecha: new Date(Date.now() - 86400000),
+    leida: true,
+    usuarioId: "1",
+  },
+]
+
+export const MOCK_CHART_DATA: ChartData[] = [
+  { fecha: "Ene", referencias: 45, aceptadas: 38, rechazadas: 7 },
+  { fecha: "Feb", referencias: 52, aceptadas: 44, rechazadas: 8 },
+  { fecha: "Mar", referencias: 48, aceptadas: 41, rechazadas: 7 },
+  { fecha: "Abr", referencias: 61, aceptadas: 53, rechazadas: 8 },
+  { fecha: "May", referencias: 55, aceptadas: 48, rechazadas: 7 },
+  { fecha: "Jun", referencias: 67, aceptadas: 59, rechazadas: 8 },
+]

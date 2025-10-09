@@ -9,9 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import InputError from '@/components/input-error';
-import AppLayout from '@/layouts/app-layout';
+import AppLayoutInertia from '@/layouts/app-layout-inertia';
 import { type BreadcrumbItem } from '@/types';
-import { Head, useForm, router, usePage } from '@inertiajs/react';
+import { useForm, router, usePage } from '@inertiajs/react';
 import { Plus, Edit, Trash2, UserCheck, UserX, Search } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
@@ -49,11 +49,11 @@ interface Props {
 }
 
 export default function GestionUsuarios({ usuarios, stats }: Props) {
+    const { auth, flash } = usePage<{ auth: { user: { nombre: string, role: string } }, flash: any }>().props;
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<Usuario | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const { flash } = usePage().props as any;
 
     // Formulario para crear usuario
     const { data: createData, setData: setCreateData, post, processing: createProcessing, errors: createErrors, reset: resetCreate } = useForm({
@@ -136,8 +136,11 @@ export default function GestionUsuarios({ usuarios, stats }: Props) {
         router.delete(route('admin.usuarios.destroy', usuario.id));
     };
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Gestión de Usuarios - Vital Red" />
+        <AppLayoutInertia 
+            title="Gestión de Usuarios - Vital Red" 
+            breadcrumbs={breadcrumbs}
+            user={auth.user}
+        >
             
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 {/* Header */}
@@ -482,6 +485,6 @@ export default function GestionUsuarios({ usuarios, stats }: Props) {
                     </DialogContent>
                 </Dialog>
             </div>
-        </AppLayout>
+        </AppLayoutInertia>
     );
 }

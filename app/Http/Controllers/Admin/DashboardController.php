@@ -29,7 +29,7 @@ class DashboardController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('dashboard', [
+        return Inertia::render('admin/admin-dashboard', [
             'registros' => $registros,
             'search' => $search,
         ]);

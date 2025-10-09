@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\IpsMiddleware;
 use App\Http\Middleware\MedicoMiddleware;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => AdminMiddleware::class,
             'medico' => MedicoMiddleware::class,
+            'ips' => IpsMiddleware::class,
             'guest' => RedirectIfAuthenticated::class,
             'auth' => Authenticate::class,
         ]);

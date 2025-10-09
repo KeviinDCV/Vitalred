@@ -36,7 +36,7 @@ interface AnalisisPriorizacion {
         porcentaje: number;
         nivel_prioridad: 'ALTA' | 'MEDIA' | 'BAJA';
     };
-    criterios: any;
+    criterios: unknown;
     razonamiento: string;
     fecha_analisis: string;
     // NUEVOS CAMPOS PARA MOSTRAR TEXTO EXTRAÍDO Y RAZONAMIENTO IA
@@ -47,7 +47,7 @@ interface AnalisisPriorizacion {
         color: 'verde' | 'rojo';
         razonamiento: string;
         puntaje_total: number;
-        criterios_evaluados: any[];
+        criterios_evaluados: unknown[];
     };
 }
 
@@ -173,9 +173,8 @@ export default function AnalisisPriorizacion() {
                 throw new Error(extractResponse.data.message || 'Error al procesar el archivo');
             }
 
-        } catch (error: any) {
-            console.error('Error en el análisis:', error);
-            
+        } catch (error: unknown) {
+                        
             // ASEGURAR QUE NO SE MUESTREN DATOS CUANDO HAY ERROR
             setAnalisis(null);
             

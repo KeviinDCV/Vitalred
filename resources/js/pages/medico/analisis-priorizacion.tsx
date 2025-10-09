@@ -153,9 +153,8 @@ export default function AnalisisPriorizacion({ analisis: analisisInicial }: Prop
                 throw new Error(extractResponse.data.message || 'Error al procesar el archivo');
             }
 
-        } catch (error: any) {
-            console.error('Error en el análisis:', error);
-            setError(error.response?.data?.message || error.message || 'Error desconocido al procesar el archivo');
+        } catch (error: unknown) {
+                        setError(error.response?.data?.message || error.message || 'Error desconocido al procesar el archivo');
         } finally {
             setCargando(false);
             setProcesando(false);

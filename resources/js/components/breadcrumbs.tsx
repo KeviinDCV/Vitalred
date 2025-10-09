@@ -3,7 +3,11 @@ import { type BreadcrumbItem as BreadcrumbItemType } from '@/types';
 import { Link } from '@inertiajs/react';
 import { Fragment } from 'react';
 
-export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: BreadcrumbItemType[] }) {
+export function Breadcrumbs({ breadcrumbs }: { breadcrumbs?: BreadcrumbItemType[] }) {
+    if (!breadcrumbs || breadcrumbs.length === 0) {
+        return null;
+    }
+
     return (
         <>
             {breadcrumbs.length > 0 && (

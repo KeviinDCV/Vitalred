@@ -4,6 +4,7 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { Toaster } from '@/components/ui/sonner';
+import ErrorBoundary from '@/components/error-boundary';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -14,7 +15,7 @@ createInertiaApp({
         const root = createRoot(el);
 
         root.render(
-            <>
+            <ErrorBoundary>
                 <App {...props} />
                 <Toaster
                     position="top-right"
@@ -29,7 +30,7 @@ createInertiaApp({
                         descriptionClassName: 'toast-description',
                     }}
                 />
-            </>
+            </ErrorBoundary>
         );
     },
     progress: {
