@@ -3,9 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return redirect()->route('login');
-})->name('home');
+Route::get('/', [App\Http\Controllers\WelcomeController::class, 'index'])->name('home');
+Route::get('/welcome', [App\Http\Controllers\WelcomeController::class, 'index'])->name('welcome');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
@@ -71,6 +70,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('priorizacion/test-gemini', [App\Http\Controllers\Medico\PriorizacionController::class, 'testGeminiIA'])->name('priorizacion.test-gemini');
             Route::post('priorizacion/guardar-analisis-manual', [App\Http\Controllers\Medico\PriorizacionController::class, 'guardarAnalisisManual'])->name('priorizacion.guardar-analisis-manual');
             Route::get('priorizacion/listar-analisis-guardados', [App\Http\Controllers\Medico\PriorizacionController::class, 'listarAnalisisGuardados'])->name('priorizacion.listar-analisis-guardados');
+            
+            // Rutas adicionales para análisis de priorización
+            Route::get('analisis-priorizacion', [App\Http\Controllers\Medico\AnalisisPriorizacionController::class, 'index'])->name('analisis-priorizacion');
+            Route::get('analisis-priorizacion-campos', [App\Http\Controllers\Medico\AnalisisPriorizacionController::class, 'campos'])->name('analisis-priorizacion-campos');
+            Route::get('analisis-priorizacion-nueva', [App\Http\Controllers\Medico\AnalisisPriorizacionController::class, 'nueva'])->name('analisis-priorizacion-nueva');
+            Route::get('carga-analisis-ia', [App\Http\Controllers\Medico\AnalisisPriorizacionController::class, 'cargaIA'])->name('carga-analisis-ia');
+            Route::post('analisis-priorizacion', [App\Http\Controllers\Medico\AnalisisPriorizacionController::class, 'store'])->name('analisis-priorizacion.store');
         });
 
         // Admin puede acceder a todas las rutas de IPS bajo /admin/ips/*
@@ -114,6 +120,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('priorizacion/test-gemini', [App\Http\Controllers\Medico\PriorizacionController::class, 'testGeminiIA'])->name('priorizacion.test-gemini');
         Route::post('priorizacion/guardar-analisis-manual', [App\Http\Controllers\Medico\PriorizacionController::class, 'guardarAnalisisManual'])->name('priorizacion.guardar-analisis-manual');
         Route::get('priorizacion/listar-analisis-guardados', [App\Http\Controllers\Medico\PriorizacionController::class, 'listarAnalisisGuardados'])->name('priorizacion.listar-analisis-guardados');
+        
+        // Rutas adicionales para análisis de priorización
+        Route::get('analisis-priorizacion', [App\Http\Controllers\Medico\AnalisisPriorizacionController::class, 'index'])->name('analisis-priorizacion');
+        Route::get('analisis-priorizacion-campos', [App\Http\Controllers\Medico\AnalisisPriorizacionController::class, 'campos'])->name('analisis-priorizacion-campos');
+        Route::get('analisis-priorizacion-nueva', [App\Http\Controllers\Medico\AnalisisPriorizacionController::class, 'nueva'])->name('analisis-priorizacion-nueva');
+        Route::get('carga-analisis-ia', [App\Http\Controllers\Medico\AnalisisPriorizacionController::class, 'cargaIA'])->name('carga-analisis-ia');
+        Route::post('analisis-priorizacion', [App\Http\Controllers\Medico\AnalisisPriorizacionController::class, 'store'])->name('analisis-priorizacion.store');
     });
 
     // Rutas para IPS (solo IPS, admin ya tiene acceso arriba)
