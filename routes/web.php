@@ -28,12 +28,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('usuarios/{usuario}/toggle-status', [App\Http\Controllers\Admin\UsuarioController::class, 'toggleStatus'])->name('usuarios.toggle-status');
         Route::delete('usuarios/{usuario}', [App\Http\Controllers\Admin\UsuarioController::class, 'destroy'])->name('usuarios.destroy');
 
-        Route::get('supervision', fn() => Inertia::render('admin/supervision'))->name('supervision');
-        Route::get('referencias', fn() => Inertia::render('admin/referencias'))->name('referencias');
-        Route::get('reportes', fn() => Inertia::render('admin/reportes'))->name('reportes');
-        Route::get('monitoreo', fn() => Inertia::render('admin/monitoreo'))->name('monitoreo');
-        Route::get('ia', fn() => Inertia::render('admin/ia'))->name('ia');
-        Route::get('configuracion', fn() => Inertia::render('admin/configuracion'))->name('configuracion');
+
+        Route::get('referencias', [App\Http\Controllers\Admin\ReferenciasController::class, 'index'])->name('referencias');
+        Route::get('reportes', [App\Http\Controllers\Admin\ReportesController::class, 'index'])->name('reportes');
+        Route::post('reportes/generar', [App\Http\Controllers\Admin\ReportesController::class, 'generar'])->name('reportes.generar');
+        Route::get('monitoreo', [App\Http\Controllers\Admin\MonitoreoController::class, 'index'])->name('monitoreo');
+        Route::get('ia', [App\Http\Controllers\Admin\IAController::class, 'index'])->name('ia');
+        Route::get('configuracion', [App\Http\Controllers\Admin\ConfiguracionController::class, 'index'])->name('configuracion');
+        Route::post('configuracion', [App\Http\Controllers\Admin\ConfiguracionController::class, 'update'])->name('configuracion.update');
+        Route::get('supervision', [App\Http\Controllers\Admin\SupervisionController::class, 'index'])->name('supervision');
 
         Route::get('buscar-registros', [App\Http\Controllers\Admin\DashboardController::class, 'buscarRegistros'])->name('buscar-registros');
         Route::get('descargar-historia/{registro}', [App\Http\Controllers\Admin\DashboardController::class, 'descargarHistoria'])->name('descargar-historia');
@@ -41,8 +44,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Admin puede acceder a todas las rutas de médico bajo /admin/medico/*
         Route::prefix('medico')->name('medico.')->group(function () {
             Route::get('dashboard', fn() => Inertia::render('medico/medico-dashboard'))->name('dashboard');
-            Route::get('casos-criticos', fn() => Inertia::render('medico/casos-criticos'))->name('casos-criticos');
-            Route::get('seguimiento', fn() => Inertia::render('medico/seguimiento'))->name('seguimiento');
+            Route::get('casos-criticos', [App\Http\Controllers\Medico\CasosCriticosController::class, 'index'])->name('casos-criticos');
+            Route::get('seguimiento', [App\Http\Controllers\Medico\SeguimientoController::class, 'index'])->name('seguimiento');
             
             Route::get('ingresar-registro', [App\Http\Controllers\Medico\MedicoController::class, 'ingresarRegistro'])->name('ingresar-registro');
             Route::post('ingresar-registro', [App\Http\Controllers\Medico\MedicoController::class, 'storeRegistro'])->name('ingresar-registro.store');
@@ -84,8 +87,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Rutas para Médico (solo médicos, admin ya tiene acceso arriba)
     Route::middleware('medico')->prefix('medico')->name('medico.')->group(function () {
         Route::get('dashboard', fn() => Inertia::render('medico/medico-dashboard'))->name('dashboard');
-        Route::get('casos-criticos', fn() => Inertia::render('medico/casos-criticos'))->name('casos-criticos');
-        Route::get('seguimiento', fn() => Inertia::render('medico/seguimiento'))->name('seguimiento');
+        Route::get('casos-criticos', [App\Http\Controllers\Medico\CasosCriticosController::class, 'index'])->name('casos-criticos');
+        Route::get('seguimiento', [App\Http\Controllers\Medico\SeguimientoController::class, 'index'])->name('seguimiento');
         
         Route::get('ingresar-registro', [App\Http\Controllers\Medico\MedicoController::class, 'ingresarRegistro'])->name('ingresar-registro');
         Route::post('ingresar-registro', [App\Http\Controllers\Medico\MedicoController::class, 'storeRegistro'])->name('ingresar-registro.store');
@@ -125,8 +128,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
     
     // Rutas compartidas
-    Route::get('notificaciones', fn() => Inertia::render('shared/notificaciones'))->name('notificaciones');
-    Route::get('perfil', fn() => Inertia::render('shared/perfil'))->name('perfil');
+    Route::get('notificaciones', [App\Http\Controllers\Shared\NotificacionesController::class, 'index'])->name('notificaciones');
+    Route::patch('notificaciones/{id}/leida', [App\Http\Controllers\Shared\NotificacionesController::class, 'marcarLeida'])->name('notificaciones.marcar-leida');
+    Route::patch('notificaciones/todas-leidas', [App\Http\Controllers\Shared\NotificacionesController::class, 'marcarTodasLeidas'])->name('notificaciones.todas-leidas');
+    Route::get('perfil', [App\Http\Controllers\Shared\PerfilController::class, 'index'])->name('perfil');
+    Route::patch('perfil', [App\Http\Controllers\Shared\PerfilController::class, 'update'])->name('perfil.update');
 });
 
 require __DIR__.'/settings.php';
