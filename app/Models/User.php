@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\RegistroMedico;
 use App\Models\SolicitudIps;
+use App\Models\Notificacion;
 
 class User extends Authenticatable
 {
@@ -97,5 +98,13 @@ class User extends Authenticatable
     public function solicitudesIps()
     {
         return $this->hasMany(SolicitudIps::class);
+    }
+
+    /**
+     * Notificaciones del usuario
+     */
+    public function notificaciones()
+    {
+        return $this->hasMany(Notificacion::class);
     }
 }

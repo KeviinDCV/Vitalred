@@ -43,7 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Admin puede acceder a todas las rutas de médico bajo /admin/medico/*
         Route::prefix('medico')->name('medico.')->group(function () {
-            Route::get('dashboard', fn() => Inertia::render('medico/medico-dashboard'))->name('dashboard');
+            Route::get('dashboard', [App\Http\Controllers\Medico\MedicoDashboardController::class, 'index'])->name('dashboard');
             Route::get('casos-criticos', [App\Http\Controllers\Medico\CasosCriticosController::class, 'index'])->name('casos-criticos');
             Route::get('seguimiento', [App\Http\Controllers\Medico\SeguimientoController::class, 'index'])->name('seguimiento');
             
@@ -86,7 +86,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rutas para Médico (solo médicos, admin ya tiene acceso arriba)
     Route::middleware('medico')->prefix('medico')->name('medico.')->group(function () {
-        Route::get('dashboard', fn() => Inertia::render('medico/medico-dashboard'))->name('dashboard');
+        Route::get('dashboard', [App\Http\Controllers\Medico\MedicoDashboardController::class, 'index'])->name('dashboard');
         Route::get('casos-criticos', [App\Http\Controllers\Medico\CasosCriticosController::class, 'index'])->name('casos-criticos');
         Route::get('seguimiento', [App\Http\Controllers\Medico\SeguimientoController::class, 'index'])->name('seguimiento');
         
