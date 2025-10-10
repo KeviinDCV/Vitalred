@@ -32,6 +32,18 @@ return Application::configure(basePath: dirname(__DIR__))
             'ips' => IpsMiddleware::class,
             'guest' => RedirectIfAuthenticated::class,
             'auth' => Authenticate::class,
+            'auditoria' => \App\Http\Middleware\AuditoriaMiddleware::class,
+            'logging' => \App\Http\Middleware\LoggingMiddleware::class,
+        ]);
+
+        $middleware->web(append: [
+            \App\Http\Middleware\LoggingMiddleware::class,
+        ]);
+
+        $middleware->group('api', [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            'throttle:api',
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

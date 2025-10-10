@@ -24,8 +24,8 @@ export default function Solicitudes() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filtroEstado, setFiltroEstado] = useState("todos")
   
-  // Mock data completo - solo registros de ESTA IPS específica
-  const registrosDeEstaIPS = [
+  // Datos de ejemplo para referencia (se usan datos reales del controlador)
+  const registrosEjemplo = [
     {
       id: 'IPS001-REG001',
       tipo_identificacion: 'CC',
@@ -135,7 +135,10 @@ export default function Solicitudes() {
     )
   }
 
-  const filteredRegistros = (registros || []).filter((registro: any) => {
+  // Usar datos reales del controlador en lugar de mock data
+  const registrosReales = registros || [];
+  
+  const filteredRegistros = registrosReales.filter((registro: any) => {
     const matchesSearch = searchTerm === "" || 
       registro.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       registro.id.toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\GenerarReporteJob;
 use App\Models\RegistroMedico;
+use App\Models\Reporte;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -40,11 +42,21 @@ class ReportesController extends Controller
             'formato' => 'required|in:pdf,excel,csv'
         ]);
 
-        $data = $this->obtenerDatosReporte($validated['tipo'], $validated['periodo']);
+        // Crear registro de reporte
+        $reporte = Reporte::create([
+            'user_id' => auth()->id(),
+            'tipo' => $validated['tipo'],
+            'nombre' => 'Reporte ' . ucfirst($validated['tipo']) . ' - ' . ucfirst($validated['periodo']),
+            'parametros' => $validated,
+            'estado' => 'pendiente',
+        ]);
+
+        // Despachar job para generar reporte
+        GenerarReporteJob::dispatch($reporte);
 
         return response()->json([
-            'message' => 'Reporte generado exitosamente',
-            'data' => $data,
+            'message' => 'Reporte en proceso de generación',
+            'reporte_id' => $reporte->id,
             'tipo' => $validated['tipo'],
             'periodo' => $validated['periodo']
         ]);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Ips;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Ips\SolicitudIpsRequest;
 use App\Models\RegistroMedico;
 use App\Models\SolicitudIps;
 use Illuminate\Http\Request;
@@ -96,7 +97,7 @@ class IpsController extends Controller
     /**
      * Crear nueva solicitud IPS
      */
-    public function crearSolicitud(Request $request)
+    public function crearSolicitud(SolicitudIpsRequest $request)
     {
         $validated = $request->validate([
             'registro_medico_id' => 'required|exists:registros_medicos,id',

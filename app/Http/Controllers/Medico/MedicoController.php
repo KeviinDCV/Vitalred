@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Medico;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Medico\RegistroMedicoRequest;
 use App\Models\RegistroMedico;
+use App\Events\RegistroMedicoCreado;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 
 class MedicoController extends Controller
@@ -22,7 +23,7 @@ class MedicoController extends Controller
     /**
      * Guardar un nuevo registro médico
      */
-    public function storeRegistro(Request $request)
+    public function storeRegistro(RegistroMedicoRequest $request)
     {
         \Log::info('Datos recibidos en storeRegistro:', $request->all());
 
@@ -93,6 +94,9 @@ class MedicoController extends Controller
             'fecha_envio' => now(),
             ...$validatedData
         ]);
+
+        // Disparar evento
+        event(new RegistroMedicoCreado($registro));
 
         return redirect()->route('medico.ingresar-registro')->with('success', 'Registro médico guardado exitosamente.');
     }
