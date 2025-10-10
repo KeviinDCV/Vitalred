@@ -9,6 +9,9 @@ use Illuminate\Notifications\Notifiable;
 use App\Models\RegistroMedico;
 use App\Models\SolicitudIps;
 use App\Models\Notificacion;
+use App\Models\Reporte;
+use App\Models\ActividadSistema;
+use App\Models\AnalisisPruebaIA;
 
 class User extends Authenticatable
 {
@@ -106,5 +109,29 @@ class User extends Authenticatable
     public function notificaciones()
     {
         return $this->hasMany(Notificacion::class);
+    }
+
+    /**
+     * Reportes generados por el usuario
+     */
+    public function reportes()
+    {
+        return $this->hasMany(Reporte::class);
+    }
+
+    /**
+     * Actividad del usuario en el sistema
+     */
+    public function actividadSistema()
+    {
+        return $this->hasMany(ActividadSistema::class);
+    }
+
+    /**
+     * Análisis de IA realizados por el usuario
+     */
+    public function analisisIA()
+    {
+        return $this->hasMany(AnalisisPruebaIA::class);
     }
 }

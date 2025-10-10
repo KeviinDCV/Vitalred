@@ -87,6 +87,14 @@ class RegistroMedico extends Model
     }
 
     /**
+     * Solicitudes IPS relacionadas con este registro
+     */
+    public function solicitudesIps()
+    {
+        return $this->hasMany(SolicitudIps::class);
+    }
+
+    /**
      * Scope para filtrar por estado
      */
     public function scopeByEstado($query, $estado)
