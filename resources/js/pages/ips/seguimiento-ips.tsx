@@ -32,7 +32,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 ]
 
 export default function AnalisisReportes() {
-  const { auth } = usePage<{ auth: { user: { nombre: string, role: string } } }>().props
+  const { user, metricas, registrosRecientes } = usePage<{ 
+    user: { name: string, role: string },
+    metricas: any,
+    registrosRecientes: any[]
+  }>().props
   const [periodoSeleccionado, setPeriodoSeleccionado] = useState("mes_actual")
   
   // Mock data para análisis
@@ -81,7 +85,7 @@ export default function AnalisisReportes() {
     <AppLayoutInertia 
       title="Análisis y Reportes - Vital Red" 
       breadcrumbs={breadcrumbs}
-      user={auth.user}
+      user={user}
     >
       <div className="space-y-6">
         <div className="flex items-center justify-between">

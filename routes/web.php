@@ -75,6 +75,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('dashboard', [App\Http\Controllers\Ips\IpsController::class, 'dashboard'])->name('dashboard');
             Route::get('ingresar-registro', [App\Http\Controllers\Ips\IpsController::class, 'ingresarRegistro'])->name('ingresar-registro');
             Route::get('solicitudes', [App\Http\Controllers\Ips\IpsController::class, 'solicitudes'])->name('solicitudes');
+            Route::post('solicitudes', [App\Http\Controllers\Ips\IpsController::class, 'crearSolicitud'])->name('solicitudes.store');
+            Route::patch('solicitudes/{solicitud}', [App\Http\Controllers\Ips\IpsController::class, 'actualizarSolicitud'])->name('solicitudes.update');
             Route::get('seguimiento', [App\Http\Controllers\Ips\IpsController::class, 'seguimiento'])->name('seguimiento');
         });
     });
@@ -115,7 +117,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('ips')->prefix('ips')->name('ips.')->group(function () {
         Route::get('dashboard', [App\Http\Controllers\Ips\IpsController::class, 'dashboard'])->name('dashboard');
         Route::get('ingresar-registro', [App\Http\Controllers\Ips\IpsController::class, 'ingresarRegistro'])->name('ingresar-registro');
+        Route::post('ingresar-registro', [App\Http\Controllers\Medico\MedicoIpsController::class, 'storeRegistroIps'])->name('ingresar-registro.store');
         Route::get('solicitudes', [App\Http\Controllers\Ips\IpsController::class, 'solicitudes'])->name('solicitudes');
+        Route::post('solicitudes', [App\Http\Controllers\Ips\IpsController::class, 'crearSolicitud'])->name('solicitudes.store');
+        Route::patch('solicitudes/{solicitud}', [App\Http\Controllers\Ips\IpsController::class, 'actualizarSolicitud'])->name('solicitudes.update');
         Route::get('seguimiento', [App\Http\Controllers\Ips\IpsController::class, 'seguimiento'])->name('seguimiento');
     });
     

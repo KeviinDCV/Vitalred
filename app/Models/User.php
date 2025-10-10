@@ -6,6 +6,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\RegistroMedico;
+use App\Models\SolicitudIps;
 
 class User extends Authenticatable
 {
@@ -79,5 +81,21 @@ class User extends Authenticatable
     public function isActive(): bool
     {
         return $this->is_active;
+    }
+
+    /**
+     * Registros médicos creados por este usuario
+     */
+    public function registrosMedicos()
+    {
+        return $this->hasMany(RegistroMedico::class);
+    }
+
+    /**
+     * Solicitudes IPS creadas por este usuario
+     */
+    public function solicitudesIps()
+    {
+        return $this->hasMany(SolicitudIps::class);
     }
 }

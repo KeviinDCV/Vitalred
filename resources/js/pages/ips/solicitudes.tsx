@@ -17,7 +17,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 ]
 
 export default function Solicitudes() {
-  const { auth } = usePage<{ auth: { user: { nombre: string, role: string } } }>().props
+  const { user, registros } = usePage<{ 
+    user: { name: string, role: string }, 
+    registros: any[] 
+  }>().props
   const [searchTerm, setSearchTerm] = useState("")
   const [filtroEstado, setFiltroEstado] = useState("todos")
   
@@ -132,7 +135,7 @@ export default function Solicitudes() {
     )
   }
 
-  const filteredRegistros = registrosDeEstaIPS.filter(registro => {
+  const filteredRegistros = (registros || []).filter((registro: any) => {
     const matchesSearch = searchTerm === "" || 
       registro.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       registro.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -147,7 +150,7 @@ export default function Solicitudes() {
     <AppLayoutInertia 
       title="Solicitudes - Vital Red" 
       breadcrumbs={breadcrumbs}
-      user={auth.user}
+      user={user}
     >
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -158,7 +161,7 @@ export default function Solicitudes() {
           <div className="flex items-center gap-2">
             <Building className="h-4 w-4 text-muted-foreground" />
             <Badge variant="outline" className="text-sm">
-              {registrosDeEstaIPS.length} registros propios
+              {registros?.length || 0} registros propios
             </Badge>
           </div>
         </div>
