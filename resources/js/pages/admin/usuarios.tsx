@@ -31,7 +31,7 @@ interface Usuario {
     id: number;
     name: string;
     email: string;
-    role: 'administrador' | 'medico';
+    role: 'administrador' | 'medico' | 'ips';
     is_active: boolean;
     created_at: string;
 }
@@ -40,6 +40,7 @@ interface Stats {
     total: number;
     administradores: number;
     medicos: number;
+    ips: number;
     activos: number;
 }
 
@@ -49,7 +50,7 @@ interface Props {
 }
 
 export default function GestionUsuarios({ usuarios, stats }: Props) {
-    const { auth, flash } = usePage<{ auth: { user: { nombre: string, role: string } }, flash: any }>().props;
+    const { auth, flash } = usePage<{ auth: { user: { name: string, role: string } }, flash: any }>().props;
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<Usuario | null>(null);
@@ -61,7 +62,7 @@ export default function GestionUsuarios({ usuarios, stats }: Props) {
         email: '',
         password: '',
         password_confirmation: '',
-        role: 'medico' as 'administrador' | 'medico',
+        role: 'medico' as 'administrador' | 'medico' | 'ips',
         is_active: true,
     });
 
@@ -69,7 +70,7 @@ export default function GestionUsuarios({ usuarios, stats }: Props) {
     const { data: editData, setData: setEditData, put, processing: editProcessing, errors: editErrors, reset: resetEdit } = useForm({
         name: '',
         email: '',
-        role: 'medico' as 'administrador' | 'medico',
+        role: 'medico' as 'administrador' | 'medico' | 'ips',
         is_active: true,
     });
 
@@ -142,13 +143,13 @@ export default function GestionUsuarios({ usuarios, stats }: Props) {
             user={auth.user}
         >
             
-            <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                {/* Header */}
+            <div className="flex h-full flex-1 flex-col gap-4 p-6">
+                {/* Header Compacto */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-foreground">Gestión de Usuarios</h1>
-                        <p className="text-muted-foreground mt-2">
-                            Administra los usuarios del sistema de referencia y contrareferencia
+                        <h1 className="text-2xl font-bold text-foreground">Gestión de Usuarios</h1>
+                        <p className="text-sm text-muted-foreground">
+                            Administra los usuarios del sistema
                         </p>
                     </div>
                     <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -194,13 +195,14 @@ export default function GestionUsuarios({ usuarios, stats }: Props) {
 
                                     <div className="grid gap-2">
                                         <Label htmlFor="create-role">Rol</Label>
-                                        <Select value={createData.role} onValueChange={(value: 'administrador' | 'medico') => setCreateData('role', value)}>
+                                        <Select value={createData.role} onValueChange={(value: 'administrador' | 'medico' | 'ips') => setCreateData('role', value)}>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Selecciona un rol" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="medico">Médico</SelectItem>
                                                 <SelectItem value="administrador">Administrador</SelectItem>
+                                                <SelectItem value="ips">IPS</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <InputError message={createErrors.role} />
@@ -245,83 +247,81 @@ export default function GestionUsuarios({ usuarios, stats }: Props) {
                     </Dialog>
                 </div>
 
-                {/* Estadísticas */}
-                <div className="grid gap-4 md:grid-cols-4">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Usuarios</CardTitle>
-                            <UserCheck className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats.total}</div>
-                            <p className="text-xs text-muted-foreground">Usuarios registrados</p>
-                        </CardContent>
+                {/* Estadísticas Compactas - Bento Grid */}
+                <div className="grid gap-3 grid-cols-5">
+                    <Card className="p-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-xs font-medium text-muted-foreground">Total</p>
+                                <h3 className="text-2xl font-bold mt-1">{stats.total}</h3>
+                            </div>
+                            <UserCheck className="h-8 w-8 text-muted-foreground opacity-50" />
+                        </div>
                     </Card>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Administradores</CardTitle>
-                            <UserCheck className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats.administradores}</div>
-                            <p className="text-xs text-muted-foreground">Usuarios admin</p>
-                        </CardContent>
+                    <Card className="p-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-xs font-medium text-muted-foreground">Admins</p>
+                                <h3 className="text-2xl font-bold mt-1">{stats.administradores}</h3>
+                            </div>
+                            <UserCheck className="h-8 w-8 opacity-60" style={{ color: '#042077' }} />
+                        </div>
                     </Card>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Médicos</CardTitle>
-                            <UserCheck className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats.medicos}</div>
-                            <p className="text-xs text-muted-foreground">Usuarios médicos</p>
-                        </CardContent>
+                    <Card className="p-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-xs font-medium text-muted-foreground">Médicos</p>
+                                <h3 className="text-2xl font-bold mt-1">{stats.medicos}</h3>
+                            </div>
+                            <UserCheck className="h-8 w-8 text-muted-foreground opacity-50" />
+                        </div>
                     </Card>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Activos</CardTitle>
-                            <UserCheck className="h-4 w-4 text-success" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-success">{stats.activos}</div>
-                            <p className="text-xs text-muted-foreground">Usuarios activos</p>
-                        </CardContent>
+                    <Card className="p-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-xs font-medium text-muted-foreground">IPS</p>
+                                <h3 className="text-2xl font-bold mt-1">{stats.ips}</h3>
+                            </div>
+                            <UserCheck className="h-8 w-8 text-muted-foreground opacity-50" />
+                        </div>
+                    </Card>
+
+                    <Card className="p-4 bg-green-50 dark:bg-green-950/20">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-xs font-medium text-green-700 dark:text-green-400">Activos</p>
+                                <h3 className="text-2xl font-bold mt-1 text-green-700 dark:text-green-400">{stats.activos}</h3>
+                            </div>
+                            <UserCheck className="h-8 w-8 text-green-600 dark:text-green-500 opacity-70" />
+                        </div>
                     </Card>
                 </div>
 
-                {/* Buscador */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Buscar Usuarios</CardTitle>
-                        <CardDescription>
-                            Filtra usuarios por nombre, email o rol
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input
-                                placeholder="Buscar por nombre, email o rol..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10"
-                            />
+                {/* Tabla de Usuarios con Buscador Integrado */}
+                <Card className="flex-1">
+                    <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between gap-4">
+                            <div>
+                                <CardTitle className="text-lg">Lista de Usuarios</CardTitle>
+                                <CardDescription>
+                                    {filteredUsuarios.length} usuario{filteredUsuarios.length !== 1 ? 's' : ''} {searchTerm ? 'encontrado' + (filteredUsuarios.length !== 1 ? 's' : '') : ''}
+                                </CardDescription>
+                            </div>
+                            <div className="relative w-80">
+                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                <Input
+                                    placeholder="Buscar por nombre, email o rol..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-10"
+                                />
+                            </div>
                         </div>
-                    </CardContent>
-                </Card>
-
-                {/* Tabla de usuarios */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Lista de Usuarios</CardTitle>
-                        <CardDescription>
-                            Gestiona todos los usuarios del sistema
-                        </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="pt-0">
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -347,7 +347,7 @@ export default function GestionUsuarios({ usuarios, stats }: Props) {
                                         <TableCell>{usuario.email}</TableCell>
                                         <TableCell>
                                             <Badge variant={usuario.role === 'administrador' ? 'default' : 'secondary'}>
-                                                {usuario.role === 'administrador' ? 'Administrador' : 'Médico'}
+                                                {usuario.role === 'administrador' ? 'Administrador' : usuario.role === 'medico' ? 'Médico' : 'IPS'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
@@ -452,13 +452,14 @@ export default function GestionUsuarios({ usuarios, stats }: Props) {
 
                                 <div className="grid gap-2">
                                     <Label htmlFor="edit-role">Rol</Label>
-                                    <Select value={editData.role} onValueChange={(value: 'administrador' | 'medico') => setEditData('role', value)}>
+                                    <Select value={editData.role} onValueChange={(value: 'administrador' | 'medico' | 'ips') => setEditData('role', value)}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Selecciona un rol" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="medico">Médico</SelectItem>
                                             <SelectItem value="administrador">Administrador</SelectItem>
+                                            <SelectItem value="ips">IPS</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <InputError message={editErrors.role} />

@@ -25,6 +25,7 @@ class UsuarioController extends Controller
             'total' => User::count(),
             'administradores' => User::where('role', 'administrador')->count(),
             'medicos' => User::where('role', 'medico')->count(),
+            'ips' => User::where('role', 'ips')->count(),
             'activos' => User::where('is_active', true)->count(),
         ];
 
@@ -43,7 +44,7 @@ class UsuarioController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => 'required|in:administrador,medico',
+            'role' => 'required|in:administrador,medico,ips',
             'is_active' => 'boolean',
         ]);
 
@@ -67,7 +68,7 @@ class UsuarioController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:users,email,' . $usuario->id,
-            'role' => 'required|in:administrador,medico',
+            'role' => 'required|in:administrador,medico,ips',
             'is_active' => 'boolean',
         ]);
 
