@@ -1,9 +1,10 @@
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarSeparator } from '@/components/ui/sidebar';
+import { Badge } from '@/components/ui/badge';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, Users, Shield, FileText, Search, AlertTriangle, Activity, BarChart3, Settings, Brain, Building2, ClipboardList, UserCheck } from 'lucide-react';
+import { LayoutGrid, Users, Shield, FileText, Search, Activity, BarChart3, Settings, Brain, Building2, ClipboardList, UserCheck, Stethoscope, AlertCircle } from 'lucide-react';
 import AppLogo from './app-logo';
 
 // Navegación para Administrador
@@ -48,14 +49,56 @@ const adminNavItems: NavItem[] = [
         href: '/admin/configuracion',
         icon: Settings,
     },
+    // Sección Médico
+    {
+        title: 'Panel Médico',
+        href: '/admin/medico/dashboard',
+        icon: Stethoscope,
+    },
+    {
+        title: 'Ingresar Registro',
+        href: '/admin/medico/ingresar-registro',
+        icon: FileText,
+    },
+    {
+        title: 'Consulta Pacientes',
+        href: '/admin/medico/consulta-pacientes',
+        icon: Search,
+    },
+    {
+        title: 'Casos Críticos',
+        href: '/admin/medico/casos-criticos',
+        icon: AlertCircle,
+    },
+    {
+        title: 'Seguimiento Médico',
+        href: '/admin/medico/seguimiento',
+        icon: UserCheck,
+    },
+    // Sección IPS
+    {
+        title: 'Panel IPS',
+        href: '/admin/ips/dashboard',
+        icon: Building2,
+    },
+    {
+        title: 'Solicitudes IPS',
+        href: '/admin/ips/solicitudes',
+        icon: ClipboardList,
+    },
+    {
+        title: 'Seguimiento IPS',
+        href: '/admin/ips/seguimiento',
+        icon: Activity,
+    },
 ];
 
-// Navegación para Médico
+// Navegación para Médico (rutas completas)
 const medicoNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: '/medico/dashboard',
-        icon: LayoutGrid,
+        icon: Stethoscope,
     },
     {
         title: 'Ingresar Registro',
@@ -70,7 +113,7 @@ const medicoNavItems: NavItem[] = [
     {
         title: 'Casos Críticos',
         href: '/medico/casos-criticos',
-        icon: AlertTriangle,
+        icon: AlertCircle,
     },
     {
         title: 'Seguimiento',
@@ -103,18 +146,18 @@ export function AppSidebar() {
     const user = auth.user;
 
     // Determinar qué navegación mostrar según el rol
-    const navItems = user.role === 'administrador' 
-        ? adminNavItems 
-        : user.role === 'ips' 
-        ? ipsNavItems 
-        : medicoNavItems;
+    const navItems = user.role === 'administrador' ? adminNavItems : user.role === 'medico' ? medicoNavItems : ipsNavItems;
+    
+    // Determinar el label del rol
+    const roleLabel = user.role === 'administrador' ? 'Administrador' : user.role === 'medico' ? 'Médico' : 'IPS';
+    const roleBadgeVariant = user.role === 'administrador' ? 'default' : 'secondary';
 
     return (
-        <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
+        <Sidebar collapsible="offcanvas" variant="sidebar">
+            <SidebarHeader className="border-b border-sidebar-border py-4 px-4">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
+                        <SidebarMenuButton size="lg" asChild className="hover:bg-sidebar-accent/50">
                             <Link href="/dashboard" prefetch>
                                 <AppLogo />
                             </Link>
@@ -123,11 +166,11 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
+            <SidebarContent className="px-3 py-4">
                 <NavMain items={navItems} />
             </SidebarContent>
 
-            <SidebarFooter>
+            <SidebarFooter className="mt-auto border-t border-sidebar-border p-4">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

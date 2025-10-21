@@ -5,20 +5,25 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useAuth } from "@/lib/auth-context"
+import { usePage } from "@inertiajs/react"
+import { type SharedData } from "@/types"
 import { User, Mail, Phone, Building, Shield, Eye, Download, Save } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import AppLayoutInertia from "@/layouts/app-layout-inertia"
 
-export function Perfil() {
-  const { user } = useAuth()
-  const [nombre, setNombre] = useState(user?.nombre || "")
+export default function Perfil() {
+  const { auth } = usePage<SharedData>().props
+  const user = auth.user
+  
+  const [nombre, setNombre] = useState(user?.name || "")
   const [email, setEmail] = useState(user?.email || "")
-  const [telefono, setTelefono] = useState(user?.telefono || "")
+  const [telefono, setTelefono] = useState("")
   const [tema, setTema] = useState("dark")
 
   if (!user) return null
 
   return (
+    <AppLayoutInertia title="Mi Perfil" user={{ name: user.name as string, role: user.role as string }}>
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Mi Perfil</h1>
@@ -36,8 +41,8 @@ export function Perfil() {
                 <User className="h-10 w-10 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-foreground">{user.nombre}</h3>
-                <Badge className="bg-primary text-primary-foreground capitalize">{user.rol}</Badge>
+                <h3 className="text-lg font-semibold text-foreground">{user.name as string}</h3>
+                <Badge className="bg-primary text-primary-foreground capitalize">{user.role as string}</Badge>
               </div>
             </div>
 
@@ -84,22 +89,24 @@ export function Perfil() {
               </div>
             </div>
 
-            {user.especialidad && (
-              <div className="space-y-2">
-                <Label className="text-foreground">Especialidad</Label>
-                <Input value={user.especialidad} disabled className="bg-secondary border-border" />
-              </div>
-            )}
-
-            {user.institucion && (
-              <div className="space-y-2">
-                <Label className="text-foreground">Institución</Label>
-                <div className="relative">
-                  <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input value={user.institucion} disabled className="pl-9 bg-secondary border-border" />
+            <>
+              {user.especialidad && (
+                <div className="space-y-2">
+                  <Label className="text-foreground">Especialidad</Label>
+                  <Input value={user.especialidad as string} disabled className="bg-secondary border-border" />
                 </div>
-              </div>
-            )}
+              )}
+
+              {user.institucion && (
+                <div className="space-y-2">
+                  <Label className="text-foreground">Institución</Label>
+                  <div className="relative">
+                    <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input value={user.institucion as string} disabled className="pl-9 bg-secondary border-border" />
+                  </div>
+                </div>
+              )}
+            </>
 
             <div className="flex gap-2 pt-4">
               <Button className="gap-2">
@@ -242,5 +249,6 @@ export function Perfil() {
         </CardContent>
       </Card>
     </div>
+    </AppLayoutInertia>
   )
 }

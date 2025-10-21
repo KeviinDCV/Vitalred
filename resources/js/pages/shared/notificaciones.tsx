@@ -7,8 +7,13 @@ import { Label } from "@/components/ui/label"
 import { MOCK_NOTIFICACIONES } from "@/lib/mock-data"
 import { Bell, AlertCircle, Info, CheckCircle, Archive, Settings, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import AppLayoutInertia from "@/layouts/app-layout-inertia"
+import { usePage } from "@inertiajs/react"
+import { type SharedData } from "@/types"
 
-export function Notificaciones() {
+export default function Notificaciones() {
+  const { auth } = usePage<SharedData>().props
+  const user = auth.user
   const [filtro, setFiltro] = useState<"todas" | "critica" | "importante" | "informativa">("todas")
   const [notificaciones, setNotificaciones] = useState(MOCK_NOTIFICACIONES)
 
@@ -25,6 +30,7 @@ export function Notificaciones() {
   }
 
   return (
+    <AppLayoutInertia title="Notificaciones" user={{ name: user.name as string, role: user.role as string }}>
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -207,5 +213,6 @@ export function Notificaciones() {
         </CardContent>
       </Card>
     </div>
+    </AppLayoutInertia>
   )
 }

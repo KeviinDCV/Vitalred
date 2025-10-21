@@ -1,7 +1,9 @@
 import { Head } from '@inertiajs/react'
-import { AppSidebarInertia } from '@/components/app-sidebar-inertia'
+import { AppShell } from '@/components/app-shell'
+import { AppSidebar } from '@/components/app-sidebar'
+import { AppContent } from '@/components/app-content'
+import { AppSidebarHeader } from '@/components/app-sidebar-header'
 import { type BreadcrumbItem } from '@/types'
-import { Breadcrumbs } from '@/components/breadcrumbs'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -23,20 +25,13 @@ export default function AppLayoutInertia({
     <>
       <Head title={title} />
       
-      <div className="flex h-screen bg-background">
-        <AppSidebarInertia user={user} />
-        
-        <main className="flex-1 md:ml-[276px] overflow-y-auto">
-          <div className="container mx-auto p-6 md:p-8">
-            {breadcrumbs && breadcrumbs.length > 0 && (
-              <div className="mb-6">
-                <Breadcrumbs breadcrumbs={breadcrumbs} />
-              </div>
-            )}
-            {children}
-          </div>
-        </main>
-      </div>
+      <AppShell variant="sidebar">
+        <AppSidebar />
+        <AppContent variant="sidebar" className="overflow-x-hidden">
+          <AppSidebarHeader breadcrumbs={breadcrumbs} />
+          {children}
+        </AppContent>
+      </AppShell>
     </>
   )
 }

@@ -5,7 +5,9 @@ export default function AppLogo() {
         <>
             <AppLogoIcon className="size-8" />
             <div className="ml-2 grid flex-1 text-left text-sm">
-                <span className="mb-0.5 truncate leading-tight font-semibold">VITAL RED</span>
+                <span className="mb-0.5 truncate leading-tight font-bold text-sidebar-foreground text-base">
+                    VITAL RED
+                </span>
             </div>
         </>
     );

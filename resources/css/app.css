@@ -115,15 +115,15 @@
 
     --radius: 0.625rem;
 
-    /* Sidebar con azul institucional */
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.3 0.15 264);
+    /* Sidebar oscuro con azul #042077 */
+    --sidebar: #042077;
+    --sidebar-foreground: oklch(0.95 0 0);
+    --sidebar-primary: #042077;
     --sidebar-primary-foreground: oklch(1 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.3 0.15 264);
+    --sidebar-accent: oklch(0.98 0 0);
+    --sidebar-accent-foreground: oklch(0.145 0 0);
+    --sidebar-border: #053099;
+    --sidebar-ring: #042077;
 }
 
 .dark {
@@ -174,14 +174,14 @@
     --chart-4: oklch(0.75 0.15 65);
     --chart-5: oklch(0.645 0.246 16.439);
 
-    /* Sidebar en modo oscuro */
-    --sidebar: oklch(0.205 0 0);
+    /* Sidebar en modo oscuro con azul institucional */
+    --sidebar: oklch(0.18 0.02 264);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.5 0.15 264);
     --sidebar-primary-foreground: oklch(1 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent: oklch(0.25 0.03 264);
     --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(0.269 0 0);
+    --sidebar-border: oklch(0.25 0.02 264);
     --sidebar-ring: oklch(0.5 0.15 264);
 }
 
@@ -193,6 +193,26 @@
     body {
         @apply bg-background text-foreground;
     }
+}
+
+/* Estilos personalizados del sidebar */
+[data-sidebar="menu-button"][data-active="true"] {
+    background-color: oklch(0.98 0 0) !important;
+    color: oklch(0.145 0 0) !important;
+    font-weight: 600;
+}
+
+[data-sidebar="menu-button"][data-active="true"] svg {
+    color: oklch(0.145 0 0) !important;
+}
+
+[data-sidebar="menu-button"]:not([data-active="true"]):hover {
+    background-color: #053099 !important;
+    color: oklch(0.95 0 0) !important;
+}
+
+[data-sidebar="menu-button"]:not([data-active="true"]):hover svg {
+    color: oklch(0.95 0 0) !important;
 }
 
 /* Estilos personalizados para toasts con mejor contraste */
