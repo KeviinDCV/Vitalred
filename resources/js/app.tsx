@@ -7,6 +7,18 @@ import { Toaster } from '@/components/ui/sonner';
 import ErrorBoundary from '@/components/error-boundary';
 import { route } from 'ziggy-js';
 
+// Suprimir warning conocido de Inertia Form con atributo inert
+const originalError = console.error;
+console.error = (...args: any[]) => {
+    if (
+        typeof args[0] === 'string' &&
+        args[0].includes('Warning: Received `false` for a non-boolean attribute `inert`')
+    ) {
+        return;
+    }
+    originalError.apply(console, args);
+};
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\RegistroMedico;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -29,9 +30,25 @@ class DashboardController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        // Últimos 6 usuarios registrados
+        $usuariosRecientes = User::select('id', 'name', 'email', 'role', 'is_active', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->limit(6)
+            ->get();
+
+        // Estadísticas generales
+        $stats = [
+            'total_usuarios' => User::count(),
+            'referencias_pendientes' => 15, // TODO: Implementar cuando tengamos modelo de referencias
+            'casos_criticos' => 3, // TODO: Implementar con lógica real
+            'sistema_activo' => '99.9%',
+        ];
+
         return Inertia::render('admin/admin-dashboard', [
             'registros' => $registros,
             'search' => $search,
+            'usuariosRecientes' => $usuariosRecientes,
+            'stats' => $stats,
         ]);
     }
 

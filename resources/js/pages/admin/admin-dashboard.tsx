@@ -1,14 +1,33 @@
 import { usePage } from '@inertiajs/react';
-import { useState } from "react";
 import { MetricCard } from "@/components/metric-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ModalCrearUsuario } from "./modal-crear-usuario";
-import { Users, FileText, AlertCircle, Activity, Plus, RefreshCw } from "lucide-react";
-import { MOCK_USUARIOS, MOCK_CHART_DATA } from "@/lib/mock-data";
+import { Badge } from "@/components/ui/badge";
+import { Users, FileText, AlertCircle, Activity, RefreshCw, TrendingUp, Clock } from "lucide-react";
 import AppLayoutInertia from '@/layouts/app-layout-inertia';
 import { type BreadcrumbItem } from '@/types';
+
+interface Usuario {
+  id: number;
+  name: string;
+  email: string;
+  role: 'administrador' | 'medico' | 'ips';
+  is_active: boolean;
+  created_at: string;
+}
+
+interface Stats {
+  total_usuarios: number;
+  referencias_pendientes: number;
+  casos_criticos: number;
+  sistema_activo: string;
+}
+
+interface Props {
+  usuariosRecientes: Usuario[];
+  stats: Stats;
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -17,9 +36,22 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ usuariosRecientes, stats }: Props) {
   const { auth } = usePage<{ auth: { user: { name: string, role: string } } }>().props;
-  const [modalCrearOpen, setModalCrearOpen] = useState(false)
+
+  const formatearFecha = (fecha: string) => {
+    const date = new Date(fecha);
+    const ahora = new Date();
+    const diffMs = ahora.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) return `Hace ${diffMins} minuto${diffMins !== 1 ? 's' : ''}`;
+    if (diffHours < 24) return `Hace ${diffHours} hora${diffHours !== 1 ? 's' : ''}`;
+    if (diffDays < 7) return `Hace ${diffDays} día${diffDays !== 1 ? 's' : ''}`;
+    return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+  }
 
   return (
     <AppLayoutInertia 
@@ -29,15 +61,9 @@ export default function AdminDashboard() {
     >
       <div className="flex h-full flex-1 flex-col gap-4 p-6">
         {/* Header Compacto */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Panel de Administración</h1>
-            <p className="text-sm text-muted-foreground">Gestión completa del sistema</p>
-          </div>
-          <Button onClick={() => setModalCrearOpen(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Crear Usuario
-          </Button>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Panel de Administración</h1>
+          <p className="text-sm text-muted-foreground">Gestión completa del sistema</p>
         </div>
 
         {/* Bento Grid - Métricas */}
@@ -46,8 +72,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-muted-foreground">Total Usuarios</p>
-                <h3 className="text-2xl font-bold mt-1">{MOCK_USUARIOS.length}</h3>
-                <p className="text-xs text-green-600 mt-1">↑ 12%</p>
+                <h3 className="text-2xl font-bold mt-1">{stats.total_usuarios}</h3>
               </div>
               <Users className="h-8 w-8 text-muted-foreground opacity-50" />
             </div>
@@ -57,8 +82,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-muted-foreground">Referencias</p>
-                <h3 className="text-2xl font-bold mt-1">15</h3>
-                <p className="text-xs text-red-600 mt-1">↓ 5%</p>
+                <h3 className="text-2xl font-bold mt-1">{stats.referencias_pendientes}</h3>
               </div>
               <FileText className="h-8 w-8 text-muted-foreground opacity-50" />
             </div>
@@ -68,8 +92,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-muted-foreground">Casos Críticos</p>
-                <h3 className="text-2xl font-bold mt-1">3</h3>
-                <p className="text-xs text-muted-foreground mt-1">Sin cambios</p>
+                <h3 className="text-2xl font-bold mt-1">{stats.casos_criticos}</h3>
               </div>
               <AlertCircle className="h-8 w-8 text-red-500 opacity-60" />
             </div>
@@ -79,8 +102,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-green-700 dark:text-green-400">Sistema</p>
-                <h3 className="text-2xl font-bold mt-1 text-green-700 dark:text-green-400">99.9%</h3>
-                <p className="text-xs text-green-600 dark:text-green-500 mt-1">↑ 0.1%</p>
+                <h3 className="text-2xl font-bold mt-1 text-green-700 dark:text-green-400">{stats.sistema_activo}</h3>
               </div>
               <Activity className="h-8 w-8 text-green-600 dark:text-green-500 opacity-70" />
             </div>
@@ -114,66 +136,95 @@ export default function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {MOCK_USUARIOS.slice(0, 5).map((usuario) => (
-                    <TableRow key={usuario.id} className="border-border">
-                      <TableCell className="font-medium">{usuario.nombre}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{usuario.email}</TableCell>
-                      <TableCell className="text-sm capitalize">{usuario.rol}</TableCell>
-                      <TableCell>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400">
-                          Activo
-                        </span>
+                  {usuariosRecientes.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                        No hay usuarios registrados aún
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    usuariosRecientes.map((usuario) => (
+                      <TableRow key={usuario.id} className="border-border">
+                        <TableCell className="font-medium">{usuario.name}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{usuario.email}</TableCell>
+                        <TableCell className="text-sm">
+                          <Badge variant={usuario.role === 'administrador' ? 'default' : 'secondary'}>
+                            {usuario.role === 'administrador' ? 'Admin' : usuario.role === 'medico' ? 'Médico' : 'IPS'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                              usuario.is_active 
+                                ? 'bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400'
+                                : 'bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400'
+                            }`}>
+                              {usuario.is_active ? 'Activo' : 'Inactivo'}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {formatearFecha(usuario.created_at)}
+                            </span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
 
-          {/* Actividad Rápida - 1 columna */}
+          {/* Actividad del Sistema - 1 columna */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Accesos Rápidos</CardTitle>
+              <CardTitle className="text-lg">Actividad del Sistema</CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">Resumen de actividad reciente</p>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start gap-2 h-10" asChild>
-                  <a href="/admin/usuarios">
-                    <Users className="h-4 w-4" />
-                    Gestión de Usuarios
-                  </a>
-                </Button>
-                <Button variant="outline" className="w-full justify-start gap-2 h-10" asChild>
-                  <a href="/admin/referencias">
-                    <FileText className="h-4 w-4" />
-                    Referencias
-                  </a>
-                </Button>
-                <Button variant="outline" className="w-full justify-start gap-2 h-10" asChild>
-                  <a href="/admin/supervision">
-                    <Activity className="h-4 w-4" />
-                    Supervisión
-                  </a>
-                </Button>
-                <Button variant="outline" className="w-full justify-start gap-2 h-10" asChild>
-                  <a href="/admin/reportes">
-                    <AlertCircle className="h-4 w-4" />
-                    Reportes
-                  </a>
-                </Button>
-                <Button variant="outline" className="w-full justify-start gap-2 h-10" asChild>
-                  <a href="/admin/configuracion">
-                    <Activity className="h-4 w-4" />
-                    Configuración
-                  </a>
-                </Button>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-950/30">
+                    <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">Nuevos Usuarios</p>
+                    <p className="text-xs text-muted-foreground">+{usuariosRecientes.length} registros hoy</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/30">
+                    <FileText className="h-5 w-5 text-blue-600 dark:text-blue-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">Referencias Activas</p>
+                    <p className="text-xs text-muted-foreground">{stats.referencias_pendientes} pendientes de revisión</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-950/30">
+                    <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">Casos Prioritarios</p>
+                    <p className="text-xs text-muted-foreground">{stats.casos_criticos} requieren atención</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/30">
+                    <Clock className="h-5 w-5 text-purple-600 dark:text-purple-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">Uptime del Sistema</p>
+                    <p className="text-xs text-muted-foreground">{stats.sistema_activo} últimas 24h</p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
-
-        <ModalCrearUsuario open={modalCrearOpen} onOpenChange={setModalCrearOpen} />
       </div>
     </AppLayoutInertia>
   );
