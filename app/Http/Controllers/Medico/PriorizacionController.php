@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Medico;
 
 use App\Http\Controllers\Controller;
-// COMENTADO: Migrado de Gemini a OpenRouter con DeepSeek 3.1
+// COMENTADO: Migrado de Gemini a OpenRouter con Qwen 2.5 72B Free
 // use App\Services\GeminiAIService;
 use App\Services\OpenRouterAIService;
 use App\Models\RegistroMedico;
@@ -13,7 +13,7 @@ use Inertia\Response;
 
 class PriorizacionController extends Controller
 {
-    // COMENTADO: Ahora usando OpenRouterAIService
+    // COMENTADO: Ahora usando OpenRouterAIService (con Qwen 2.5)
     // protected $geminiService;
     protected $aiService;
 
@@ -285,7 +285,7 @@ class PriorizacionController extends Controller
             
             $archivo->move(dirname($rutaCompleta), basename($rutaCompleta));
             
-            // Extraer texto usando OpenRouterAIService (con OCR automático para PDFs escaneados)
+            // Extraer texto usando OpenRouterAIService (con Qwen 2.5 + OCR automático para PDFs escaneados)
             \Log::info('USANDO OPENROUTER SERVICE PARA EXTRACCIÓN', [
                 'archivo' => basename($rutaCompleta),
                 'ruta' => $rutaCompleta,
@@ -330,7 +330,7 @@ class PriorizacionController extends Controller
                 unlink($rutaCompleta);
             }
             
-            // Análisis libre con IA (OpenRouter - DeepSeek 3.1)
+            // Análisis libre con IA (OpenRouter - Qwen 2.5 72B Free)
             $analisisCompleto = $this->aiService->analizarHistoriaClinicaLibre($textoExtraido);
             
             // Análisis de priorización con IA
@@ -440,7 +440,7 @@ class PriorizacionController extends Controller
             \Log::info('INICIANDO ANÁLISIS DE PRIORIZACIÓN CON IA');
             
             $prompt = $this->buildPromptPriorizacion($textoExtraido);
-            // Usando OpenRouter - DeepSeek 3.1 para análisis de priorización
+            // Usando OpenRouter - Qwen 2.5 72B Free para análisis de priorización
             $respuestaIA = $this->aiService->analizarConPromptEspecifico($prompt);
             
             // Parsear la respuesta de la IA para extraer la decisión y el razonamiento

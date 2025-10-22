@@ -22,7 +22,7 @@ class OpenRouterAIService
             throw new \Exception('API Key de OpenRouter no configurada. Por favor agregue OPENROUTER_API_KEY en el archivo .env');
         }
         
-        Log::info('OpenRouterAIService inicializado correctamente');
+        Log::info('OpenRouterAIService (usando OpenRouter con Qwen 2.5 72B Free) inicializado correctamente');
     }
 
     /**
@@ -242,7 +242,7 @@ class OpenRouterAIService
     }
 
     /**
-     * Analizar texto con OpenRouter (DeepSeek 3.1) y extraer datos del paciente
+     * Analizar texto con OpenRouter (Qwen 2.5 72B Free) y extraer datos del paciente
      */
     public function analyzePatientDocument(string $text): array
     {
@@ -283,7 +283,7 @@ class OpenRouterAIService
         try {
             $response = $this->callOpenRouterAPI($prompt);
             
-            Log::info('Análisis con prompt específico completado con OpenRouter');
+            Log::info('Análisis con prompt específico completado con Groq');
             
             return $response;
         } catch (\Exception $e) {
@@ -720,12 +720,12 @@ class OpenRouterAIService
     }
 
     /**
-     * Llamar a la API de OpenRouter con DeepSeek 3.1
+     * Llamar a la API de OpenRouter con Qwen 2.5 72B Free
      */
     private function callOpenRouterAPI(string $prompt): string
     {
         try {
-            Log::info("Llamando a OpenRouter API con DeepSeek 3.1");
+            Log::info("Llamando a OpenRouter API con Qwen 2.5 72B Free");
             
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
@@ -875,7 +875,7 @@ class OpenRouterAIService
     }
 
     /**
-     * Analizar priorización médica de un paciente usando OpenRouter con DeepSeek 3.1
+     * Analizar priorización médica de un paciente usando OpenRouter con Qwen 2.5 72B Free
      */
     public function analizarPriorizacionMedica(array $datosPaciente): array
     {

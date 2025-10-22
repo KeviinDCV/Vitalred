@@ -175,14 +175,15 @@ export default function AnalisisPriorizacion() {
             }
 
         } catch (error: unknown) {
-                        setAnalisis(null);
+            setAnalisis(null);
             
-            if (error.response?.status === 503 && error.response?.data?.error_type === 'api_overload') {
+            const axiosError = error as any;
+            if (axiosError.response?.status === 503 && axiosError.response?.data?.error_type === 'api_overload') {
                 setError('⚠️ El servicio de IA está temporalmente sobrecargado. Por favor intenta nuevamente en unos minutos. 🔄');
-            } else if (error.message.includes('🤖 La IA no pudo procesar')) {
-                setError(error.message);
+            } else if (axiosError.message?.includes('🤖 La IA no pudo procesar')) {
+                setError(axiosError.message);
             } else {
-                setError(`❌ Error en el procesamiento: ${error.response?.data?.message || error.message || 'Error desconocido al procesar el archivo'}\n\n💡 Sugerencia: Verifique los logs del backend para más detalles técnicos.`);
+                setError(`❌ Error en el procesamiento: ${axiosError.response?.data?.message || axiosError.message || 'Error desconocido al procesar el archivo'}\n\n💡 Sugerencia: Verifique los logs del backend para más detalles técnicos.`);
             }
         } finally {
             setCargando(false);
@@ -249,7 +250,8 @@ export default function AnalisisPriorizacion() {
                 }, 3000);
             }
         } catch (error: unknown) {
-                        setError(error.response?.data?.message || 'Error al guardar el análisis');
+            const axiosError = error as any;
+            setError(axiosError.response?.data?.message || 'Error al guardar el análisis');
         } finally {
             setGuardando(false);
         }
@@ -271,24 +273,22 @@ export default function AnalisisPriorizacion() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Análisis de Priorización IA - Prueba - Vital Red" />
 
-            <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => router.visit('/medico/consulta-pacientes')}
-                        >
-                            <ArrowLeft className="h-4 w-4 mr-2" />
-                            Volver
-                        </Button>
-                        <div>
-                            <h1 className="text-2xl font-bold">Análisis de Priorización IA</h1>
-                            <p className="text-muted-foreground">
-                                Vista temporal para evaluación del algoritmo de priorización
-                            </p>
-                        </div>
+            <div className="flex h-full flex-1 flex-col gap-4 p-6">
+                {/* Header Compacto */}
+                <div className="flex items-center gap-4">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.visit('/medico/consulta-pacientes')}
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Volver
+                    </Button>
+                    <div>
+                        <h1 className="text-2xl font-bold text-foreground">Análisis de Priorización IA</h1>
+                        <p className="text-sm text-muted-foreground">
+                            Sistema de evaluación automatizada con OCR + OpenRouter (Qwen 2.5)
+                        </p>
                     </div>
                 </div>
 
@@ -405,130 +405,132 @@ export default function AnalisisPriorizacion() {
                     </Card>
                 )}
 
-                {/* PASO 2: Resultado del Análisis (se muestra solo después de analizar) */}
+                {/* PASO 2: Resultado del Análisis - BENTO GRID COMPACTO */}
                 {analisis && (
-                    <div className="space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="flex items-center gap-2">
-                                        <CheckCircle className="h-5 w-5 text-green-600" />
-                                        ✅ Análisis IA Completado
-                                    </CardTitle>
-                                    <Button 
-                                        onClick={handleNuevoAnalisis}
-                                        variant="outline"
-                                        size="sm"
-                                    >
-                                        Analizar Nuevo Archivo
-                                    </Button>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">📄 Archivo procesado</p>
-                                        <p className="font-medium">{archivo?.name}</p>
+                    <div className="space-y-3">
+                        {/* Bento Grid - Header Info (MÁS COMPACTO) */}
+                        <div className="grid gap-2 md:grid-cols-4 lg:grid-cols-6">
+                            <Card className="lg:col-span-2">
+                                <CardContent className="p-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <CheckCircle className="h-4 w-4 text-green-600" />
+                                            <span className="text-sm font-semibold">Análisis OK</span>
+                                        </div>
+                                        <Button 
+                                            onClick={handleNuevoAnalisis}
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-7 text-xs"
+                                        >
+                                            Nuevo
+                                        </Button>
                                     </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">👤 Paciente extraído</p>
-                                        <p className="font-medium">{analisis.paciente.nombre} {analisis.paciente.apellidos}</p>
+                                    <div className="space-y-1">
+                                        <div>
+                                            <p className="text-xs text-muted-foreground">📄 {archivo?.name?.substring(0, 30)}...</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-muted-foreground">📊 {analisis.longitud_texto || 0} caracteres</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">🎂 Edad</p>
-                                        <p className="font-medium">{analisis.paciente.edad} años</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">👥 Tipo</p>
-                                        <Badge variant="outline">{analisis.paciente.tipo_paciente}</Badge>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                </CardContent>
+                            </Card>
+                            
+                            <Card className="lg:col-span-2">
+                                <CardContent className="p-3">
+                                    <p className="text-xs text-muted-foreground mb-1">👤 Paciente</p>
+                                    <p className="text-sm font-semibold leading-tight">{analisis.paciente.nombre}</p>
+                                    <p className="text-sm font-semibold leading-tight">{analisis.paciente.apellidos}</p>
+                                </CardContent>
+                            </Card>
+                            
+                            <Card>
+                                <CardContent className="p-3">
+                                    <p className="text-xs text-muted-foreground mb-1">🎂 Edad</p>
+                                    <p className="text-xl font-bold">{analisis.paciente.edad}</p>
+                                    <p className="text-xs text-muted-foreground">años</p>
+                                </CardContent>
+                            </Card>
+                            
+                            <Card>
+                                <CardContent className="p-3">
+                                    <p className="text-xs text-muted-foreground mb-1">👥 Tipo</p>
+                                    <Badge variant="outline" className="text-xs">{analisis.paciente.tipo_paciente}</Badge>
+                                </CardContent>
+                            </Card>
+                        </div>
 
+                        {/* Texto Extraído - Colapsable y Compacto */}
                         {analisis.texto_extraido && (
                             <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <FileText className="h-5 w-5" />
-                                        📋 Texto Extraído del Documento
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="text-base flex items-center gap-2">
+                                        <FileText className="h-4 w-4" />
+                                        📋 Texto Extraído ({(analisis.longitud_texto || 0).toLocaleString()} chars)
                                     </CardTitle>
-                                    <CardDescription>
-                                        Texto completo extraído del archivo ({analisis.longitud_texto || 0} caracteres)
-                                    </CardDescription>
                                 </CardHeader>
-                                <CardContent>
-                                    <div className="bg-muted/30 border rounded-lg p-4 max-h-96 overflow-y-auto">
-                                        <pre className="text-sm whitespace-pre-wrap font-mono text-muted-foreground leading-relaxed">
+                                <CardContent className="pt-0">
+                                    <div className="bg-muted/30 border rounded-lg p-3 max-h-64 overflow-y-auto">
+                                        <pre className="text-xs whitespace-pre-wrap font-mono text-muted-foreground leading-relaxed">
                                             {analisis.texto_extraido}
                                         </pre>
-                                    </div>
-                                    <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
-                                        <span>📊 Longitud: {analisis.longitud_texto || 0} caracteres</span>
-                                        <span>📄 Páginas: Todas las páginas procesadas</span>
-                                        <span>✅ Estado: Extracción completa</span>
                                     </div>
                                 </CardContent>
                             </Card>
                         )}
 
+                        {/* Análisis de Priorización - Compacto */}
                         {analisis.razonamiento_priorizacion && (
                             <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Brain className="h-5 w-5" />
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="text-base flex items-center gap-2">
+                                        <Brain className="h-4 w-4" />
                                         🎯 Análisis de Priorización Médica
                                     </CardTitle>
-                                    <CardDescription>
-                                        Análisis basado en los 8 criterios específicos de priorización
-                                    </CardDescription>
                                 </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
+                                <CardContent className="pt-0">
+                                    <div className="space-y-3">
                                         <div className="text-center">
-                                            <div className={`inline-flex items-center gap-3 px-8 py-4 rounded-full text-xl font-bold border-2 ${
+                                            <div className={`inline-flex items-center gap-2 px-6 py-3 rounded-full text-lg font-bold border-2 ${
                                                 analisis.razonamiento_priorizacion.color === 'verde' 
                                                     ? 'bg-green-100 text-green-800 border-green-300' 
                                                     : 'bg-red-100 text-red-800 border-red-300'
                                             }`}>
                                                 {analisis.razonamiento_priorizacion.color === 'verde' ? (
-                                                    <CheckCircle className="h-8 w-8" />
+                                                    <CheckCircle className="h-6 w-6" />
                                                 ) : (
-                                                    <XCircle className="h-8 w-8" />
+                                                    <XCircle className="h-6 w-6" />
                                                 )}
                                                 {analisis.razonamiento_priorizacion.prioriza ? '🟢 PRIORIZA' : '🔴 NO PRIORIZA'}
                                             </div>
                                         </div>
 
-                                        <div className="bg-muted/50 p-4 rounded-lg">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <span className="font-medium">🏥 Decisión Clínica:</span>
-                                                <span className={`font-bold text-lg ${analisis.razonamiento_priorizacion.prioriza ? 'text-green-700' : 'text-red-700'}`}>
+                                        <div className="bg-muted/50 p-3 rounded-lg">
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className="text-sm font-medium">🏥 Decisión Clínica:</span>
+                                                <span className={`font-bold text-base ${analisis.razonamiento_priorizacion.prioriza ? 'text-green-700' : 'text-red-700'}`}>
                                                     {analisis.razonamiento_priorizacion.prioriza ? 'PRIORIZAR' : 'NO PRIORIZAR'}
                                                 </span>
                                             </div>
-                                            <div className="text-sm text-muted-foreground">
-                                                <p>• Análisis basado en criterios oficiales de priorización médica</p>
-                                                <p>• Evaluación integral considerando factores de riesgo y urgencia clínica</p>
-                                            </div>
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                Análisis basado en criterios oficiales de priorización médica
+                                            </p>
                                         </div>
 
-                                        <div className="bg-muted/30 border rounded-lg p-6">
-                                            <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                        <div className="bg-muted/30 border rounded-lg p-3">
+                                            <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
                                                 <AlertTriangle className="h-4 w-4" />
-                                                Razonamiento Detallado de la IA
+                                                Razonamiento IA
                                             </h4>
-                                            <div className="text-sm leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto">
+                                            <div className="text-xs leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto">
                                                 {analisis.razonamiento_priorizacion.razonamiento}
                                             </div>
-                                            <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">
-                                                📝 Caracteres: {analisis.razonamiento_priorizacion.razonamiento?.length || 0}
-                                            </div>
                                         </div>
 
-                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                            <h5 className="font-medium text-blue-800 mb-2">🔍 Criterios de Evaluación Aplicados:</h5>
-                                            <div className="text-sm text-blue-700 space-y-1">
+                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                            <h5 className="text-sm font-medium text-blue-800 mb-1">🔍 Criterios Aplicados:</h5>
+                                            <div className="text-xs text-blue-700 space-y-0.5">
                                                 <p>✓ Datos Generales (edad, institución remitente)</p>
                                                 <p>✓ Datos Clínicos (tipo paciente, fecha ingreso)</p>
                                                 <p>✓ Signos Vitales (FC, FR, TA, Temperatura, SatO2, Glasgow)</p>
