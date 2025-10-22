@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AppLayoutInertia from '@/layouts/app-layout-inertia';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { Search, Users, FileText, Calendar, Filter, Eye, ChevronLeft, ChevronRight, Download, Brain } from 'lucide-react';
+import { Search, Users, FileText, Eye, ChevronLeft, ChevronRight, Download, Brain } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 interface RegistroMedico {
@@ -26,6 +26,7 @@ interface RegistroMedico {
     estado: string;
     tipo_paciente: string;
     clasificacion_triage: string;
+    prioriza_ia?: boolean; // Resultado de análisis IA
     historia_clinica_path?: string;
     created_at: string;
     updated_at: string;
@@ -46,6 +47,11 @@ interface Props {
     filters: {
         search?: string;
     };
+    stats?: {
+        total: number;
+        priorizados: number;
+        no_priorizados: number;
+    };
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -55,9 +61,21 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function ConsultaPacientes({ registros, filters, auth }: Props & { auth: { user: { nombre: string; role: string } } }) {
+export default function ConsultaPacientes({ registros, filters, stats, auth }: Props & { auth: { user: { nombre: string; role: string } } }) {
+    // Mapear nombre a name para el layout
+    const userForLayout = {
+        name: auth.user.nombre,
+        role: auth.user.role
+    };
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [isSearching, setIsSearching] = useState(false);
+
+    // Calcular estadísticas si no vienen del backend
+    const estadisticas = stats || {
+        total: registros.total || 0,
+        priorizados: registros.data.filter(r => r.prioriza_ia === true).length,
+        no_priorizados: registros.data.filter(r => r.prioriza_ia === false).length,
+    };
 
     const handleSearch = (term: string) => {
         setIsSearching(true);
@@ -77,26 +95,22 @@ export default function ConsultaPacientes({ registros, filters, auth }: Props & 
         );
     };
 
-    const getPrioridadBadge = (triage: string) => {
-        const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-            'triage_1': 'destructive',
-            'triage_2': 'destructive',
-            'triage_3': 'default',
-            'triage_4': 'secondary',
-            'triage_5': 'outline'
-        };
+    const getPrioridadIABadge = (priorizaIA?: boolean) => {
+        if (priorizaIA === undefined || priorizaIA === null) {
+            return (
+                <Badge variant="outline" className="bg-gray-50">
+                    Pendiente IA
+                </Badge>
+            );
+        }
 
-        const labels: Record<string, string> = {
-            'triage_1': 'Crítico',
-            'triage_2': 'Alto',
-            'triage_3': 'Medio',
-            'triage_4': 'Bajo',
-            'triage_5': 'Mínimo'
-        };
-
-        return (
-            <Badge variant={variants[triage] || 'outline'}>
-                {labels[triage] || 'Sin clasificar'}
+        return priorizaIA ? (
+            <Badge variant="destructive" className="bg-red-600">
+                ✓ Prioriza
+            </Badge>
+        ) : (
+            <Badge variant="secondary" className="bg-gray-200 text-gray-700">
+                ✗ No Prioriza
             </Badge>
         );
     };
@@ -125,7 +139,7 @@ export default function ConsultaPacientes({ registros, filters, auth }: Props & 
     };
 
     return (
-        <AppLayoutInertia breadcrumbs={breadcrumbs} user={auth.user}>
+        <AppLayoutInertia breadcrumbs={breadcrumbs} user={userForLayout}>
             <Head title="Consulta Pacientes - Vital Red" />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
@@ -152,18 +166,49 @@ export default function ConsultaPacientes({ registros, filters, auth }: Props & 
                     </div>
                 </div>
 
-                {/* Buscador principal */}
+                {/* Bento Grid - Estadísticas */}
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">Total Pacientes</CardTitle>
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{estadisticas.total}</div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">Priorizados</CardTitle>
+                            <Brain className="h-4 w-4 text-green-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-green-600">{estadisticas.priorizados}</div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">No Priorizados</CardTitle>
+                            <FileText className="h-4 w-4 text-red-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-red-600">{estadisticas.no_priorizados}</div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Tabla de registros con buscador integrado */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Search className="h-5 w-5" />
-                            Buscar Pacientes
-                        </CardTitle>
+                        <CardTitle>Registros Médicos</CardTitle>
                         <CardDescription>
-                            Busca pacientes por nombre, apellidos, número de identificación o diagnóstico
+                            Busca y consulta los registros médicos de pacientes
                         </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="space-y-4">
+                        {/* Buscador integrado */}
                         <div className="flex gap-4">
                             <div className="flex-1">
                                 <div className="relative">
@@ -204,18 +249,8 @@ export default function ConsultaPacientes({ registros, filters, auth }: Props & 
                                 </Button>
                             )}
                         </div>
-                    </CardContent>
-                </Card>
 
-                {/* Tabla de registros */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Registros Médicos</CardTitle>
-                        <CardDescription>
-                            Lista de todos los registros médicos de pacientes
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
+                        {/* Tabla */}
                         {registros.data.length > 0 ? (
                             <div className="space-y-4">
                                 <div className="rounded-md border">
@@ -229,7 +264,6 @@ export default function ConsultaPacientes({ registros, filters, auth }: Props & 
                                                 <TableHead>Edad</TableHead>
                                                 <TableHead>Tipo de Paciente</TableHead>
                                                 <TableHead>Prioridad</TableHead>
-                                                <TableHead>Análisis IA</TableHead>
                                                 <TableHead>Descargar Historia</TableHead>
                                             </TableRow>
                                         </TableHeader>
@@ -272,18 +306,7 @@ export default function ConsultaPacientes({ registros, filters, auth }: Props & 
                                                         </Badge>
                                                     </TableCell>
                                                     <TableCell>
-                                                        {getPrioridadBadge(registro.clasificacion_triage)}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() => router.visit(`/medico/priorizacion/analisis/${registro.id}`)}
-                                                            className="border-green-200 text-green-700 hover:bg-green-50"
-                                                            title="Analizar con IA"
-                                                        >
-                                                            <Brain className="h-4 w-4" />
-                                                        </Button>
+                                                        {getPrioridadIABadge(registro.prioriza_ia)}
                                                     </TableCell>
                                                     <TableCell>
                                                         <Button

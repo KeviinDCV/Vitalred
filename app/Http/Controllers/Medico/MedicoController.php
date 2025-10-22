@@ -99,6 +99,33 @@ class MedicoController extends Controller
             'paciente' => $registro->nombre . ' ' . $registro->apellidos
         ]);
 
+        // Analizar con IA si hay historia clínica
+        if ($historiaClinicaPath) {
+            try {
+                \Log::info('Iniciando análisis de priorización con IA para registro ' . $registro->id);
+                
+                $aiService = app(\App\Services\OpenRouterAIService::class);
+                
+                // Extraer texto de la historia clínica
+                $textoHistoria = $aiService->extractTextFromFile($historiaClinicaPath);
+                
+                // Analizar priorización
+                $analisisPriorizacion = $aiService->analizarPriorizacion($textoHistoria);
+                
+                // Guardar resultado en la base de datos
+                $registro->prioriza_ia = $analisisPriorizacion['prioriza'] ?? null;
+                $registro->save();
+                
+                \Log::info('Análisis de priorización completado', [
+                    'registro_id' => $registro->id,
+                    'prioriza' => $registro->prioriza_ia
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Error analizando priorización para registro ' . $registro->id . ': ' . $e->getMessage());
+                // No fallar el guardado si el análisis falla
+            }
+        }
+
         // Redirigir a consulta-pacientes para ver el registro guardado
         return redirect()->route('medico.consulta-pacientes')->with('success', 'Registro médico guardado exitosamente.');
     }
@@ -121,13 +148,23 @@ class MedicoController extends Controller
                 });
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(10)
+            ->paginate(7)
             ->withQueryString(); // Mantener parámetros de búsqueda en la paginación
+
+        // Calcular estadísticas
+        $totalRegistros = RegistroMedico::where('user_id', auth()->id())->count();
+        $priorizados = RegistroMedico::where('user_id', auth()->id())->where('prioriza_ia', true)->count();
+        $noPriorizados = RegistroMedico::where('user_id', auth()->id())->where('prioriza_ia', false)->count();
 
         return Inertia::render('medico/consulta-pacientes', [
             'registros' => $registros,
             'filters' => [
                 'search' => $search
+            ],
+            'stats' => [
+                'total' => $totalRegistros,
+                'priorizados' => $priorizados,
+                'no_priorizados' => $noPriorizados,
             ]
         ]);
     }
@@ -144,7 +181,7 @@ class MedicoController extends Controller
                 return $query->buscarPaciente($termino);
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(7);
 
         return response()->json($registros);
     }

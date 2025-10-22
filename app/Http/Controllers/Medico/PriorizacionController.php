@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Medico;
 
 use App\Http\Controllers\Controller;
-// COMENTADO: Migrado de Gemini a OpenRouter con Qwen 2.5 72B Free
+// COMENTADO: Migrado de Gemini a GROQ con GPT-OSS 120B
 // use App\Services\GeminiAIService;
 use App\Services\OpenRouterAIService;
 use App\Models\RegistroMedico;
@@ -13,7 +13,7 @@ use Inertia\Response;
 
 class PriorizacionController extends Controller
 {
-    // COMENTADO: Ahora usando OpenRouterAIService (con Qwen 2.5)
+    // COMENTADO: Ahora usando OpenRouterAIService (con GROQ GPT-OSS 120B)
     // protected $geminiService;
     protected $aiService;
 
@@ -285,7 +285,7 @@ class PriorizacionController extends Controller
             
             $archivo->move(dirname($rutaCompleta), basename($rutaCompleta));
             
-            // Extraer texto usando OpenRouterAIService (con Qwen 2.5 + OCR automático para PDFs escaneados)
+            // Extraer texto usando OpenRouterAIService (con GROQ GPT-OSS 120B + OCR automático para PDFs escaneados)
             \Log::info('USANDO OPENROUTER SERVICE PARA EXTRACCIÓN', [
                 'archivo' => basename($rutaCompleta),
                 'ruta' => $rutaCompleta,
@@ -330,7 +330,7 @@ class PriorizacionController extends Controller
                 unlink($rutaCompleta);
             }
             
-            // Análisis libre con IA (OpenRouter - Qwen 2.5 72B Free)
+            // Análisis libre con IA (GROQ - GPT-OSS 120B)
             $analisisCompleto = $this->aiService->analizarHistoriaClinicaLibre($textoExtraido);
             
             // Análisis de priorización con IA
@@ -440,7 +440,7 @@ class PriorizacionController extends Controller
             \Log::info('INICIANDO ANÁLISIS DE PRIORIZACIÓN CON IA');
             
             $prompt = $this->buildPromptPriorizacion($textoExtraido);
-            // Usando OpenRouter - Qwen 2.5 72B Free para análisis de priorización
+            // Usando GROQ - GPT-OSS 120B para análisis de priorización
             $respuestaIA = $this->aiService->analizarConPromptEspecifico($prompt);
             
             // Parsear la respuesta de la IA para extraer la decisión y el razonamiento
@@ -917,8 +917,8 @@ $textoCompleto
                 unlink($rutaCompleta);
             }
         
-        // PASO 2: Analizar con OpenRouter (DeepSeek 3.1) - CON FALLBACK SOCIODEMOGRÁFICO
-        \Log::info('ANALIZANDO CON OPENROUTER (DeepSeek 3.1) + FALLBACK');
+        // PASO 2: Analizar con GROQ (GPT-OSS 120B) - CON FALLBACK SOCIODEMOGRÁFICO
+        \Log::info('ANALIZANDO CON GROQ (GPT-OSS 120B) + FALLBACK');
         
         try {
             // ✅ USAR EL MÉTODO CORRECTO CON FALLBACK

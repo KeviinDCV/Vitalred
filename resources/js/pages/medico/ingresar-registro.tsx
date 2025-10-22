@@ -2674,10 +2674,8 @@ export default function IngresarRegistro() {
                     setData('enfermedad_actual', extractedData.enfermedad_actual);
                     console.log('   📝 Enfermedad actual llenada:', extractedData.enfermedad_actual);
                 }
-                if (extractedData.antecedentes) {
-                    setData('antecedentes', extractedData.antecedentes);
-                    console.log('   📋 Antecedentes llenados:', extractedData.antecedentes);
-                }
+                // ANTECEDENTES: El médico debe revisarlo manualmente de la HC
+                console.log('   ⚠️ Antecedentes NO se auto-llena (debe revisarse manualmente)');
 
                 toast.success("🤖 ¡Datos extraídos automáticamente!", {
                     description: "Los campos sociodemográficos Y clínicos se han llenado con IA. Revisa los datos y navega por los pasos para validar la información.",

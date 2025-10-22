@@ -10,19 +10,19 @@ use Smalot\PdfParser\Parser;
 class OpenRouterAIService
 {
     private string $apiKey;
-    private string $baseUrl = 'https://openrouter.ai/api/v1/chat/completions';
-    private string $model = 'qwen/qwen-2.5-72b-instruct:free';
+    private string $baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
+    private string $model = 'openai/gpt-oss-120b'; // GPT-OSS 120B: 120B params, 131K context, 500 T/sec
 
     public function __construct()
     {
-        $this->apiKey = env('OPENROUTER_API_KEY', '');
+        $this->apiKey = env('GROQ_API_KEY', '');
         
         if (empty($this->apiKey)) {
-            Log::error('OpenRouter API Key no configurada en .env');
-            throw new \Exception('API Key de OpenRouter no configurada. Por favor agregue OPENROUTER_API_KEY en el archivo .env');
+            Log::error('GROQ API Key no configurada en .env');
+            throw new \Exception('API Key de GROQ no configurada. Por favor agregue GROQ_API_KEY en el archivo .env');
         }
         
-        Log::info('OpenRouterAIService (usando OpenRouter con Qwen 2.5 72B Free) inicializado correctamente');
+        Log::info('🚀 GroqAIService (usando GROQ con GPT-OSS 120B) inicializado correctamente');
     }
 
     /**
@@ -727,17 +727,15 @@ class OpenRouterAIService
     }
 
     /**
-     * Llamar a la API de OpenRouter con Qwen 2.5 72B Free
+     * Llamar a la API de GROQ con GPT-OSS 120B
      */
     private function callOpenRouterAPI(string $prompt): string
     {
         try {
-            Log::info("Llamando a OpenRouter API con Qwen 2.5 72B Free");
+            Log::info("🚀 Llamando a GROQ API con GPT-OSS 120B");
             
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
-                'HTTP-Referer' => config('app.url', 'http://localhost'),
-                'X-Title' => 'Vital-Red Medical System',
                 'Content-Type' => 'application/json',
             ])->timeout(60)->post($this->baseUrl, [
                 'model' => $this->model,
@@ -746,7 +744,9 @@ class OpenRouterAIService
                         'role' => 'user',
                         'content' => $prompt
                     ]
-                ]
+                ],
+                'temperature' => 0.5,
+                'max_tokens' => 4096,
             ]);
 
             if (!$response->successful()) {
@@ -754,7 +754,7 @@ class OpenRouterAIService
                 $statusCode = $response->status();
                 
                 // Logging detallado para diagnóstico
-                Log::error("❌ Error en llamada a OpenRouter API", [
+                Log::error("❌ Error en llamada a GROQ API", [
                     'status_code' => $statusCode,
                     'error_body' => $errorBody,
                     'api_key_presente' => !empty($this->apiKey),
@@ -765,28 +765,28 @@ class OpenRouterAIService
                 
                 // Mensaje específico para error 401
                 if ($statusCode === 401) {
-                    throw new \Exception("Error de autenticación con OpenRouter (401): Verifica tu API key. Detalles: " . $errorBody);
+                    throw new \Exception("Error de autenticación con GROQ (401): Verifica tu API key. Detalles: " . $errorBody);
                 }
                 
-                throw new \Exception("Error en la API de OpenRouter: " . $statusCode . " - " . $errorBody);
+                throw new \Exception("Error en la API de GROQ: " . $statusCode . " - " . $errorBody);
             }
 
             $data = $response->json();
             
             if (!isset($data['choices'][0]['message']['content'])) {
-                throw new \Exception("Respuesta inválida de la API de OpenRouter");
+                throw new \Exception("Respuesta inválida de la API de GROQ");
             }
 
             $content = $data['choices'][0]['message']['content'];
-            Log::info("Respuesta recibida de OpenRouter, longitud: " . strlen($content));
+            Log::info("✅ Respuesta recibida de GROQ, longitud: " . strlen($content));
         
             // 🔍 DEBUG: Mostrar respuesta RAW de la IA para depuración
-            Log::info("🔍 RESPUESTA RAW DE LA IA:", ['content' => $content]);
+            Log::info("🔍 RESPUESTA RAW DE LA IA:", ['content' => substr($content, 0, 500) . '...']);
 
             return $content;
         } catch (\Exception $e) {
-            Log::error("Error llamando a OpenRouter API: " . $e->getMessage());
-            throw new \Exception("Error al comunicarse con OpenRouter: " . $e->getMessage());
+            Log::error("Error llamando a GROQ API: " . $e->getMessage());
+            throw new \Exception("Error al comunicarse con GROQ: " . $e->getMessage());
         }
     }
 
@@ -1092,5 +1092,128 @@ class OpenRouterAIService
             Log::error("❌ FALLBACK: Error formateando fecha de ingreso: {$fecha} - " . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * Analizar priorización de un texto de historia clínica
+     * Devuelve si el paciente debe ser priorizado o no
+     */
+    public function analizarPriorizacion(string $textoHistoria): array
+    {
+        try {
+            Log::info('🚀 Analizando priorización de historia clínica con GROQ GPT-OSS 120B');
+            
+            $prompt = <<<PROMPT
+Eres un experto médico en priorización de pacientes. Analiza la siguiente historia clínica y determina si el paciente debe ser PRIORIZADO para atención urgente.
+
+CRITERIOS DE PRIORIZACIÓN (el paciente debe cumplir AL MENOS UNO):
+1. **Edad vulnerable**: <5 años o >70 años
+2. **Tipo de paciente crítico**: Gestante, neonato, menor con patología grave
+3. **Signos vitales críticos**: 
+   - FC <50 o >120 lpm
+   - FR <12 o >25 rpm
+   - Temp >38.5°C o <35°C
+   - TA sistólica <90 o >180
+   - SatO2 <92%
+4. **Diagnósticos graves**: Sepsis, shock, trauma grave, dolor torácico, ACV, hemorragia, etc.
+5. **Servicios críticos**: UCI, urgencias vitales, reanimación
+6. **Triage alto**: Triage I (rojo) o II (naranja)
+
+HISTORIA CLÍNICA:
+$textoHistoria
+
+RESPONDE ÚNICAMENTE EN FORMATO JSON:
+{
+  "prioriza": true o false,
+  "razonamiento": "Breve explicación de por qué sí o no (máximo 2 líneas)",
+  "factores_clave": ["factor1", "factor2", "factor3"]
+}
+
+IMPORTANTE: 
+- Si el paciente cumple AL MENOS UNO de los criterios, prioriza = true
+- Si NO cumple ninguno, prioriza = false
+- Sé estricto pero preciso
+PROMPT;
+
+            $response = $this->callOpenRouterAPI($prompt);
+            
+            // Extraer JSON de la respuesta
+            $jsonStart = strpos($response, '{');
+            $jsonEnd = strrpos($response, '}');
+            
+            if ($jsonStart !== false && $jsonEnd !== false) {
+                $jsonString = substr($response, $jsonStart, $jsonEnd - $jsonStart + 1);
+                $resultado = json_decode($jsonString, true);
+                
+                if (json_last_error() === JSON_ERROR_NONE && isset($resultado['prioriza'])) {
+                    Log::info('Análisis de priorización completado', [
+                        'prioriza' => $resultado['prioriza'],
+                        'razonamiento' => $resultado['razonamiento'] ?? 'No disponible'
+                    ]);
+                    
+                    return [
+                        'prioriza' => (bool)$resultado['prioriza'],
+                        'razonamiento' => $resultado['razonamiento'] ?? 'Análisis completado',
+                        'factores_clave' => $resultado['factores_clave'] ?? []
+                    ];
+                }
+            }
+            
+            // Fallback: analizar keywords críticos
+            Log::warning('No se pudo parsear respuesta de IA, usando análisis de keywords');
+            return $this->analizarPriorizacionFallback($textoHistoria);
+            
+        } catch (\Exception $e) {
+            Log::error('Error en análisis de priorización: ' . $e->getMessage());
+            return $this->analizarPriorizacionFallback($textoHistoria);
+        }
+    }
+
+    /**
+     * Análisis de priorización fallback basado en keywords
+     */
+    private function analizarPriorizacionFallback(string $texto): array
+    {
+        $texto = strtolower($texto);
+        $prioriza = false;
+        $factores = [];
+        
+        // Verificar keywords críticos
+        if (preg_match('/triage\s*[:\s]*(1|i|rojo)/i', $texto)) {
+            $prioriza = true;
+            $factores[] = 'Triage I - Crítico';
+        }
+        
+        if (preg_match('/(sepsis|shock|hemorragia|trauma\s+grave|infarto|acv|stroke)/i', $texto)) {
+            $prioriza = true;
+            $factores[] = 'Diagnóstico crítico detectado';
+        }
+        
+        if (preg_match('/(uci|unidad\s+de\s+cuidados\s+intensivos|reanimacion)/i', $texto)) {
+            $prioriza = true;
+            $factores[] = 'Servicio crítico (UCI)';
+        }
+        
+        if (preg_match('/(gestante|embaraz)/i', $texto)) {
+            $prioriza = true;
+            $factores[] = 'Paciente gestante';
+        }
+        
+        // Verificar edad
+        if (preg_match('/edad[:\s]*(\d+)/i', $texto, $matches)) {
+            $edad = (int)$matches[1];
+            if ($edad < 5 || $edad > 70) {
+                $prioriza = true;
+                $factores[] = 'Edad vulnerable: ' . $edad . ' años';
+            }
+        }
+        
+        return [
+            'prioriza' => $prioriza,
+            'razonamiento' => $prioriza 
+                ? 'Análisis automático detectó criterios de priorización' 
+                : 'No se detectaron criterios críticos de priorización',
+            'factores_clave' => $factores
+        ];
     }
 }

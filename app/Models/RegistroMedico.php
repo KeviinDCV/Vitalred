@@ -61,6 +61,7 @@ class RegistroMedico extends Model
         // Campos de control
         'estado',
         'fecha_envio',
+        'prioriza_ia',
     ];
 
     protected $casts = [
@@ -76,6 +77,7 @@ class RegistroMedico extends Model
         'tension_diastolica' => 'integer',
         'saturacion_oxigeno' => 'integer',
         'glucometria' => 'integer',
+        'prioriza_ia' => 'boolean',
     ];
 
     /**
