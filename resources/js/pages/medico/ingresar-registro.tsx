@@ -1854,7 +1854,7 @@ export default function IngresarRegistro() {
         const aseguradorUpper = aseguradorIA?.toUpperCase().trim();
         const mapped = mappings[aseguradorUpper];
         console.log(`Mapeando asegurador: "${aseguradorIA}" -> "${mapped}"`);
-        return mapped || '';
+        return mapped || aseguradorIA?.toLowerCase() || ''; // Si no hay mapeo, usar el valor directo en minúsculas
     };
 
     // Función para inferir departamento basado en ciudad conocida
@@ -2466,10 +2466,10 @@ export default function IngresarRegistro() {
 
         try {
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append('historia_clinica', file);
 
             // Usar axios para manejar la respuesta JSON correctamente
-            const response = await axios.post(route('medico.ai.extract-patient-data'), formData, {
+            const response = await axios.post(route('medico.ai.extraer-datos-documento'), formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
@@ -4031,21 +4031,29 @@ export default function IngresarRegistro() {
                                                         if (validateStep4()) {
                                                             console.log('Datos a enviar:', data);
 
-                                                            // Enviar formulario al servidor
-                                                            post(route('medico.ingresar-registro.store'), {
+                                                            // Preparar datos transformados
+                                                            const transformedData = {
+                                                                ...data,
+                                                                // Convertir array de especialidades a string
+                                                                especialidad_solicitada: Array.isArray(data.especialidad_solicitada) 
+                                                                    ? data.especialidad_solicitada.join(', ') 
+                                                                    : data.especialidad_solicitada,
+                                                                // Asegurar que glucometria sea un número válido o null
+                                                                glucometria: data.glucometria || null
+                                                            };
+
+                                                            // Enviar formulario al servidor con datos transformados
+                                                            router.post(route('medico.ingresar-registro.store'), transformedData, {
                                                                 onStart: () => {
                                                                     console.log('Iniciando envío...');
                                                                 },
-                                                                onSuccess: (response) => {
-                                                                    console.log('Éxito:', response);
+                                                                onSuccess: () => {
                                                                     toast.success("¡Registro médico guardado exitosamente!", {
-                                                                        description: "Los datos del paciente han sido registrados en el sistema.",
-                                                                        duration: 4000,
+                                                                        description: "El paciente ha sido registrado. Redirigiendo a consulta de pacientes...",
+                                                                        duration: 3000,
                                                                     });
-                                                                    // Limpiar formulario después del éxito
-                                                                    reset();
-                                                                    setCurrentStep(1);
-                                                                    setValidationErrors([]);
+                                                                    // El controlador ya hace redirect a consulta-pacientes
+                                                                    // No necesitamos hacer nada más aquí
                                                                 },
                                                                 onError: (errors) => {
                                                                     console.error('Errores de validación:', errors);

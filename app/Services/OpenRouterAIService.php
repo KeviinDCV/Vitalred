@@ -376,11 +376,17 @@ class OpenRouterAIService
         $prompt .= "- Si solo tienes ciudad, infiere el departamento más probable (ej: Medellín = Antioquia, Cali = Valle del Cauca)\n";
         $prompt .= "- Si no encuentras datos geográficos explícitos, usa null\n\n";
         $prompt .= "⚠️ CRÍTICO - EXTRACCIÓN DEL ASEGURADOR (OBLIGATORIO):\n";
-        $prompt .= "- BUSCA exactamente estas palabras: 'Entidad:', 'EPS', 'NUEVA EMPRESA PROMOTORA', 'Régimen:', 'DATOS DE AFILIACIÓN'\n";
-        $prompt .= "- Si encuentras 'NUEVA EMPRESA PROMOTORA DE SALUD' → usa 'Nueva EPS'\n";
-        $prompt .= "- Si encuentras 'Entidad:' seguido de cualquier nombre → usa ese nombre\n";
-        $prompt .= "- Variaciones: 'Nueva EPS', 'NUEVA EPS', 'Nueva Empresa Promotora'\n";
-        $prompt .= "- OBLIGATORIO: SIEMPRE incluye el campo 'asegurador' en el JSON, aunque sea null\n\n";
+        $prompt .= "- BUSCA exactamente estas palabras: 'Entidad:', 'EPS', 'NUEVA EMPRESA PROMOTORA', 'Régimen:', 'DATOS DE AFILIACIÓN', 'Contrato:', 'Aseguradora'\n";
+        $prompt .= "- El campo 'asegurador' debe ser UNA de estas categorías:\n";
+        $prompt .= "  * 'eps' = Si menciona EPS, Entidad Promotora de Salud, Régimen Contributivo, Régimen Subsidiado\n";
+        $prompt .= "  * 'ars' = Si menciona ARL, ARS, Riesgos Laborales\n";
+        $prompt .= "  * 'soat' = Si menciona SOAT, Seguro Obligatorio, Accidentes de Tránsito\n";
+        $prompt .= "  * 'particular' = Si menciona Particular, Privado, Sin Asegurador\n";
+        $prompt .= "  * 'secretaria_salud_departamental' = Si menciona Secretaría de Salud Departamental\n";
+        $prompt .= "  * 'secretaria_salud_distrital' = Si menciona Secretaría de Salud Distrital\n";
+        $prompt .= "- Si encuentras nombres como SURA, NUEVA EPS, COOSALUD, SANITAS → usa 'eps'\n";
+        $prompt .= "- Si encuentras COLMENA, MAPFRE, POSITIVA → usa 'ars'\n";
+        $prompt .= "- OBLIGATORIO: SIEMPRE incluye el campo 'asegurador' en el JSON con la categoría, aunque sea null\n\n";
 
         $prompt .= "⚠️ CRÍTICO - EXTRACCIÓN GEOGRÁFICA (OBLIGATORIO):\n";
         $prompt .= "- BUSCA exactamente: 'Lugar Residencia:', 'POPAYAN', 'Dirección:', 'Residencia:', 'Domicilio:'\n";
@@ -405,7 +411,8 @@ class OpenRouterAIService
         $prompt .= "- OBLIGATORIO: SIEMPRE incluye el campo 'fecha_ingreso' en el JSON, aunque sea null\n\n";
         $prompt .= "Responde ÚNICAMENTE con un JSON válido (sin markdown, sin explicaciones adicionales) con esta estructura:\n";
         $prompt .= "{\n";
-        $prompt .= '  "asegurador": "nombre EPS/asegurador",' . "\n";
+        $prompt .= '  "asegurador": "eps/ars/soat/particular/secretaria_salud_departamental/secretaria_salud_distrital - categoría del asegurador",' . "\n";
+        $prompt .= '  "asegurador_nombre": "Nombre específico de la EPS/ARS si lo encuentras (ej: COOSALUD, NUEVA EPS, SURA) o null",' . "\n";
         $prompt .= '  "departamento": "departamento",' . "\n";
         $prompt .= '  "ciudad": "ciudad",' . "\n";
         $prompt .= '  "institucion_remitente": "nombre institución",' . "\n";

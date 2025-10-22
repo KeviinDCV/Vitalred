@@ -61,7 +61,7 @@ class MedicoController extends Controller
             'tension_sistolica' => 'required|integer|min:50|max:300',
             'tension_diastolica' => 'required|integer|min:30|max:200',
             'saturacion_oxigeno' => 'required|integer|min:50|max:100',
-            'glucometria' => 'nullable|integer|min:30|max:600',
+            'glucometria' => 'nullable|integer|min:0|max:600',
             'escala_glasgow' => 'required|string',
             'examen_fisico' => 'required|string',
             'tratamiento' => 'required|string',
@@ -94,7 +94,13 @@ class MedicoController extends Controller
             ...$validatedData
         ]);
 
-        return redirect()->route('medico.ingresar-registro')->with('success', 'Registro médico guardado exitosamente.');
+        \Log::info('Registro médico creado exitosamente', [
+            'id' => $registro->id,
+            'paciente' => $registro->nombre . ' ' . $registro->apellidos
+        ]);
+
+        // Redirigir a consulta-pacientes para ver el registro guardado
+        return redirect()->route('medico.consulta-pacientes')->with('success', 'Registro médico guardado exitosamente.');
     }
 
     /**
