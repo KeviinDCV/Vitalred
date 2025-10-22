@@ -6,8 +6,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AppLayoutInertia from '@/layouts/app-layout-inertia';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { Search, Users, FileText, Eye, ChevronLeft, ChevronRight, Download, Brain } from 'lucide-react';
+import { Search, Users, FileText, Eye, ChevronLeft, ChevronRight, Download, Brain, Stethoscope, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 interface RegistroMedico {
     id: number;
@@ -130,6 +131,16 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
         }
     };
 
+    const handleAtender = (registro: RegistroMedico) => {
+        toast.success(`Atendiendo caso de ${registro.nombre} ${registro.apellidos}`);
+        // TODO: Implementar lógica de atención
+    };
+
+    const handleDerivar = (registro: RegistroMedico) => {
+        toast.info(`Derivando/Rechazando caso de ${registro.nombre} ${registro.apellidos}`);
+        // TODO: Implementar modal de derivación/rechazo
+    };
+
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('es-ES', {
             year: 'numeric',
@@ -143,60 +154,40 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
             <Head title="Consulta Pacientes - Vital Red" />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
+                {/* Header con estadísticas inline */}
+                <div className="flex items-start justify-between">
                     <div>
                         <h1 className="text-3xl font-bold text-foreground">Consulta Pacientes</h1>
-                        <p className="text-muted-foreground mt-2">
-                            Consulta y gestiona los registros médicos de pacientes
-                        </p>
+                        <div className="flex items-center gap-6 mt-3">
+                            <div className="flex items-center gap-2">
+                                <Users className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">Total:</span>
+                                <span className="text-lg font-bold">{estadisticas.total}</span>
+                            </div>
+                            {estadisticas.priorizados > 0 && (
+                                <div className="flex items-center gap-2">
+                                    <Brain className="h-4 w-4 text-green-600" />
+                                    <span className="text-sm text-muted-foreground">Priorizados:</span>
+                                    <span className="text-lg font-bold text-green-600">{estadisticas.priorizados}</span>
+                                </div>
+                            )}
+                            {estadisticas.no_priorizados > 0 && (
+                                <div className="flex items-center gap-2">
+                                    <FileText className="h-4 w-4 text-blue-600" />
+                                    <span className="text-sm text-muted-foreground">No Priorizados:</span>
+                                    <span className="text-lg font-bold text-blue-600">{estadisticas.no_priorizados}</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Button
-                            onClick={() => router.visit('/medico/priorizacion/prueba')}
-                            variant="outline"
-                            className="border-green-200 text-green-700 hover:bg-green-50"
-                        >
-                            <Eye className="h-4 w-4 mr-2" />
-                            🧠 Prueba IA Priorización
-                        </Button>
-                        <Badge variant="outline" className="text-sm">
-                            {registros.total} registros totales
-                        </Badge>
-                    </div>
-                </div>
-
-                {/* Bento Grid - Estadísticas */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">Total Pacientes</CardTitle>
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{estadisticas.total}</div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">Priorizados</CardTitle>
-                            <Brain className="h-4 w-4 text-green-600" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-green-600">{estadisticas.priorizados}</div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">No Priorizados</CardTitle>
-                            <FileText className="h-4 w-4 text-red-600" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-red-600">{estadisticas.no_priorizados}</div>
-                        </CardContent>
-                    </Card>
+                    <Button
+                        onClick={() => router.visit('/medico/priorizacion/prueba')}
+                        variant="outline"
+                        className="border-green-200 text-green-700 hover:bg-green-50"
+                    >
+                        <Eye className="h-4 w-4 mr-2" />
+                        🧠 Prueba IA Priorización
+                    </Button>
                 </div>
 
                 {/* Tabla de registros con buscador integrado */}
@@ -264,7 +255,8 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
                                                 <TableHead>Edad</TableHead>
                                                 <TableHead>Tipo de Paciente</TableHead>
                                                 <TableHead>Prioridad</TableHead>
-                                                <TableHead>Descargar Historia</TableHead>
+                                                <TableHead>Historia</TableHead>
+                                                <TableHead>Acciones</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -317,6 +309,26 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
                                                         >
                                                             <Download className="h-4 w-4" />
                                                         </Button>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-1">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleAtender(registro)}
+                                                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                            >
+                                                                <Stethoscope className="h-4 w-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleDerivar(registro)}
+                                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                            >
+                                                                <X className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
                                                     </TableCell>
                                                 </TableRow>
                                             ))}

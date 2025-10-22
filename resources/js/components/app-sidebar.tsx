@@ -66,11 +66,6 @@ const adminNavItems: NavItem[] = [
         icon: Search,
     },
     {
-        title: 'Casos Críticos',
-        href: '/admin/medico/casos-criticos',
-        icon: AlertCircle,
-    },
-    {
         title: 'Seguimiento Médico',
         href: '/admin/medico/seguimiento',
         icon: UserCheck,
@@ -109,11 +104,6 @@ const medicoNavItems: NavItem[] = [
         title: 'Consulta Pacientes',
         href: '/medico/consulta-pacientes',
         icon: Search,
-    },
-    {
-        title: 'Casos Críticos',
-        href: '/medico/casos-criticos',
-        icon: AlertCircle,
     },
     {
         title: 'Seguimiento',
