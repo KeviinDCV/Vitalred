@@ -70,10 +70,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Admin puede acceder a todas las rutas de IPS bajo /admin/ips/*
         Route::prefix('ips')->name('ips.')->group(function () {
-            Route::get('dashboard', [App\Http\Controllers\Ips\IpsController::class, 'dashboard'])->name('dashboard');
+            Route::get('dashboard', fn() => redirect('/admin/ips/ingresar-registro'))->name('dashboard');
             Route::get('ingresar-registro', [App\Http\Controllers\Ips\IpsController::class, 'ingresarRegistro'])->name('ingresar-registro');
-            Route::get('solicitudes', [App\Http\Controllers\Ips\IpsController::class, 'solicitudes'])->name('solicitudes');
-            Route::get('seguimiento', [App\Http\Controllers\Ips\IpsController::class, 'seguimiento'])->name('seguimiento');
+            Route::post('ingresar-registro', [App\Http\Controllers\Ips\IpsController::class, 'storeRegistro'])->name('ingresar-registro.store');
+            Route::get('consulta-pacientes', [App\Http\Controllers\Ips\IpsController::class, 'consultaPacientes'])->name('consulta-pacientes');
+            
+            // Rutas de IA
+            Route::post('ai/extraer-datos-documento', [App\Http\Controllers\Medico\PriorizacionController::class, 'extraerDatosPaciente'])->name('ai.extraer-datos-documento');
         });
     });
 
@@ -109,10 +112,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rutas para IPS (solo IPS, admin ya tiene acceso arriba)
     Route::middleware('ips')->prefix('ips')->name('ips.')->group(function () {
-        Route::get('dashboard', [App\Http\Controllers\Ips\IpsController::class, 'dashboard'])->name('dashboard');
+        Route::get('dashboard', fn() => redirect('/ips/ingresar-registro'))->name('dashboard');
         Route::get('ingresar-registro', [App\Http\Controllers\Ips\IpsController::class, 'ingresarRegistro'])->name('ingresar-registro');
-        Route::get('solicitudes', [App\Http\Controllers\Ips\IpsController::class, 'solicitudes'])->name('solicitudes');
-        Route::get('seguimiento', [App\Http\Controllers\Ips\IpsController::class, 'seguimiento'])->name('seguimiento');
+        Route::post('ingresar-registro', [App\Http\Controllers\Ips\IpsController::class, 'storeRegistro'])->name('ingresar-registro.store');
+        Route::get('consulta-pacientes', [App\Http\Controllers\Ips\IpsController::class, 'consultaPacientes'])->name('consulta-pacientes');
+        
+        // Rutas de IA (IPS necesita las mismas funcionalidades que médico)
+        Route::post('ai/extraer-datos-documento', [App\Http\Controllers\Medico\PriorizacionController::class, 'extraerDatosPaciente'])->name('ai.extraer-datos-documento');
     });
     
     // Rutas compartidas
@@ -121,4 +127,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+
+// Rutas de autenticación con rate limiting
+Route::middleware('throttle:5,1')->group(function () {
+    require __DIR__.'/auth.php';
+});

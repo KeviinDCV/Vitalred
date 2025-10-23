@@ -24,7 +24,11 @@ class MedicoController extends Controller
      */
     public function storeRegistro(Request $request)
     {
-        \Log::info('Datos recibidos en storeRegistro:', $request->all());
+        // ✅ SEGURIDAD: No loguear todos los datos del request
+        \Log::info('Médico guardando registro', [
+            'user_id' => auth()->id(),
+            'tipo_identificacion' => $request->input('tipo_identificacion')
+        ]);
 
         // Validar todos los datos del formulario
         $validatedData = $request->validate([
@@ -40,6 +44,7 @@ class MedicoController extends Controller
 
             // Paso 2: Datos Sociodemográficos
             'asegurador' => 'required|string|max:255',
+            'asegurador_secundario' => 'nullable|string|max:255',
             'departamento' => 'required|string|max:255',
             'ciudad' => 'required|string|max:255',
             'institucion_remitente' => 'required|string|max:255',
@@ -84,6 +89,12 @@ class MedicoController extends Controller
                 'public'
             );
         }
+
+        // Usar asegurador_secundario si está disponible (nombre específico de EPS/ARL/SOAT)
+        // Si no, usar asegurador (categoría general)
+        $aseguradorFinal = $validatedData['asegurador_secundario'] ?? $validatedData['asegurador'];
+        $validatedData['asegurador'] = $aseguradorFinal;
+        unset($validatedData['asegurador_secundario']); // Remover el campo secundario
 
         // Crear el registro médico
         $registro = RegistroMedico::create([
@@ -137,8 +148,8 @@ class MedicoController extends Controller
     {
         $search = $request->get('search');
 
-        // Obtener registros del médico actual con búsqueda y paginación
-        $registros = RegistroMedico::where('user_id', auth()->id())
+        // Obtener todos los registros (no solo del médico actual) con información del usuario que los creó
+        $registros = RegistroMedico::with('user') // Incluir relación con usuario
             ->when($search, function ($query, $search) {
                 return $query->where(function ($q) use ($search) {
                     $q->where('nombre', 'like', "%{$search}%")
@@ -148,13 +159,13 @@ class MedicoController extends Controller
                 });
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(7)
+            ->paginate(10)
             ->withQueryString(); // Mantener parámetros de búsqueda en la paginación
 
-        // Calcular estadísticas
-        $totalRegistros = RegistroMedico::where('user_id', auth()->id())->count();
-        $priorizados = RegistroMedico::where('user_id', auth()->id())->where('prioriza_ia', true)->count();
-        $noPriorizados = RegistroMedico::where('user_id', auth()->id())->where('prioriza_ia', false)->count();
+        // Calcular estadísticas (todos los registros, no solo del médico)
+        $totalRegistros = RegistroMedico::count();
+        $priorizados = RegistroMedico::where('prioriza_ia', true)->count();
+        $noPriorizados = RegistroMedico::where('prioriza_ia', false)->count();
 
         return Inertia::render('medico/consulta-pacientes', [
             'registros' => $registros,

@@ -38,7 +38,7 @@ class AuthenticatedSessionController extends Controller
         if ($user->role === 'medico') {
             return redirect()->intended('/medico/ingresar-registro');
         } elseif ($user->role === 'ips') {
-            return redirect()->intended('/ips/dashboard');
+            return redirect()->intended('/ips/ingresar-registro');
         } else {
             // Admin y otros roles van al dashboard
             return redirect()->intended(route('dashboard', absolute: false));

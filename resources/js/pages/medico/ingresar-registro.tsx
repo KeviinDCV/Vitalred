@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router, usePage } from '@inertiajs/react';
 import { Edit, Calendar, Upload, ChevronRight } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
@@ -1496,6 +1496,8 @@ const tiposApoyo = [
 ];
 
 export default function IngresarRegistro() {
+    const { props } = usePage();
+    const userRole = (props.auth as any)?.user?.role || 'medico';
     const [currentStep, setCurrentStep] = useState(1);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -2468,8 +2470,9 @@ export default function IngresarRegistro() {
             const formData = new FormData();
             formData.append('historia_clinica', file);
 
-            // Usar axios para manejar la respuesta JSON correctamente
-            const response = await axios.post(route('medico.ai.extraer-datos-documento'), formData, {
+            // Usar la ruta correcta según el rol del usuario
+            const aiRoute = userRole === 'ips' ? 'ips.ai.extraer-datos-documento' : 'medico.ai.extraer-datos-documento';
+            const response = await axios.post(route(aiRoute), formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
@@ -4040,8 +4043,9 @@ export default function IngresarRegistro() {
                                                                 glucometria: data.glucometria || null
                                                             };
 
-                                                            // Enviar formulario al servidor con datos transformados
-                                                            router.post(route('medico.ingresar-registro.store'), transformedData, {
+                                                            // Usar la ruta correcta según el rol del usuario
+                                                            const storeRoute = userRole === 'ips' ? 'ips.ingresar-registro.store' : 'medico.ingresar-registro.store';
+                                                            router.post(route(storeRoute), transformedData, {
                                                                 onStart: () => {
                                                                     console.log('Iniciando envío...');
                                                                 },

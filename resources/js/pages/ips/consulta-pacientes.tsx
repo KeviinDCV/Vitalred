@@ -6,9 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AppLayoutInertia from '@/layouts/app-layout-inertia';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { Search, Users, FileText, Eye, ChevronLeft, ChevronRight, Download, Brain, Stethoscope, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import { Search, Users, FileText, ChevronLeft, ChevronRight, Brain, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { useState } from 'react';
 
 interface RegistroMedico {
     id: number;
@@ -27,7 +26,7 @@ interface RegistroMedico {
     estado: string;
     tipo_paciente: string;
     clasificacion_triage: string;
-    prioriza_ia?: boolean; // Resultado de análisis IA
+    prioriza_ia?: boolean;
     historia_clinica_path?: string;
     created_at: string;
     updated_at: string;
@@ -64,12 +63,11 @@ interface Props {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Consulta Pacientes',
-        href: '/medico/consulta-pacientes',
+        href: '/ips/consulta-pacientes',
     },
 ];
 
-export default function ConsultaPacientes({ registros, filters, stats, auth }: Props & { auth: { user: { nombre: string; role: string } } }) {
-    // Mapear nombre a name para el layout
+export default function ConsultaPacientesIPS({ registros, filters, stats, auth }: Props & { auth: { user: { nombre: string; role: string } } }) {
     const userForLayout = {
         name: auth.user.nombre,
         role: auth.user.role
@@ -77,7 +75,6 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [isSearching, setIsSearching] = useState(false);
 
-    // Calcular estadísticas si no vienen del backend
     const estadisticas = stats || {
         total: registros.total || 0,
         priorizados: registros.data.filter(r => r.prioriza_ia === true).length,
@@ -86,7 +83,7 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
 
     const handleSearch = (term: string) => {
         setIsSearching(true);
-        router.get(route('medico.consulta-pacientes'),
+        router.get(route('ips.consulta-pacientes'),
             { search: term },
             {
                 preserveState: true,
@@ -96,7 +93,7 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
     };
 
     const handlePageChange = (page: number) => {
-        router.get(route('medico.consulta-pacientes'),
+        router.get(route('ips.consulta-pacientes'),
             { page, search: searchTerm },
             { preserveState: true }
         );
@@ -122,29 +119,34 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
         );
     };
 
-    const handleDownloadHistoria = (registro: RegistroMedico) => {
-        if (registro.historia_clinica_path) {
-            // Usar la ruta protegida del controlador
-            const downloadUrl = route('medico.descargar-historia', registro.id);
-
-            // Crear elemento temporal para descargar
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.target = '_blank'; // Abrir en nueva pestaña por si hay errores
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+    const getEstadoBadge = (estado: string) => {
+        switch (estado.toLowerCase()) {
+            case 'aceptado':
+            case 'atendido':
+                return (
+                    <Badge className="bg-green-600 hover:bg-green-700">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Aceptado
+                    </Badge>
+                );
+            case 'rechazado':
+            case 'derivado':
+                return (
+                    <Badge variant="destructive">
+                        <XCircle className="h-3 w-3 mr-1" />
+                        Rechazado
+                    </Badge>
+                );
+            case 'enviado':
+            case 'pendiente':
+            default:
+                return (
+                    <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                        <Clock className="h-3 w-3 mr-1" />
+                        Pendiente
+                    </Badge>
+                );
         }
-    };
-
-    const handleAtender = (registro: RegistroMedico) => {
-        toast.success(`Atendiendo caso de ${registro.nombre} ${registro.apellidos}`);
-        // TODO: Implementar lógica de atención
-    };
-
-    const handleDerivar = (registro: RegistroMedico) => {
-        toast.info(`Derivando/Rechazando caso de ${registro.nombre} ${registro.apellidos}`);
-        // TODO: Implementar modal de derivación/rechazo
     };
 
     const formatDate = (dateString: string) => {
@@ -186,22 +188,14 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
                             )}
                         </div>
                     </div>
-                    <Button
-                        onClick={() => router.visit('/medico/priorizacion/prueba')}
-                        variant="outline"
-                        className="border-green-200 text-green-700 hover:bg-green-50"
-                    >
-                        <Eye className="h-4 w-4 mr-2" />
-                        🧠 Prueba IA Priorización
-                    </Button>
                 </div>
 
                 {/* Tabla de registros con buscador integrado */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Registros Médicos</CardTitle>
+                        <CardTitle>Registros Enviados</CardTitle>
                         <CardDescription>
-                            Busca y consulta los registros médicos de pacientes
+                            Consulta el estado de los registros médicos que has enviado
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -258,12 +252,10 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
                                                 <TableHead>Nombre</TableHead>
                                                 <TableHead>Fecha solicitud</TableHead>
                                                 <TableHead>EPS</TableHead>
-                                                <TableHead>Ingresado por</TableHead>
                                                 <TableHead>Edad</TableHead>
                                                 <TableHead>Tipo de Paciente</TableHead>
                                                 <TableHead>Prioridad</TableHead>
-                                                <TableHead>Historia</TableHead>
-                                                <TableHead>Acciones</TableHead>
+                                                <TableHead>Estado</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -295,11 +287,6 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <div className="text-sm text-muted-foreground">
-                                                            {registro.user?.name || 'Desconocido'}
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
                                                         <Badge variant="outline">
                                                             {registro.edad} años
                                                         </Badge>
@@ -313,34 +300,7 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
                                                         {getPrioridadIABadge(registro.prioriza_ia)}
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() => handleDownloadHistoria(registro)}
-                                                            disabled={!registro.historia_clinica_path}
-                                                        >
-                                                            <Download className="h-4 w-4" />
-                                                        </Button>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <div className="flex items-center gap-1">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => handleAtender(registro)}
-                                                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                                            >
-                                                                <Stethoscope className="h-4 w-4" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => handleDerivar(registro)}
-                                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                            >
-                                                                <X className="h-4 w-4" />
-                                                            </Button>
-                                                        </div>
+                                                        {getEstadoBadge(registro.estado)}
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
@@ -353,7 +313,7 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
                                 <Users className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
                                 <h3 className="text-lg font-medium mb-2">No hay registros</h3>
                                 <p className="text-sm text-muted-foreground mb-4">
-                                    {searchTerm ? 'No se encontraron registros que coincidan con tu búsqueda.' : 'Aún no hay registros médicos creados.'}
+                                    {searchTerm ? 'No se encontraron registros que coincidan con tu búsqueda.' : 'Aún no has enviado registros médicos.'}
                                 </p>
                                 {searchTerm && (
                                     <Button

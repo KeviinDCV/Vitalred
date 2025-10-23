@@ -62,19 +62,14 @@ const adminNavItems: NavItem[] = [
     },
     // Sección IPS
     {
-        title: 'Panel IPS',
-        href: '/admin/ips/dashboard',
-        icon: Building2,
+        title: 'Ingresar Registro IPS',
+        href: '/admin/ips/ingresar-registro',
+        icon: FileText,
     },
     {
-        title: 'Solicitudes IPS',
-        href: '/admin/ips/solicitudes',
-        icon: ClipboardList,
-    },
-    {
-        title: 'Seguimiento IPS',
-        href: '/admin/ips/seguimiento',
-        icon: Activity,
+        title: 'Consulta Pacientes IPS',
+        href: '/admin/ips/consulta-pacientes',
+        icon: Search,
     },
 ];
 
@@ -95,19 +90,14 @@ const medicoNavItems: NavItem[] = [
 // Navegación para IPS
 const ipsNavItems: NavItem[] = [
     {
-        title: 'Dashboard IPS',
-        href: '/ips/dashboard',
-        icon: Building2,
+        title: 'Ingresar Registro',
+        href: '/ips/ingresar-registro',
+        icon: FileText,
     },
     {
-        title: 'Solicitudes',
-        href: '/ips/solicitudes',
-        icon: ClipboardList,
-    },
-    {
-        title: 'Seguimiento',
-        href: '/ips/seguimiento',
-        icon: Activity,
+        title: 'Consulta Pacientes',
+        href: '/ips/consulta-pacientes',
+        icon: Search,
     },
 ];
 
