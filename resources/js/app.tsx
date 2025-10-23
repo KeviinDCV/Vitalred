@@ -8,15 +8,21 @@ import ErrorBoundary from '@/components/error-boundary';
 import { route } from 'ziggy-js';
 
 // Suprimir warning conocido de Inertia Form con atributo inert
-const originalError = console.error;
+const originalError = console.error.bind(console);
 console.error = (...args: any[]) => {
-    if (
-        typeof args[0] === 'string' &&
-        args[0].includes('Warning: Received `false` for a non-boolean attribute `inert`')
-    ) {
-        return;
+    // El mensaje usa placeholders %s, así que verificamos el patrón
+    const firstArg = args[0];
+    if (firstArg && typeof firstArg === 'string') {
+        // Suprimir el warning de inert (con placeholders %s)
+        if (firstArg.includes('non-boolean attribute') && firstArg.includes('%s')) {
+            // Verificar que sea el warning de inert específicamente
+            if (args.includes('inert') || firstArg.includes('inert')) {
+                return;
+            }
+        }
     }
-    originalError.apply(console, args);
+    
+    originalError(...args);
 };
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';

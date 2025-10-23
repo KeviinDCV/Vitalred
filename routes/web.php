@@ -40,8 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Admin puede acceder a todas las rutas de médico bajo /admin/medico/*
         Route::prefix('medico')->name('medico.')->group(function () {
-            Route::get('dashboard', fn() => Inertia::render('medico/medico-dashboard'))->name('dashboard');
-            Route::get('seguimiento', fn() => Inertia::render('medico/seguimiento'))->name('seguimiento');
+            Route::get('dashboard', fn() => redirect('/admin/medico/ingresar-registro'))->name('dashboard');
             
             Route::get('ingresar-registro', [App\Http\Controllers\Medico\MedicoController::class, 'ingresarRegistro'])->name('ingresar-registro');
             Route::post('ingresar-registro', [App\Http\Controllers\Medico\MedicoController::class, 'storeRegistro'])->name('ingresar-registro.store');
@@ -80,8 +79,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rutas para Médico (solo médicos, admin ya tiene acceso arriba)
     Route::middleware('medico')->prefix('medico')->name('medico.')->group(function () {
-        Route::get('dashboard', fn() => Inertia::render('medico/medico-dashboard'))->name('dashboard');
-        Route::get('seguimiento', fn() => Inertia::render('medico/seguimiento'))->name('seguimiento');
+        Route::get('dashboard', fn() => redirect('/medico/ingresar-registro'))->name('dashboard');
         
         Route::get('ingresar-registro', [App\Http\Controllers\Medico\MedicoController::class, 'ingresarRegistro'])->name('ingresar-registro');
         Route::post('ingresar-registro', [App\Http\Controllers\Medico\MedicoController::class, 'storeRegistro'])->name('ingresar-registro.store');

@@ -51,11 +51,6 @@ const adminNavItems: NavItem[] = [
     },
     // Sección Médico
     {
-        title: 'Panel Médico',
-        href: '/admin/medico/dashboard',
-        icon: Stethoscope,
-    },
-    {
         title: 'Ingresar Registro',
         href: '/admin/medico/ingresar-registro',
         icon: FileText,
@@ -64,11 +59,6 @@ const adminNavItems: NavItem[] = [
         title: 'Consulta Pacientes',
         href: '/admin/medico/consulta-pacientes',
         icon: Search,
-    },
-    {
-        title: 'Seguimiento Médico',
-        href: '/admin/medico/seguimiento',
-        icon: UserCheck,
     },
     // Sección IPS
     {
@@ -91,11 +81,6 @@ const adminNavItems: NavItem[] = [
 // Navegación para Médico (rutas completas)
 const medicoNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
-        href: '/medico/dashboard',
-        icon: Stethoscope,
-    },
-    {
         title: 'Ingresar Registro',
         href: '/medico/ingresar-registro',
         icon: FileText,
@@ -104,11 +89,6 @@ const medicoNavItems: NavItem[] = [
         title: 'Consulta Pacientes',
         href: '/medico/consulta-pacientes',
         icon: Search,
-    },
-    {
-        title: 'Seguimiento',
-        href: '/medico/seguimiento',
-        icon: UserCheck,
     },
 ];
 

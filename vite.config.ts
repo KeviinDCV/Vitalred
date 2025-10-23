@@ -32,7 +32,7 @@ export default defineConfig({
     server: {
         host: true, // Permite acceso desde cualquier IP
         cors: {
-            origin: ['http://192.168.2.202:8000', 'http://localhost:8000', 'http://127.0.0.1:8000'],
+            origin: '*', // Permitir todos los orígenes (incluye ngrok)
             credentials: true,
         },
         hmr: {
