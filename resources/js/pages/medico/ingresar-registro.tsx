@@ -2846,17 +2846,17 @@ export default function IngresarRegistro() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Ingresar Registro - Vital Red" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 sm:gap-5 md:gap-6 p-4 sm:p-5 md:p-6 bg-slate-50">
-                <div className="max-w-7xl mx-auto w-full px-2 sm:px-0">
-                    {/* Header con información de consulta - Responsive padding & typography */}
-                    <Card className="bg-gradient-to-b from-primary via-primary to-primary/95 text-primary-foreground mb-4 sm:mb-5 md:mb-6 border-0 shadow-[0_2px_4px_rgba(0,0,0,0.1),0_8px_24px_rgba(59,130,246,0.25),inset_0_1px_0_rgba(255,255,255,0.2)] relative before:absolute before:inset-0 before:rounded-lg before:shadow-[inset_0_-1px_0_rgba(0,0,0,0.1)] before:pointer-events-none">
-                        <CardContent className="p-4 sm:p-5 md:p-6 relative z-10">
-                            <div className="flex items-center gap-2 sm:gap-3">
-                                <Edit className="h-5 w-5 sm:h-6 sm:w-6" />
+            <div className="flex h-full flex-1 flex-col gap-6 p-6">
+                <div className="max-w-7xl mx-auto w-full">
+                    {/* Header con información de consulta */}
+                    <Card className="bg-primary text-primary-foreground mb-6">
+                        <CardContent className="p-6">
+                            <div className="flex items-center gap-3">
+                                <Edit className="h-6 w-6" />
                                 <div>
-                                    <h2 className="text-lg sm:text-xl md:text-xl font-semibold">Ingreso de datos</h2>
-                                    <p className="text-xs sm:text-sm text-primary-foreground/80">Fecha de consulta:</p>
-                                    <p className="text-base sm:text-lg font-medium">
+                                    <h2 className="text-xl font-semibold">Ingreso de datos</h2>
+                                    <p className="text-primary-foreground/80">Fecha de consulta:</p>
+                                    <p className="text-lg font-medium">
                                         {new Date().toLocaleDateString('es-ES', {
                                             day: '2-digit',
                                             month: '2-digit',
@@ -2868,46 +2868,12 @@ export default function IngresarRegistro() {
                         </CardContent>
                     </Card>
 
-                    {/* Layout principal - Responsive grid: mobile stacked, desktop side-by-side */}
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-                        {/* Stepper - Reorganizes: top on mobile, side on desktop */}
+                    {/* Layout principal con stepper y contenido */}
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        {/* Stepper - Columna izquierda */}
                         <div className="lg:col-span-1">
-                            <div className="lg:sticky lg:top-6 bg-gradient-to-b from-slate-100 to-slate-100/80 p-3 sm:p-4 rounded-lg sm:rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.5)]">
-                                {/* Mobile: Horizontal stepper */}
-                                <div className="flex lg:hidden justify-between mb-4 overflow-x-auto pb-2">
-                                    {steps.map((step) => (
-                                        <div key={step.number} className="flex flex-col items-center min-w-[60px] sm:min-w-[80px]">
-                                            <div className={`
-                                                flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full text-white font-semibold text-sm
-                                                transition-all duration-500 ease-in-out
-                                                ${
-                                                    step.number === currentStep
-                                                        ? 'bg-primary scale-110 shadow-lg shadow-primary/30'
-                                                        : step.number < currentStep
-                                                            ? 'bg-green-500'
-                                                            : 'bg-gray-300'
-                                                }
-                                            `}>
-                                                {step.number}
-                                            </div>
-                                            <p className={`
-                                                text-[10px] sm:text-xs mt-1 text-center font-medium
-                                                ${
-                                                    step.number === currentStep
-                                                        ? 'text-primary'
-                                                        : step.number < currentStep
-                                                            ? 'text-green-600'
-                                                            : 'text-gray-600'
-                                                }
-                                            `}>
-                                                {step.title.split(' ')[0]}
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* Desktop: Vertical stepper */}
-                                <div className="hidden lg:block space-y-1">
+                            <div className="sticky top-6">
+                                <div className="space-y-1">
                                     {steps.map((step, index) => (
                                         <div key={step.number} className="relative">
                                             <div className="flex items-center group">
@@ -2972,15 +2938,15 @@ export default function IngresarRegistro() {
                                     ))}
                                 </div>
 
-                                {/* Indicador de progreso general - Responsive padding */}
-                                <div className="mt-4 sm:mt-6 p-2.5 sm:p-3 bg-gradient-to-b from-white to-slate-50/50 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.05),0_2px_8px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.8)]">
-                                    <div className="flex items-center justify-between text-[10px] sm:text-xs text-slate-700 mb-2">
-                                        <span className="font-medium">Progreso</span>
-                                        <span className="font-semibold">{Math.round((currentStep / steps.length) * 100)}%</span>
+                                {/* Indicador de progreso general */}
+                                <div className="mt-6 p-3 bg-gray-50 rounded-lg border">
+                                    <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
+                                        <span>Progreso</span>
+                                        <span>{Math.round((currentStep / steps.length) * 100)}%</span>
                                     </div>
-                                    <div className="w-full bg-slate-200 rounded-full h-2 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1),inset_0_2px_4px_rgba(0,0,0,0.08)]">
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
                                         <div
-                                            className="bg-gradient-to-r from-primary via-primary to-primary/90 h-2 rounded-full transition-all duration-700 ease-out shadow-[0_1px_2px_rgba(0,0,0,0.2),0_2px_4px_rgba(59,130,246,0.4),inset_0_1px_0_rgba(255,255,255,0.3)]"
+                                            className="bg-primary h-2 rounded-full transition-all duration-700 ease-out"
                                             style={{ width: `${(currentStep / steps.length) * 100}%` }}
                                         ></div>
                                     </div>
@@ -2988,8 +2954,8 @@ export default function IngresarRegistro() {
                             </div>
                         </div>
 
-                        {/* Contenido principal - Fluid spacing & padding */}
-                        <div className="lg:col-span-3 bg-gradient-to-b from-slate-100 to-slate-100/80 p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.5)]">
+                        {/* Contenido principal - Columna derecha */}
+                        <div className="lg:col-span-3">
 
                             {/* Contenido del paso actual con animación */}
                             <div className={`
@@ -2997,26 +2963,26 @@ export default function IngresarRegistro() {
                                 ${isTransitioning ? 'opacity-0 transform translate-x-4' : 'opacity-100 transform translate-x-0'}
                             `}>
                                 {currentStep === 1 && (
-                        <Card className="border-0 shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_24px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.8)] bg-gradient-to-b from-white via-white to-slate-50/30 relative before:absolute before:inset-0 before:rounded-lg sm:before:rounded-xl before:shadow-[inset_0_-1px_0_rgba(0,0,0,0.05)] before:pointer-events-none">
-                            <CardHeader className="border-b border-slate-100 relative z-10 p-4 sm:p-5 md:p-6">
-                                <CardTitle className="text-lg sm:text-xl md:text-xl text-slate-800">Información Personal</CardTitle>
-                                <CardDescription className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-slate-600">
-                                    <p><strong className="text-slate-800">Datos Personales</strong></p>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-xl">Información Personal</CardTitle>
+                                <CardDescription className="space-y-2">
+                                    <p><strong>Datos Personales</strong></p>
                                     <p>Escriba los datos solicitados tal como aparecen en su documento de identidad.</p>
                                     <p>Escriba el número de su documento de identidad sin puntos ni comas.</p>
                                     <p>Escriba la fecha separada por guión (-), o haga uso del calendario ubicando el cursor dentro del campo.</p>
                                     <p>Los campos marcados con (*) son obligatorios</p>
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-5 sm:space-y-6 p-4 sm:p-5 md:p-6">
+                            <CardContent className="space-y-6">
                                 {/* Cargar historia clínica */}
                                 <div className="space-y-2">
-                                    <Label className="text-base font-medium text-slate-700">
+                                    <Label className="text-base font-medium">
                                         Cargar historia clínica con nota de ingreso
                                     </Label>
-                                    <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-slate-400 hover:bg-slate-50/50 transition-all bg-white">
-                                        <Upload className="h-8 w-8 mx-auto mb-2 text-slate-400" />
-                                        <p className="text-sm text-slate-600 mb-2">
+                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                                        <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                                        <p className="text-sm text-gray-600 mb-2">
                                             Haga clic para cargar documentos o arrastre archivos aquí
                                         </p>
                                         <input
@@ -3056,7 +3022,7 @@ export default function IngresarRegistro() {
                                         )}
 
                                         {isAnalyzingWithAI && (
-                                            <div className="mt-2 p-3 bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-lg shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]">
+                                            <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                                 <div className="flex items-center gap-2">
                                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                                                     <span className="text-sm font-medium text-blue-800">Analizando documento con IA...</span>
@@ -3068,12 +3034,12 @@ export default function IngresarRegistro() {
                                         )}
 
                                         {aiAnalysisResult && (
-                                            <div className="mt-3 p-3 bg-gradient-to-r from-emerald-50 to-emerald-100/50 rounded-lg shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]">
+                                            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                                                 <div className="flex items-center gap-2 mb-2">
-                                                    <span className="text-emerald-600">✅</span>
-                                                    <span className="text-sm font-medium text-emerald-800">Datos extraídos automáticamente</span>
+                                                    <span className="text-green-600">✅</span>
+                                                    <span className="text-sm font-medium text-green-800">Datos extraídos automáticamente</span>
                                                 </div>
-                                                <p className="text-xs text-emerald-600 mb-2">
+                                                <p className="text-xs text-green-600 mb-2">
                                                     Los campos se han llenado con la información del documento. Revisa los datos y haz clic en "Siguiente".
                                                 </p>
                                             </div>
@@ -3200,11 +3166,11 @@ export default function IngresarRegistro() {
                                     </div>
                                 </div>
 
-                                {/* Botón siguiente - Medium shadow with lift on hover */}
+                                {/* Botón siguiente */}
                                 <div className="flex justify-end pt-6">
                                     <Button
                                         onClick={handleNext}
-                                        className="px-8 bg-gradient-to-b from-primary via-primary to-primary/95 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_4px_12px_rgba(59,130,246,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.12),0_8px_20px_rgba(59,130,246,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-[0_1px_2px_rgba(0,0,0,0.1),0_2px_6px_rgba(59,130,246,0.25)] transition-all duration-200"
+                                        className="px-8"
                                         disabled={isTransitioning}
                                     >
                                         {isTransitioning ? (
@@ -3226,14 +3192,14 @@ export default function IngresarRegistro() {
 
                                 {/* Paso 2: Datos Sociodemográficos */}
                                 {currentStep === 2 && (
-                                    <Card className="border-0 shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_24px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.8)] bg-gradient-to-b from-white via-white to-slate-50/30 relative before:absolute before:inset-0 before:rounded-lg sm:before:rounded-xl before:shadow-[inset_0_-1px_0_rgba(0,0,0,0.05)] before:pointer-events-none">
-                                        <CardHeader className="border-b border-slate-100 relative z-10 p-4 sm:p-5 md:p-6">
-                                            <CardTitle className="text-lg sm:text-xl md:text-xl text-slate-800">Datos Sociodemográficos</CardTitle>
-                                            <CardDescription className="text-xs sm:text-sm text-slate-600">
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="text-xl">Datos Sociodemográficos</CardTitle>
+                                            <CardDescription>
                                                 Los campos marcados con (*) son obligatorios
                                             </CardDescription>
                                         </CardHeader>
-                                        <CardContent className="space-y-5 sm:space-y-6 p-4 sm:p-5 md:p-6">
+                                        <CardContent className="space-y-6">
                                             <div className="grid gap-6 md:grid-cols-2">
                                                 {/* Asegurador */}
                                                 <div className="space-y-2">
@@ -3328,20 +3294,18 @@ export default function IngresarRegistro() {
                                                 </div>
                                             </div>
 
-                                            {/* Botones de navegación - Small & Medium shadows */}
+                                            {/* Botones de navegación */}
                                             <div className="flex justify-between pt-6">
                                                 <Button
                                                     variant="outline"
                                                     onClick={handlePrevious}
                                                     disabled={isTransitioning}
-                                                    className="shadow-[0_1px_2px_rgba(0,0,0,0.05),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_2px_3px_rgba(0,0,0,0.08),0_4px_10px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
                                                 >
                                                     Anterior
                                                 </Button>
                                                 <Button
                                                     onClick={handleNext}
                                                     disabled={isTransitioning}
-                                                    className="bg-gradient-to-b from-primary via-primary to-primary/95 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_4px_12px_rgba(59,130,246,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.12),0_8px_20px_rgba(59,130,246,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-[0_1px_2px_rgba(0,0,0,0.1),0_2px_6px_rgba(59,130,246,0.25)] transition-all duration-200"
                                                 >
                                                     {isTransitioning ? (
                                                         <>
@@ -3362,14 +3326,14 @@ export default function IngresarRegistro() {
 
                                 {/* Paso 3: Datos Clínicos */}
                                 {currentStep === 3 && (
-                                    <Card className="border-0 shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_24px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.8)] bg-gradient-to-b from-white via-white to-slate-50/30 relative before:absolute before:inset-0 before:rounded-lg sm:before:rounded-xl before:shadow-[inset_0_-1px_0_rgba(0,0,0,0.05)] before:pointer-events-none">
-                                        <CardHeader className="border-b border-slate-100 relative z-10 p-4 sm:p-5 md:p-6">
-                                            <CardTitle className="text-lg sm:text-xl md:text-xl text-slate-800">Datos Clínicos</CardTitle>
-                                            <CardDescription className="text-xs sm:text-sm text-slate-600">
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="text-xl">Datos Clínicos</CardTitle>
+                                            <CardDescription>
                                                 Los campos marcados con (*) son obligatorios
                                             </CardDescription>
                                         </CardHeader>
-                                        <CardContent className="space-y-5 sm:space-y-6 p-4 sm:p-5 md:p-6">
+                                        <CardContent className="space-y-6">
                                             {/* Primera sección: Información básica */}
                                             <div className="grid gap-6 md:grid-cols-2">
                                                 {/* Tipo de paciente */}
@@ -3848,20 +3812,18 @@ export default function IngresarRegistro() {
                                                 </div>
                                             </div>
 
-                                            {/* Botones de navegación - Small & Medium shadows */}
+                                            {/* Botones de navegación */}
                                             <div className="flex justify-between pt-6">
                                                 <Button
                                                     variant="outline"
                                                     onClick={handlePrevious}
                                                     disabled={isTransitioning}
-                                                    className="shadow-[0_1px_2px_rgba(0,0,0,0.05),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_2px_3px_rgba(0,0,0,0.08),0_4px_10px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
                                                 >
                                                     Anterior
                                                 </Button>
                                                 <Button
                                                     onClick={handleNext}
                                                     disabled={isTransitioning}
-                                                    className="bg-gradient-to-b from-primary via-primary to-primary/95 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_4px_12px_rgba(59,130,246,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.12),0_8px_20px_rgba(59,130,246,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-[0_1px_2px_rgba(0,0,0,0.1),0_2px_6px_rgba(59,130,246,0.25)] transition-all duration-200"
                                                 >
                                                     {isTransitioning ? (
                                                         <>
@@ -3882,14 +3844,14 @@ export default function IngresarRegistro() {
 
                                 {/* Paso 4: Datos De Remisión */}
                                 {currentStep === 4 && (
-                                    <Card className="border-0 shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_24px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.8)] bg-gradient-to-b from-white via-white to-slate-50/30 relative before:absolute before:inset-0 before:rounded-lg sm:before:rounded-xl before:shadow-[inset_0_-1px_0_rgba(0,0,0,0.05)] before:pointer-events-none">
-                                        <CardHeader className="border-b border-slate-100 relative z-10 p-4 sm:p-5 md:p-6">
-                                            <CardTitle className="text-lg sm:text-xl md:text-xl text-slate-800">Datos De Remisión</CardTitle>
-                                            <CardDescription className="text-xs sm:text-sm text-slate-600">
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="text-xl">Datos De Remisión</CardTitle>
+                                            <CardDescription>
                                                 Los campos marcados con (*) son obligatorios
                                             </CardDescription>
                                         </CardHeader>
-                                        <CardContent className="space-y-5 sm:space-y-6 p-4 sm:p-5 md:p-6">
+                                        <CardContent className="space-y-6">
                                             {/* Primera sección: Información de remisión */}
                                             <div className="space-y-4">
                                                 <div className="space-y-2">
@@ -4055,13 +4017,12 @@ export default function IngresarRegistro() {
                                                 </Select>
                                             </div>
 
-                                            {/* Botones de navegación - Large shadow for final submit */}
+                                            {/* Botones de navegación */}
                                             <div className="flex justify-between pt-6">
                                                 <Button
                                                     variant="outline"
                                                     onClick={handlePrevious}
                                                     disabled={isTransitioning}
-                                                    className="shadow-[0_1px_2px_rgba(0,0,0,0.05),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_2px_3px_rgba(0,0,0,0.08),0_4px_10px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
                                                 >
                                                     Anterior
                                                 </Button>
@@ -4110,7 +4071,7 @@ export default function IngresarRegistro() {
                                                         }
                                                     }}
                                                     disabled={isTransitioning}
-                                                    className="bg-gradient-to-b from-green-600 via-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-[0_2px_4px_rgba(0,0,0,0.12),0_8px_24px_rgba(34,197,94,0.35),inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[0_4px_6px_rgba(0,0,0,0.15),0_12px_32px_rgba(34,197,94,0.45),inset_0_1px_0_rgba(255,255,255,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-[0_1px_2px_rgba(0,0,0,0.1),0_4px_12px_rgba(34,197,94,0.3)] transition-all duration-200"
+                                                    className="bg-green-600 hover:bg-green-700"
                                                 >
                                                     {isTransitioning ? (
                                                         <>
