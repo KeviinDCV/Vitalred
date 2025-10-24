@@ -47,6 +47,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('consulta-pacientes', [App\Http\Controllers\Medico\MedicoController::class, 'consultaPacientes'])->name('consulta-pacientes');
             Route::get('buscar-pacientes', [App\Http\Controllers\Medico\MedicoController::class, 'buscarPacientes'])->name('buscar-pacientes');
             Route::get('descargar-historia/{registro}', [App\Http\Controllers\Medico\MedicoController::class, 'descargarHistoria'])->name('descargar-historia');
+            
+            // Acciones de casos
+            Route::post('atender-caso/{registro}', [App\Http\Controllers\Medico\MedicoController::class, 'atenderCaso'])->name('atender-caso');
+            Route::post('rechazar-caso/{registro}', [App\Http\Controllers\Medico\MedicoController::class, 'rechazarCaso'])->name('rechazar-caso');
 
             // IA y Priorización
             Route::post('ai/extract-patient-data', [App\Http\Controllers\AIController::class, 'extractPatientData'])->name('ai.extract-patient-data');
@@ -77,6 +81,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             
             // Rutas de IA
             Route::post('ai/extraer-datos-documento', [App\Http\Controllers\Medico\PriorizacionController::class, 'extraerDatosPaciente'])->name('ai.extraer-datos-documento');
+            
+            // Notificaciones en tiempo real
+            Route::get('notificaciones/no-leidas', [App\Http\Controllers\NotificacionController::class, 'getNoLeidas'])->name('notificaciones.no-leidas');
+            Route::post('notificaciones/{notificacion}/marcar-leida', [App\Http\Controllers\NotificacionController::class, 'marcarComoLeida'])->name('notificaciones.marcar-leida');
+            Route::post('notificaciones/marcar-todas-leidas', [App\Http\Controllers\NotificacionController::class, 'marcarTodasComoLeidas'])->name('notificaciones.marcar-todas-leidas');
         });
     });
 
@@ -89,6 +98,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('consulta-pacientes', [App\Http\Controllers\Medico\MedicoController::class, 'consultaPacientes'])->name('consulta-pacientes');
         Route::get('buscar-pacientes', [App\Http\Controllers\Medico\MedicoController::class, 'buscarPacientes'])->name('buscar-pacientes');
         Route::get('descargar-historia/{registro}', [App\Http\Controllers\Medico\MedicoController::class, 'descargarHistoria'])->name('descargar-historia');
+        
+        // Acciones de casos
+        Route::post('atender-caso/{registro}', [App\Http\Controllers\Medico\MedicoController::class, 'atenderCaso'])->name('atender-caso');
+        Route::post('rechazar-caso/{registro}', [App\Http\Controllers\Medico\MedicoController::class, 'rechazarCaso'])->name('rechazar-caso');
 
         // IA y Priorización
         Route::post('ai/extract-patient-data', [App\Http\Controllers\AIController::class, 'extractPatientData'])->name('ai.extract-patient-data');
@@ -119,6 +132,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
         // Rutas de IA (IPS necesita las mismas funcionalidades que médico)
         Route::post('ai/extraer-datos-documento', [App\Http\Controllers\Medico\PriorizacionController::class, 'extraerDatosPaciente'])->name('ai.extraer-datos-documento');
+        
+        // Notificaciones en tiempo real
+        Route::get('notificaciones/no-leidas', [App\Http\Controllers\NotificacionController::class, 'getNoLeidas'])->name('notificaciones.no-leidas');
+        Route::post('notificaciones/{notificacion}/marcar-leida', [App\Http\Controllers\NotificacionController::class, 'marcarComoLeida'])->name('notificaciones.marcar-leida');
+        Route::post('notificaciones/marcar-todas-leidas', [App\Http\Controllers\NotificacionController::class, 'marcarTodasComoLeidas'])->name('notificaciones.marcar-todas-leidas');
     });
     
     // Rutas compartidas

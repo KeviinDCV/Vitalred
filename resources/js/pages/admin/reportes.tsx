@@ -53,9 +53,9 @@ export default function Reportes() {
 
     return (
         <AppLayoutInertia 
-            title="Reportes - Vital Red" 
+            title="Reportes - HERMES" 
             breadcrumbs={breadcrumbs}
-            user={auth.user}
+            user={{ name: auth.user.nombre, role: auth.user.role }}
         >
             <div className="space-y-6">
                 <div>

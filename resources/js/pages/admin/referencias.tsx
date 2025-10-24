@@ -36,9 +36,9 @@ export default function Referencias() {
 
   return (
     <AppLayoutInertia 
-      title="Referencias - Vital Red" 
+      title="Referencias - HERMES" 
       breadcrumbs={breadcrumbs}
-      user={auth.user}
+      user={{ name: auth.user.nombre, role: auth.user.role }}
     >
       <div className="space-y-6">
       <div className="flex items-center justify-between">

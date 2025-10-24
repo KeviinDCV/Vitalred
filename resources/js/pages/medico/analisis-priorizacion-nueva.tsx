@@ -179,12 +179,17 @@ export default function AnalisisPriorizacion() {
             setAnalisis(null);
             
             // Manejo específico para errores de API de OpenRouter (DeepSeek 3.1)
-            if (error.response?.status === 503 && error.response?.data?.error_type === 'api_overload') {
+            const axiosError = error as any;
+            const errorMessage = axiosError?.message || 'Error desconocido';
+            const responseStatus = axiosError?.response?.status;
+            const responseData = axiosError?.response?.data;
+            
+            if (responseStatus === 503 && responseData?.error_type === 'api_overload') {
                 setError('⚠️ El servicio de IA está temporalmente sobrecargado. Por favor intenta nuevamente en unos minutos. 🔄');
-            } else if (error.message.includes('🤖 La IA no pudo procesar')) {
-                setError(error.message);
+            } else if (errorMessage.includes('🤖 La IA no pudo procesar')) {
+                setError(errorMessage);
             } else {
-                setError(`❌ Error en el procesamiento: ${error.response?.data?.message || error.message || 'Error desconocido al procesar el archivo'}\n\n💡 Sugerencia: Verifique los logs del backend para más detalles técnicos.`);
+                setError(`❌ Error en el procesamiento: ${responseData?.message || errorMessage || 'Error desconocido al procesar el archivo'}\n\n💡 Sugerencia: Verifique los logs del backend para más detalles técnicos.`);
             }
         } finally {
             setCargando(false);
@@ -217,7 +222,7 @@ export default function AnalisisPriorizacion() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Análisis de Priorización IA - Prueba - Vital Red" />
+            <Head title="Análisis de Priorización IA - Prueba - HERMES" />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 {/* Header */}

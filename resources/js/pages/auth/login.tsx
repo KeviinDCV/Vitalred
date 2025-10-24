@@ -20,11 +20,11 @@ export default function Login({ status }: LoginProps) {
     };
 
     return (
-        <AuthLayout title="Iniciar Sesión" description="Accede a tu cuenta de Vital Red">
-            <Head title="Iniciar Sesión - Vital Red">
+        <AuthLayout title="Iniciar Sesión" description="Accede a tu cuenta de HERMES">
+            <Head title="Iniciar Sesión - HERMES">
                 <meta 
                     name="description" 
-                    content="Accede a Vital Red, el sistema integral de referencia y contrareferencia para una atención médica coordinada y eficiente. Inicia sesión de forma segura." 
+                    content="Accede a HERMES, el sistema integral de referencia y contrareferencia para una atención médica coordinada y eficiente. Inicia sesión de forma segura." 
                 />
             </Head>
 

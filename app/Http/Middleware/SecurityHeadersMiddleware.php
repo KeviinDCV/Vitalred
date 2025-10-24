@@ -35,11 +35,11 @@ class SecurityHeadersMiddleware
         // Content Security Policy (CSP) - Ajustar según necesidades
         $csp = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' localhost:5173 http://localhost:5173", // Vite en desarrollo
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' localhost:5173 http://localhost:5173 192.168.2.202:5173 http://192.168.2.202:5173", // Vite en desarrollo (local y red)
             "style-src 'self' 'unsafe-inline' https://fonts.bunny.net",
             "font-src 'self' https://fonts.bunny.net",
             "img-src 'self' data: blob:",
-            "connect-src 'self' localhost:5173 ws://localhost:5173", // WebSocket de Vite
+            "connect-src 'self' localhost:5173 ws://localhost:5173 192.168.2.202:5173 ws://192.168.2.202:5173", // WebSocket de Vite (local y red)
             "frame-ancestors 'none'"
         ];
         $response->headers->set('Content-Security-Policy', implode('; ', $csp));

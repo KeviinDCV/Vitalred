@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Medico;
 
 use App\Http\Controllers\Controller;
-// COMENTADO: Migrado de Gemini a GROQ con GPT-OSS 120B
+// COMENTADO: Migrado de Gemini a OpenRouter con OpenAI gpt-oss-20b
 // use App\Services\GeminiAIService;
 use App\Services\OpenRouterAIService;
 use App\Models\RegistroMedico;
@@ -13,7 +13,7 @@ use Inertia\Response;
 
 class PriorizacionController extends Controller
 {
-    // COMENTADO: Ahora usando OpenRouterAIService (con GROQ GPT-OSS 120B)
+    // Ahora usando OpenRouterAIService (con OpenRouter OpenAI gpt-oss-20b - Rápido y Confiable)
     // protected $geminiService;
     protected $aiService;
 
@@ -52,6 +52,12 @@ class PriorizacionController extends Controller
      */
     public function analizarPriorizacion(Request $request)
     {
+        // Aumentar tiempo de ejecución para procesamiento rápido con IA (Llama 8B es rápido)
+        set_time_limit(180); // 3 minutos
+        
+        // ✅ LIBERAR SESIÓN: Permite que otras peticiones se procesen mientras la IA trabaja
+        session_write_close();
+        
         try {
             // Caso 1: Análisis de paciente existente
             if ($request->has('registro_id')) {
@@ -265,8 +271,11 @@ class PriorizacionController extends Controller
      */
     public function procesarArchivoPrueba(Request $request)
     {
-        // Aumentar tiempo de ejecución para OCR (puede tardar en PDFs grandes)
+        // Aumentar tiempo de ejecución para procesamiento rápido con IA (Llama 8B es rápido)
         set_time_limit(180); // 3 minutos
+        
+        // ✅ LIBERAR SESIÓN: Permite que otras peticiones se procesen mientras la IA trabaja
+        session_write_close();
         
         try {
             $request->validate([
@@ -285,7 +294,7 @@ class PriorizacionController extends Controller
             
             $archivo->move(dirname($rutaCompleta), basename($rutaCompleta));
             
-            // Extraer texto usando OpenRouterAIService (con GROQ GPT-OSS 120B + OCR automático para PDFs escaneados)
+            // Extraer texto usando OpenRouterAIService (con OpenRouter OpenAI gpt-oss-20b + OCR automático para PDFs escaneados)
             \Log::info('USANDO OPENROUTER SERVICE PARA EXTRACCIÓN', [
                 'archivo' => basename($rutaCompleta),
                 'ruta' => $rutaCompleta,
@@ -330,7 +339,7 @@ class PriorizacionController extends Controller
                 unlink($rutaCompleta);
             }
             
-            // Análisis libre con IA (GROQ - GPT-OSS 120B)
+            // Análisis libre con IA (OpenRouter - OpenAI gpt-oss-20b)
             $analisisCompleto = $this->aiService->analizarHistoriaClinicaLibre($textoExtraido);
             
             // Análisis de priorización con IA
@@ -432,6 +441,14 @@ class PriorizacionController extends Controller
     }
 
     /**
+     * Método público para analizar priorización (usado por MedicoController)
+     */
+    public function analizarPriorizacionPublico(string $textoExtraido): array
+    {
+        return $this->analizarPriorizacionConIA($textoExtraido);
+    }
+
+    /**
      * Analiza la priorización del paciente usando IA con criterios específicos
      */
     private function analizarPriorizacionConIA(string $textoExtraido): array
@@ -440,7 +457,7 @@ class PriorizacionController extends Controller
             \Log::info('INICIANDO ANÁLISIS DE PRIORIZACIÓN CON IA');
             
             $prompt = $this->buildPromptPriorizacion($textoExtraido);
-            // Usando GROQ - GPT-OSS 120B para análisis de priorización
+            // Usando OpenRouter - OpenAI gpt-oss-20b para análisis de priorización
             $respuestaIA = $this->aiService->analizarConPromptEspecifico($prompt);
             
             // Parsear la respuesta de la IA para extraer la decisión y el razonamiento
@@ -861,8 +878,11 @@ $textoCompleto
 
     public function extraerDatosPaciente(Request $request)
     {
-        // Aumentar tiempo de ejecución para OCR (puede tardar en PDFs grandes)
+        // Aumentar tiempo de ejecución para procesamiento rápido con IA (Llama 8B es rápido)
         set_time_limit(180); // 3 minutos
+        
+        // ✅ LIBERAR SESIÓN: Permite que otras peticiones se procesen mientras la IA trabaja
+        session_write_close();
         
         try {
             $request->validate([
@@ -917,8 +937,8 @@ $textoCompleto
                 unlink($rutaCompleta);
             }
         
-        // PASO 2: Analizar con GROQ (GPT-OSS 120B) - CON FALLBACK SOCIODEMOGRÁFICO
-        \Log::info('ANALIZANDO CON GROQ (GPT-OSS 120B) + FALLBACK');
+        // PASO 2: Analizar con OpenRouter (OpenAI gpt-oss-20b) - CON FALLBACK SOCIODEMOGRÁFICO
+        \Log::info('ANALIZANDO CON OPENROUTER (OpenAI gpt-oss-20b) + FALLBACK');
         
         try {
             // ✅ USAR EL MÉTODO CORRECTO CON FALLBACK

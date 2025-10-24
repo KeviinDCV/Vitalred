@@ -154,7 +154,9 @@ export default function AnalisisPriorizacion({ analisis: analisisInicial }: Prop
             }
 
         } catch (error: unknown) {
-                        setError(error.response?.data?.message || error.message || 'Error desconocido al procesar el archivo');
+            const axiosError = error as any;
+            const errorMessage = axiosError?.response?.data?.message || axiosError?.message || 'Error desconocido al procesar el archivo';
+            setError(errorMessage);
         } finally {
             setCargando(false);
             setProcesando(false);
@@ -225,14 +227,14 @@ export default function AnalisisPriorizacion({ analisis: analisisInicial }: Prop
         seccionKey: string
     ) => {
         const puntuacionTotal = criterios.reduce((sum, c) => sum + c.puntuacion, 0);
-        const isExpanded = seccionExpandida === seccionKey;
+        const isExpanded = expandedSections[seccionKey];
 
         return (
             <Card className="mb-4">
                 <CardHeader className="pb-3">
                     <div 
                         className="flex items-center justify-between cursor-pointer"
-                        onClick={() => toggleSeccion(seccionKey)}
+                        onClick={() => toggleSection(seccionKey)}
                     >
                         <div className="flex items-center gap-3">
                             {icono}
@@ -267,7 +269,7 @@ export default function AnalisisPriorizacion({ analisis: analisisInicial }: Prop
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Análisis IA Priorización - Vital Red" />
+            <Head title="Análisis IA Priorización - HERMES" />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 {/* Header */}
@@ -290,6 +292,18 @@ export default function AnalisisPriorizacion({ analisis: analisisInicial }: Prop
                     </div>
                 </div>
 
+                {!analisis ? (
+                    <Card>
+                        <CardContent className="flex flex-col items-center justify-center py-12">
+                            <Brain className="h-16 w-16 text-muted-foreground mb-4" />
+                            <h3 className="text-lg font-semibold mb-2">No hay análisis disponible</h3>
+                            <p className="text-sm text-muted-foreground mb-4">
+                                Cargue un archivo de historia clínica para iniciar el análisis
+                            </p>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <>
                 {/* Información del Paciente */}
                 <Card>
                     <CardHeader>
@@ -479,6 +493,8 @@ export default function AnalisisPriorizacion({ analisis: analisisInicial }: Prop
                         </p>
                     </CardContent>
                 </Card>
+                    </>
+                )}
             </div>
         </AppLayout>
     );

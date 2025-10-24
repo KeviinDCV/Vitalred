@@ -62,12 +62,16 @@ class RegistroMedico extends Model
         'estado',
         'fecha_envio',
         'prioriza_ia',
+        'medico_asignado_id',
+        'fecha_atencion',
+        'motivo_rechazo',
     ];
 
     protected $casts = [
         'fecha_nacimiento' => 'date',
         'fecha_ingreso' => 'date',
         'fecha_envio' => 'datetime',
+        'fecha_atencion' => 'datetime',
         'edad' => 'integer',
         'dias_hospitalizados' => 'integer',
         'frecuencia_cardiaca' => 'integer',

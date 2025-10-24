@@ -124,7 +124,9 @@ export default function CargaAnalisisIA() {
             }
 
         } catch (error: unknown) {
-                        setError(error.response?.data?.message || error.message || 'Error desconocido al procesar el archivo');
+            const axiosError = error as any;
+            const errorMessage = axiosError?.response?.data?.message || axiosError?.message || 'Error desconocido al procesar el archivo';
+            setError(errorMessage);
         } finally {
             setCargando(false);
             setProcesando(false);
@@ -156,7 +158,7 @@ export default function CargaAnalisisIA() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Análisis IA con Carga de Archivo - Vital Red" />
+            <Head title="Análisis IA con Carga de Archivo - HERMES" />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 {/* Header */}

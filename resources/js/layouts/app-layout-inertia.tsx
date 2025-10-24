@@ -4,6 +4,7 @@ import { AppSidebar } from '@/components/app-sidebar'
 import { AppContent } from '@/components/app-content'
 import { AppSidebarHeader } from '@/components/app-sidebar-header'
 import { type BreadcrumbItem } from '@/types'
+import { useNotifications } from '@/hooks/useNotifications'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -17,10 +18,17 @@ interface AppLayoutProps {
 
 export default function AppLayoutInertia({ 
   children, 
-  title = 'Vital Red', 
+  title = 'HERMES', 
   breadcrumbs = [],
   user 
 }: AppLayoutProps) {
+  // 🔔 Notificaciones en tiempo real para IPS (funciona en TODAS las páginas)
+  useNotifications({
+    enabled: user.role === 'ips',
+    interval: 10000, // Verificar cada 10 segundos
+    rolePrefix: 'ips'
+  });
+
   return (
     <>
       <Head title={title} />

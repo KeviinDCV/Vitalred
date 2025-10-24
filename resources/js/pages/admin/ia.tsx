@@ -105,9 +105,9 @@ export default function IA() {
 
     return (
         <AppLayoutInertia 
-            title="Inteligencia Artificial - Vital Red" 
+            title="Inteligencia Artificial - HERMES" 
             breadcrumbs={breadcrumbs}
-            user={auth.user}
+            user={{ name: auth.user.nombre, role: auth.user.role }}
         >
             <div className="space-y-6">
                 <div>

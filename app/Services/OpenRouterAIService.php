@@ -10,19 +10,19 @@ use Smalot\PdfParser\Parser;
 class OpenRouterAIService
 {
     private string $apiKey;
-    private string $baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    private string $model = 'openai/gpt-oss-120b'; // GPT-OSS 120B: 120B params, 131K context, 500 T/sec
+    private string $baseUrl = 'https://openrouter.ai/api/v1/chat/completions';
+    private string $model = 'openai/gpt-oss-20b:free'; // OpenAI gpt-oss-20b: FREE, MoE 3.6B activos, rápido y confiable, 131K context
 
     public function __construct()
     {
-        $this->apiKey = env('GROQ_API_KEY', '');
+        $this->apiKey = env('OPENROUTER_API_KEY', '');
         
         if (empty($this->apiKey)) {
-            Log::error('GROQ API Key no configurada en .env');
-            throw new \Exception('API Key de GROQ no configurada. Por favor agregue GROQ_API_KEY en el archivo .env');
+            Log::error('OPENROUTER API Key no configurada en .env');
+            throw new \Exception('API Key de OpenRouter no configurada. Por favor agregue OPENROUTER_API_KEY en el archivo .env');
         }
         
-        Log::info('🚀 GroqAIService (usando GROQ con GPT-OSS 120B) inicializado correctamente');
+        Log::info('🚀 OpenRouterAIService (usando OpenAI gpt-oss-20b - Rápido y Confiable) inicializado correctamente');
     }
 
     /**
@@ -727,17 +727,19 @@ class OpenRouterAIService
     }
 
     /**
-     * Llamar a la API de GROQ con GPT-OSS 120B
+     * Llamar a la API de OpenRouter con OpenAI gpt-oss-20b
      */
     private function callOpenRouterAPI(string $prompt): string
     {
         try {
-            Log::info("🚀 Llamando a GROQ API con GPT-OSS 120B");
+            Log::info("🚀 Llamando a OpenRouter API con OpenAI gpt-oss-20b");
             
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
+                'HTTP-Referer' => config('app.url', 'http://localhost'),
+                'X-Title' => 'Vital Red - Sistema Médico',
                 'Content-Type' => 'application/json',
-            ])->timeout(60)->post($this->baseUrl, [
+            ])->timeout(120)->post($this->baseUrl, [
                 'model' => $this->model,
                 'messages' => [
                     [
@@ -754,7 +756,7 @@ class OpenRouterAIService
                 $statusCode = $response->status();
                 
                 // Logging detallado para diagnóstico
-                Log::error("❌ Error en llamada a GROQ API", [
+                Log::error("❌ Error en llamada a OpenRouter API", [
                     'status_code' => $statusCode,
                     'error_body' => $errorBody,
                     'api_key_presente' => !empty($this->apiKey),
@@ -765,28 +767,28 @@ class OpenRouterAIService
                 
                 // Mensaje específico para error 401
                 if ($statusCode === 401) {
-                    throw new \Exception("Error de autenticación con GROQ (401): Verifica tu API key. Detalles: " . $errorBody);
+                    throw new \Exception("Error de autenticación con OpenRouter (401): Verifica tu API key. Detalles: " . $errorBody);
                 }
                 
-                throw new \Exception("Error en la API de GROQ: " . $statusCode . " - " . $errorBody);
+                throw new \Exception("Error en la API de OpenRouter: " . $statusCode . " - " . $errorBody);
             }
 
             $data = $response->json();
             
             if (!isset($data['choices'][0]['message']['content'])) {
-                throw new \Exception("Respuesta inválida de la API de GROQ");
+                throw new \Exception("Respuesta inválida de la API de OpenRouter");
             }
 
             $content = $data['choices'][0]['message']['content'];
-            Log::info("✅ Respuesta recibida de GROQ, longitud: " . strlen($content));
+            Log::info("✅ Respuesta recibida de OpenRouter, longitud: " . strlen($content));
         
             // 🔍 DEBUG: Mostrar respuesta RAW de la IA para depuración
             Log::info("🔍 RESPUESTA RAW DE LA IA:", ['content' => substr($content, 0, 500) . '...']);
 
             return $content;
         } catch (\Exception $e) {
-            Log::error("Error llamando a GROQ API: " . $e->getMessage());
-            throw new \Exception("Error al comunicarse con GROQ: " . $e->getMessage());
+            Log::error("Error llamando a OpenRouter API: " . $e->getMessage());
+            throw new \Exception("Error al comunicarse con OpenRouter: " . $e->getMessage());
         }
     }
 

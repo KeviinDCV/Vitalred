@@ -8,7 +8,7 @@ export default function AppLogoIcon({ size = 36, className, ...props }: AppLogoI
     return (
         <img
             src="/images/logo.png"
-            alt="Vital Red Logo"
+            alt="HERMES Logo"
             width={size}
             height={size}
             className={className}

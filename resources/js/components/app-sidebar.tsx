@@ -113,11 +113,11 @@ export function AppSidebar() {
     const roleBadgeVariant = user.role === 'administrador' ? 'default' : 'secondary';
 
     return (
-        <Sidebar collapsible="offcanvas" variant="sidebar">
-            <SidebarHeader className="border-b border-sidebar-border py-4 px-4">
+        <Sidebar collapsible="offcanvas" variant="sidebar" className="bg-[#042077] border-r-0">
+            <SidebarHeader className="border-b border-[#0a4db5]/30 py-3 px-3 sm:py-4 sm:px-4">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild className="hover:bg-sidebar-accent/50">
+                        <SidebarMenuButton size="lg" asChild className="hover:bg-[#0a4db5] transition-colors duration-200">
                             <Link href="/dashboard" prefetch>
                                 <AppLogo />
                             </Link>
@@ -126,11 +126,11 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent className="px-3 py-4">
+            <SidebarContent className="px-2 py-3 sm:px-3 sm:py-4 bg-[#042077]">
                 <NavMain items={navItems} />
             </SidebarContent>
 
-            <SidebarFooter className="mt-auto border-t border-sidebar-border p-4">
+            <SidebarFooter className="mt-auto border-t border-[#0a4db5]/30 p-3 sm:p-4 bg-[#042077]">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

@@ -152,12 +152,13 @@ class IpsController extends Controller
                 \Log::info('Iniciando análisis de priorización con IA para registro ' . $registro->id);
                 
                 $aiService = app(\App\Services\OpenRouterAIService::class);
+                $priorizacionController = app(\App\Http\Controllers\Medico\PriorizacionController::class);
                 
                 // Extraer texto de la historia clínica
                 $textoHistoria = $aiService->extractTextFromFile($historiaClinicaPath);
                 
-                // Analizar priorización
-                $analisisPriorizacion = $aiService->analizarPriorizacion($textoHistoria);
+                // Analizar priorización usando el método correcto del PriorizacionController
+                $analisisPriorizacion = $priorizacionController->analizarPriorizacionPublico($textoHistoria);
                 
                 // Guardar resultado en la base de datos
                 $registro->prioriza_ia = $analisisPriorizacion['prioriza'] ?? null;

@@ -271,11 +271,11 @@ export default function AnalisisPriorizacion() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Análisis de Priorización IA - Prueba - Vital Red" />
+            <Head title="Análisis de Priorización IA - Prueba - HERMES" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 p-6">
+            <div className="flex h-full flex-1 flex-col gap-4 p-4 sm:gap-5 sm:p-5 md:gap-6 md:p-6 bg-slate-50">
                 {/* Header Compacto */}
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                     <Button
                         variant="outline"
                         size="sm"
@@ -285,16 +285,16 @@ export default function AnalisisPriorizacion() {
                         Volver
                     </Button>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Análisis de Priorización IA</h1>
-                        <p className="text-sm text-muted-foreground">
-                            Sistema de evaluación automatizada con OCR + OpenRouter (Qwen 2.5)
+                        <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Análisis de Priorización IA</h1>
+                        <p className="text-xs sm:text-sm text-slate-600">
+                            Sistema de evaluación automatizada con inteligencia artificial
                         </p>
                     </div>
                 </div>
 
                 {/* PASO 1: Sección de Carga de Archivo (se muestra si no hay análisis) */}
                 {!analisis && (
-                    <Card>
+                    <Card className="bg-white border-0 shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_20px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)]">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Upload className="h-5 w-5" />
@@ -305,7 +305,7 @@ export default function AnalisisPriorizacion() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
+                            <div className="border-2 border-dashed border-slate-200 rounded-lg p-4 sm:p-6 md:p-8 text-center bg-slate-50/50">
                                 <div className="mx-auto flex max-w-sm flex-col items-center gap-4">
                                     <FileText className="h-12 w-12 text-muted-foreground" />
                                     
@@ -332,11 +332,12 @@ export default function AnalisisPriorizacion() {
                                         </div>
                                     )}
 
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 w-full sm:w-auto">
                                         <Button 
                                             onClick={handleCargarArchivo}
                                             variant="outline"
                                             disabled={cargando}
+                                            className="w-full sm:w-auto touch-manipulation"
                                         >
                                             <Upload className="h-4 w-4 mr-2" />
                                             Seleccionar Archivo
@@ -346,7 +347,7 @@ export default function AnalisisPriorizacion() {
                                             <Button 
                                                 onClick={handleAnalizar}
                                                 disabled={cargando}
-                                                className="bg-green-600 hover:bg-green-700"
+                                                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 shadow-[0_1px_2px_rgba(0,0,0,0.1),0_2px_4px_rgba(34,197,94,0.2)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.12),0_8px_16px_rgba(34,197,94,0.3)] hover:-translate-y-0.5 transition-all duration-200 touch-manipulation"
                                             >
                                                 {cargando ? (
                                                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -391,16 +392,6 @@ export default function AnalisisPriorizacion() {
                                     <p className="text-sm text-red-600 mt-2">{error}</p>
                                 </div>
                             )}
-
-                            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                                <h4 className="font-medium text-blue-800 mb-2">📋 Instrucciones:</h4>
-                                <ul className="text-sm text-blue-700 space-y-1">
-                                    <li>• <strong>Paso 1:</strong> Selecciona un archivo de historia clínica (PDF, imagen o documento)</li>
-                                    <li>• <strong>Paso 2:</strong> La IA extraerá automáticamente los datos médicos relevantes</li>
-                                    <li>• <strong>Paso 3:</strong> Se analizarán los 8 criterios de priorización médica</li>
-                                    <li>• <strong>Resultado:</strong> Recibirás análisis completo Verde/Rojo con desglose detallado</li>
-                                </ul>
-                            </div>
                         </CardContent>
                     </Card>
                 )}
@@ -409,8 +400,8 @@ export default function AnalisisPriorizacion() {
                 {analisis && (
                     <div className="space-y-3">
                         {/* Bento Grid - Header Info (MÁS COMPACTO) */}
-                        <div className="grid gap-2 md:grid-cols-4 lg:grid-cols-6">
-                            <Card className="lg:col-span-2">
+                        <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+                            <Card className="sm:col-span-2 lg:col-span-2 bg-white border-0 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_8px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.9)]">
                                 <CardContent className="p-3">
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2">
@@ -437,25 +428,25 @@ export default function AnalisisPriorizacion() {
                                 </CardContent>
                             </Card>
                             
-                            <Card className="lg:col-span-2">
+                            <Card className="sm:col-span-2 lg:col-span-2 bg-white border-0 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_8px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.9)]">
                                 <CardContent className="p-3">
-                                    <p className="text-xs text-muted-foreground mb-1">👤 Paciente</p>
+                                    <p className="text-xs text-slate-500 mb-1">👤 Paciente</p>
                                     <p className="text-sm font-semibold leading-tight">{analisis.paciente.nombre}</p>
                                     <p className="text-sm font-semibold leading-tight">{analisis.paciente.apellidos}</p>
                                 </CardContent>
                             </Card>
                             
-                            <Card>
+                            <Card className="bg-white border-0 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_8px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.9)]">
                                 <CardContent className="p-3">
-                                    <p className="text-xs text-muted-foreground mb-1">🎂 Edad</p>
+                                    <p className="text-xs text-slate-500 mb-1">🎂 Edad</p>
                                     <p className="text-xl font-bold">{analisis.paciente.edad}</p>
-                                    <p className="text-xs text-muted-foreground">años</p>
+                                    <p className="text-xs text-slate-500">años</p>
                                 </CardContent>
                             </Card>
                             
-                            <Card>
+                            <Card className="bg-white border-0 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_8px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.9)]">
                                 <CardContent className="p-3">
-                                    <p className="text-xs text-muted-foreground mb-1">👥 Tipo</p>
+                                    <p className="text-xs text-slate-500 mb-1">👥 Tipo</p>
                                     <Badge variant="outline" className="text-xs">{analisis.paciente.tipo_paciente}</Badge>
                                 </CardContent>
                             </Card>
@@ -463,7 +454,7 @@ export default function AnalisisPriorizacion() {
 
                         {/* Texto Extraído - Colapsable y Compacto */}
                         {analisis.texto_extraido && (
-                            <Card>
+                            <Card className="bg-white border-0 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_8px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.9)]">
                                 <CardHeader className="pb-3">
                                     <CardTitle className="text-base flex items-center gap-2">
                                         <FileText className="h-4 w-4" />
@@ -471,7 +462,7 @@ export default function AnalisisPriorizacion() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="pt-0">
-                                    <div className="bg-muted/30 border rounded-lg p-3 max-h-64 overflow-y-auto">
+                                    <div className="bg-slate-50 border-0 rounded-lg p-3 max-h-64 overflow-y-auto shadow-[inset_0_2px_4px_rgba(0,0,0,0.06),inset_0_0_8px_rgba(0,0,0,0.04)]">
                                         <pre className="text-xs whitespace-pre-wrap font-mono text-muted-foreground leading-relaxed">
                                             {analisis.texto_extraido}
                                         </pre>
@@ -482,7 +473,7 @@ export default function AnalisisPriorizacion() {
 
                         {/* Análisis de Priorización - Compacto */}
                         {analisis.razonamiento_priorizacion && (
-                            <Card>
+                            <Card className="bg-white border-0 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_8px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.9)]">
                                 <CardHeader className="pb-3">
                                     <CardTitle className="text-base flex items-center gap-2">
                                         <Brain className="h-4 w-4" />
@@ -506,7 +497,7 @@ export default function AnalisisPriorizacion() {
                                             </div>
                                         </div>
 
-                                        <div className="bg-muted/50 p-3 rounded-lg">
+                                        <div className="bg-slate-50 p-3 rounded-lg border-0">
                                             <div className="flex items-center justify-between mb-1">
                                                 <span className="text-sm font-medium">🏥 Decisión Clínica:</span>
                                                 <span className={`font-bold text-base ${analisis.razonamiento_priorizacion.prioriza ? 'text-green-700' : 'text-red-700'}`}>
@@ -603,13 +594,13 @@ export default function AnalisisPriorizacion() {
 
                                 <div>
                                     <Label htmlFor="analisis_vital_red" className="text-blue-900 font-medium">
-                                        2. Análisis Vital Red *
+                                        2. Análisis HERMES *
                                     </Label>
                                     <Textarea
                                         id="analisis_vital_red"
                                         value={analisisVitalRed}
                                         onChange={(e) => setAnalisisVitalRed(e.target.value)}
-                                        placeholder="Ingrese su análisis desde la perspectiva de Vital Red..."
+                                        placeholder="Ingrese su análisis desde la perspectiva de HERMES..."
                                         className="mt-2 min-h-[100px] border-blue-300 focus:ring-blue-500"
                                     />
                                 </div>

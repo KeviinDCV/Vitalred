@@ -80,9 +80,9 @@ export default function Monitoreo() {
 
     return (
         <AppLayoutInertia 
-            title="Monitoreo - Vital Red" 
+            title="Monitoreo - HERMES" 
             breadcrumbs={breadcrumbs}
-            user={auth.user}
+            user={{ name: auth.user.nombre, role: auth.user.role }}
         >
             <div className="space-y-6">
                 <div className="flex items-center justify-between">

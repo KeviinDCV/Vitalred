@@ -40,9 +40,9 @@ export default function Supervision() {
 
     return (
         <AppLayoutInertia 
-            title="Supervisión - Vital Red" 
+            title="Supervisión - HERMES" 
             breadcrumbs={breadcrumbs}
-            user={auth.user}
+            user={{ name: auth.user.nombre, role: auth.user.role }}
         >
             <div className="space-y-6">
                 <div>

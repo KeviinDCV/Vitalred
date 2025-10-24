@@ -57,9 +57,9 @@ export default function Configuracion() {
 
     return (
         <AppLayoutInertia 
-            title="Configuración - Vital Red" 
+            title="Configuración - HERMES" 
             breadcrumbs={breadcrumbs}
-            user={auth.user}
+            user={{ name: auth.user.nombre, role: auth.user.role }}
         >
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
@@ -172,12 +172,12 @@ export default function Configuracion() {
                                 <CardContent className="space-y-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="app-name">Nombre de la Aplicación</Label>
-                                        <Input id="app-name" defaultValue="Vital Red" />
+                                        <Input id="app-name" defaultValue="HERMES" />
                                     </div>
                                     
                                     <div className="space-y-2">
                                         <Label htmlFor="app-url">URL de la Aplicación</Label>
-                                        <Input id="app-url" defaultValue="https://vitalred.com" />
+                                        <Input id="app-url" defaultValue="https://hermes.com" />
                                     </div>
                                     
                                     <div className="space-y-2">
@@ -367,7 +367,7 @@ export default function Configuracion() {
                                         
                                         <div className="space-y-2">
                                             <Label htmlFor="from-email">Email Remitente</Label>
-                                            <Input id="from-email" type="email" defaultValue="noreply@vitalred.com" />
+                                            <Input id="from-email" type="email" defaultValue="noreply@hermes.com" />
                                         </div>
                                         
                                         <Button variant="outline" className="w-full">

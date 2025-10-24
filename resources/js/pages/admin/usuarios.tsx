@@ -138,7 +138,7 @@ export default function GestionUsuarios({ usuarios, stats }: Props) {
     };
     return (
         <AppLayoutInertia 
-            title="Gestión de Usuarios - Vital Red" 
+            title="Gestión de Usuarios - HERMES" 
             breadcrumbs={breadcrumbs}
             user={auth.user}
         >

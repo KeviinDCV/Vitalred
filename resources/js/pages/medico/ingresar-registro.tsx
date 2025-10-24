@@ -2654,18 +2654,18 @@ export default function IngresarRegistro() {
                     console.log('   🔍 Campos buscados: fecha_ingreso, fechaIngreso, fecha_de_ingreso, fechaDeIngreso, ingreso_fecha');
                 }
 
-                // 🚫 DIAGNÓSTICO PRINCIPAL NO SE LLENA AUTOMÁTICAMENTE - Responsabilidad del médico
+                // 🚫 DIAGNÓSTICOS (CIE-10) NO SE LLENAN AUTOMÁTICAMENTE - Responsabilidad del médico
                 if (extractedData.diagnostico_principal) {
-                    console.log('   🩺 Diagnóstico extraído por IA (NO LLENADO):', extractedData.diagnostico_principal);
+                    console.log('   🩺 Diagnóstico principal extraído por IA (NO LLENADO):', extractedData.diagnostico_principal);
                     console.log('   ⚠️ El diagnóstico principal debe ser verificado y llenado manualmente por el médico');
                 }
                 if (extractedData.diagnostico_1) {
-                    setData('diagnostico_1', extractedData.diagnostico_1);
-                    console.log('   🩺 Diagnóstico 1 llenado:', extractedData.diagnostico_1);
+                    console.log('   🩺 Diagnóstico No. 1 extraído por IA (NO LLENADO):', extractedData.diagnostico_1);
+                    console.log('   ⚠️ El diagnóstico No. 1 debe ser verificado y llenado manualmente por el médico');
                 }
                 if (extractedData.diagnostico_2) {
-                    setData('diagnostico_2', extractedData.diagnostico_2);
-                    console.log('   🩺 Diagnóstico 2 llenado:', extractedData.diagnostico_2);
+                    console.log('   🩺 Diagnóstico No. 2 extraído por IA (NO LLENADO):', extractedData.diagnostico_2);
+                    console.log('   ⚠️ El diagnóstico No. 2 debe ser verificado y llenado manualmente por el médico');
                 }
 
                 // Información clínica
@@ -2681,7 +2681,7 @@ export default function IngresarRegistro() {
                 console.log('   ⚠️ Antecedentes NO se auto-llena (debe revisarse manualmente)');
 
                 toast.success("🤖 ¡Datos extraídos automáticamente!", {
-                    description: "Los campos sociodemográficos Y clínicos se han llenado con IA. Revisa los datos y navega por los pasos para validar la información.",
+                    description: "Los campos sociodemográficos y clínicos se han llenado. ⚠️ IMPORTANTE: Los diagnósticos CIE-10 deben ser llenados manualmente por el médico.",
                     duration: 8000,
                 });
             } else {
@@ -2844,19 +2844,19 @@ export default function IngresarRegistro() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Ingresar Registro - Vital Red" />
+            <Head title="Ingresar Registro - HERMES" />
 
-            <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                <div className="max-w-7xl mx-auto w-full">
+            <div className="flex h-full flex-1 flex-col gap-4 p-4 sm:gap-5 sm:p-5 md:gap-6 md:p-6 bg-slate-50">
+                <div className="max-w-7xl mx-auto w-full px-2 sm:px-0">
                     {/* Header con información de consulta */}
-                    <Card className="bg-primary text-primary-foreground mb-6">
-                        <CardContent className="p-6">
-                            <div className="flex items-center gap-3">
-                                <Edit className="h-6 w-6" />
+                    <Card className="bg-gradient-to-br from-primary via-primary to-primary/95 text-primary-foreground mb-4 sm:mb-5 md:mb-6 border-0 shadow-[0_2px_4px_rgba(0,0,0,0.1),0_8px_16px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.2)]">
+                        <CardContent className="p-4 sm:p-5 md:p-6">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <Edit className="h-5 w-5 sm:h-6 sm:w-6" />
                                 <div>
-                                    <h2 className="text-xl font-semibold">Ingreso de datos</h2>
-                                    <p className="text-primary-foreground/80">Fecha de consulta:</p>
-                                    <p className="text-lg font-medium">
+                                    <h2 className="text-lg sm:text-xl font-semibold">Ingreso de datos</h2>
+                                    <p className="text-xs sm:text-sm text-primary-foreground/80">Fecha de consulta:</p>
+                                    <p className="text-base sm:text-lg font-medium">
                                         {new Date().toLocaleDateString('es-ES', {
                                             day: '2-digit',
                                             month: '2-digit',
@@ -2869,23 +2869,23 @@ export default function IngresarRegistro() {
                     </Card>
 
                     {/* Layout principal con stepper y contenido */}
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
                         {/* Stepper - Columna izquierda */}
                         <div className="lg:col-span-1">
-                            <div className="sticky top-6">
-                                <div className="space-y-1">
+                            <div className="lg:sticky lg:top-6 bg-gradient-to-b from-white to-slate-50/30 rounded-lg sm:rounded-xl p-4 sm:p-5 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.8)] relative before:absolute before:inset-0 before:rounded-lg sm:before:rounded-xl before:pointer-events-none">
+                                <div className="space-y-1 relative z-10">
                                     {steps.map((step, index) => (
                                         <div key={step.number} className="relative">
                                             <div className="flex items-center group">
                                                 {/* Círculo del paso con animaciones */}
                                                 <div className={`
-                                                    flex items-center justify-center w-10 h-10 rounded-full text-white font-semibold
+                                                    flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white text-sm sm:text-base font-semibold
                                                     transition-all duration-500 ease-in-out transform
                                                     ${step.number === currentStep
-                                                        ? 'bg-primary scale-110 shadow-lg shadow-primary/30 ring-4 ring-primary/20'
+                                                        ? 'bg-gradient-to-b from-primary to-primary/90 scale-110 shadow-[0_2px_4px_rgba(0,0,0,0.1),0_8px_16px_rgba(59,130,246,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] ring-4 ring-primary/20'
                                                         : step.number < currentStep
-                                                            ? 'bg-green-500 scale-105 shadow-md shadow-green-500/20'
-                                                            : 'bg-gray-300 scale-100 hover:scale-105'
+                                                            ? 'bg-gradient-to-b from-green-500 to-green-600 scale-105 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_4px_12px_rgba(34,197,94,0.3)]'
+                                                            : 'bg-gradient-to-b from-gray-300 to-gray-400 scale-100 hover:scale-105 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
                                                     }
                                                 `}>
                                                     <span className={`
@@ -2897,9 +2897,9 @@ export default function IngresarRegistro() {
                                                 </div>
 
                                                 {/* Texto del paso con animaciones */}
-                                                <div className="ml-4 flex-1 overflow-hidden">
+                                                <div className="ml-3 sm:ml-4 flex-1 overflow-hidden">
                                                     <p className={`
-                                                        font-medium text-sm transition-all duration-300 ease-in-out
+                                                        font-medium text-xs sm:text-sm transition-all duration-300 ease-in-out
                                                         ${step.number === currentStep
                                                             ? 'text-primary font-semibold transform translate-x-1'
                                                             : step.number < currentStep
@@ -2939,14 +2939,14 @@ export default function IngresarRegistro() {
                                 </div>
 
                                 {/* Indicador de progreso general */}
-                                <div className="mt-6 p-3 bg-gray-50 rounded-lg border">
-                                    <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
-                                        <span>Progreso</span>
-                                        <span>{Math.round((currentStep / steps.length) * 100)}%</span>
+                                <div className="mt-6 p-3 bg-gradient-to-b from-slate-50 to-slate-100/50 rounded-lg border-0 shadow-[0_1px_2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)]">
+                                    <div className="flex items-center justify-between text-xs text-slate-600 mb-2">
+                                        <span className="font-medium">Progreso</span>
+                                        <span className="font-semibold text-primary">{Math.round((currentStep / steps.length) * 100)}%</span>
                                     </div>
-                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div className="w-full bg-slate-200 rounded-full h-2 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]">
                                         <div
-                                            className="bg-primary h-2 rounded-full transition-all duration-700 ease-out"
+                                            className="bg-gradient-to-r from-primary via-primary to-primary/80 h-2 rounded-full transition-all duration-700 ease-out shadow-[0_1px_2px_rgba(59,130,246,0.3),inset_0_1px_0_rgba(255,255,255,0.4)]"
                                             style={{ width: `${(currentStep / steps.length) * 100}%` }}
                                         ></div>
                                     </div>
@@ -2963,9 +2963,9 @@ export default function IngresarRegistro() {
                                 ${isTransitioning ? 'opacity-0 transform translate-x-4' : 'opacity-100 transform translate-x-0'}
                             `}>
                                 {currentStep === 1 && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-xl">Información Personal</CardTitle>
+                        <Card className="bg-gradient-to-b from-white to-slate-50/20 border-0 shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_20px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)] rounded-lg sm:rounded-xl relative before:absolute before:inset-0 before:rounded-lg sm:before:rounded-xl before:pointer-events-none">
+                            <CardHeader className="border-b border-slate-100 pb-3 sm:pb-4 relative z-10 p-4 sm:p-6">
+                                <CardTitle className="text-lg sm:text-xl text-slate-900">Información Personal</CardTitle>
                                 <CardDescription className="space-y-2">
                                     <p><strong>Datos Personales</strong></p>
                                     <p>Escriba los datos solicitados tal como aparecen en su documento de identidad.</p>
@@ -2976,13 +2976,13 @@ export default function IngresarRegistro() {
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 {/* Cargar historia clínica */}
-                                <div className="space-y-2">
-                                    <Label className="text-base font-medium">
+                                <div className="space-y-1.5 sm:space-y-2">
+                                    <Label className="text-sm sm:text-base font-medium">
                                         Cargar historia clínica con nota de ingreso
                                     </Label>
-                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                                        <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                                        <p className="text-sm text-gray-600 mb-2">
+                                    <div className="bg-gradient-to-b from-slate-50 to-slate-100/50 border-2 border-dashed border-slate-200 rounded-lg p-4 sm:p-6 text-center hover:from-slate-100 hover:to-slate-50 hover:border-slate-300 hover:shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] transition-all duration-200 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] touch-manipulation">
+                                        <Upload className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-slate-400" />
+                                        <p className="text-xs sm:text-sm text-slate-600 mb-2">
                                             Haga clic para cargar documentos o arrastre archivos aquí
                                         </p>
                                         <input
@@ -3022,7 +3022,7 @@ export default function IngresarRegistro() {
                                         )}
 
                                         {isAnalyzingWithAI && (
-                                            <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                            <div className="mt-2 p-3 bg-gradient-to-b from-blue-50 to-blue-100/30 border-0 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.05),0_2px_6px_rgba(59,130,246,0.15),inset_0_1px_0_rgba(255,255,255,0.6)]">
                                                 <div className="flex items-center gap-2">
                                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                                                     <span className="text-sm font-medium text-blue-800">Analizando documento con IA...</span>
@@ -3034,7 +3034,7 @@ export default function IngresarRegistro() {
                                         )}
 
                                         {aiAnalysisResult && (
-                                            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                            <div className="mt-3 p-3 bg-gradient-to-b from-green-50 to-green-100/30 border-0 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.05),0_2px_6px_rgba(34,197,94,0.15),inset_0_1px_0_rgba(255,255,255,0.6)]">
                                                 <div className="flex items-center gap-2 mb-2">
                                                     <span className="text-green-600">✅</span>
                                                     <span className="text-sm font-medium text-green-800">Datos extraídos automáticamente</span>

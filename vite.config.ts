@@ -30,13 +30,15 @@ export default defineConfig({
         },
     },
     server: {
-        host: true, // Permite acceso desde cualquier IP
+        host: '0.0.0.0', // Escuchar en todas las interfaces de red
+        port: 5173,
         cors: {
-            origin: '*', // Permitir todos los orígenes (incluye ngrok)
+            origin: '*', // Permitir todos los orígenes
             credentials: true,
         },
         hmr: {
-            host: 'localhost',
+            host: '192.168.2.202', // IP de tu servidor en la red local
+            protocol: 'ws',
         },
     },
 });

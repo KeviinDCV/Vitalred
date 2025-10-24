@@ -116,12 +116,13 @@ class MedicoController extends Controller
                 \Log::info('Iniciando análisis de priorización con IA para registro ' . $registro->id);
                 
                 $aiService = app(\App\Services\OpenRouterAIService::class);
+                $priorizacionController = app(\App\Http\Controllers\Medico\PriorizacionController::class);
                 
                 // Extraer texto de la historia clínica
                 $textoHistoria = $aiService->extractTextFromFile($historiaClinicaPath);
                 
-                // Analizar priorización
-                $analisisPriorizacion = $aiService->analizarPriorizacion($textoHistoria);
+                // Analizar priorización usando el método correcto del PriorizacionController
+                $analisisPriorizacion = $priorizacionController->analizarPriorizacionPublico($textoHistoria);
                 
                 // Guardar resultado en la base de datos
                 $registro->prioriza_ia = $analisisPriorizacion['prioriza'] ?? null;
@@ -228,5 +229,93 @@ class MedicoController extends Controller
         return response()->download($filePath, $downloadName, [
             'Content-Type' => mime_content_type($filePath),
         ]);
+    }
+
+    /**
+     * Atender un caso (aceptar el paciente)
+     */
+    public function atenderCaso(Request $request, RegistroMedico $registro)
+    {
+        try {
+            // Actualizar estado del registro
+            $registro->update([
+                'estado' => 'aceptado',
+                'medico_asignado_id' => auth()->id(),
+                'fecha_atencion' => now(),
+            ]);
+
+            // Crear notificación para el IPS que creó el registro
+            if ($registro->user_id) {
+                \App\Models\Notificacion::create([
+                    'user_id' => $registro->user_id, // IPS que recibe la notificación
+                    'registro_medico_id' => $registro->id,
+                    'medico_id' => auth()->id(),
+                    'tipo' => 'aceptado',
+                    'titulo' => 'Caso Aceptado',
+                    'mensaje' => "El Dr./Dra. " . auth()->user()->nombre . " ha aceptado el caso del paciente {$registro->nombre} {$registro->apellidos} (ID: {$registro->numero_identificacion}).",
+                ]);
+            }
+
+            \Log::info('Caso atendido', [
+                'registro_id' => $registro->id,
+                'medico_id' => auth()->id(),
+                'ips_id' => $registro->user_id,
+            ]);
+
+            return redirect()->back()->with('success', "Caso de {$registro->nombre} {$registro->apellidos} aceptado exitosamente. La IPS ha sido notificada.");
+
+        } catch (\Exception $e) {
+            \Log::error('Error atendiendo caso: ' . $e->getMessage());
+            
+            return redirect()->back()->with('error', 'Error al atender el caso: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Rechazar/Derivar un caso
+     */
+    public function rechazarCaso(Request $request, RegistroMedico $registro)
+    {
+        $request->validate([
+            'motivo' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            $motivo = $request->input('motivo', 'No especificado');
+
+            // Actualizar estado del registro
+            $registro->update([
+                'estado' => 'rechazado',
+                'medico_asignado_id' => auth()->id(),
+                'fecha_atencion' => now(),
+                'motivo_rechazo' => $motivo,
+            ]);
+
+            // Crear notificación para el IPS que creó el registro
+            if ($registro->user_id) {
+                \App\Models\Notificacion::create([
+                    'user_id' => $registro->user_id, // IPS que recibe la notificación
+                    'registro_medico_id' => $registro->id,
+                    'medico_id' => auth()->id(),
+                    'tipo' => 'rechazado',
+                    'titulo' => 'Caso Rechazado',
+                    'mensaje' => "El Dr./Dra. " . auth()->user()->nombre . " ha rechazado/derivado el caso del paciente {$registro->nombre} {$registro->apellidos} (ID: {$registro->numero_identificacion}). Motivo: {$motivo}",
+                ]);
+            }
+
+            \Log::info('Caso rechazado', [
+                'registro_id' => $registro->id,
+                'medico_id' => auth()->id(),
+                'ips_id' => $registro->user_id,
+                'motivo' => $motivo,
+            ]);
+
+            return redirect()->back()->with('success', "Caso de {$registro->nombre} {$registro->apellidos} rechazado exitosamente. La IPS ha sido notificada.");
+
+        } catch (\Exception $e) {
+            \Log::error('Error rechazando caso: ' . $e->getMessage());
+            
+            return redirect()->back()->with('error', 'Error al rechazar el caso: ' . $e->getMessage());
+        }
     }
 }

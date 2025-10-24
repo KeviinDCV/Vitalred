@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AppLayoutInertia from '@/layouts/app-layout-inertia';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { Search, Users, FileText, ChevronLeft, ChevronRight, Brain, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Search, Users, FileText, ChevronLeft, ChevronRight, Brain, CheckCircle, XCircle, Clock, X } from 'lucide-react';
 import { useState } from 'react';
 
 interface RegistroMedico {
@@ -124,7 +124,7 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
             case 'aceptado':
             case 'atendido':
                 return (
-                    <Badge className="bg-green-600 hover:bg-green-700">
+                    <Badge className="bg-green-100 text-green-700 border-green-200">
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Aceptado
                     </Badge>
@@ -132,7 +132,7 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
             case 'rechazado':
             case 'derivado':
                 return (
-                    <Badge variant="destructive">
+                    <Badge className="bg-red-100 text-red-700 border-red-200">
                         <XCircle className="h-3 w-3 mr-1" />
                         Rechazado
                     </Badge>
@@ -141,7 +141,7 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
             case 'pendiente':
             default:
                 return (
-                    <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                    <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200">
                         <Clock className="h-3 w-3 mr-1" />
                         Pendiente
                     </Badge>
@@ -159,31 +159,31 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
 
     return (
         <AppLayoutInertia breadcrumbs={breadcrumbs} user={userForLayout}>
-            <Head title="Consulta Pacientes - Vital Red" />
+            <Head title="Consulta Pacientes - HERMES" />
 
-            <div className="flex h-full flex-1 flex-col gap-6 p-6">
+            <div className="flex h-full flex-1 flex-col gap-4 p-4 sm:gap-5 sm:p-5 md:gap-6 md:p-6 bg-slate-50">
                 {/* Header con estadísticas inline */}
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-start sm:justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-foreground">Consulta Pacientes</h1>
-                        <div className="flex items-center gap-6 mt-3">
-                            <div className="flex items-center gap-2">
-                                <Users className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-sm text-muted-foreground">Total:</span>
-                                <span className="text-lg font-bold">{estadisticas.total}</span>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Consulta Pacientes</h1>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 mt-3 sm:mt-4">
+                            <div className="flex items-center gap-1.5 sm:gap-2 bg-gradient-to-b from-white to-slate-50/50 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_8px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.8)] touch-manipulation">
+                                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-500" />
+                                <span className="text-xs sm:text-sm text-slate-600">Total:</span>
+                                <span className="text-base sm:text-lg font-bold text-slate-900">{estadisticas.total}</span>
                             </div>
                             {estadisticas.priorizados > 0 && (
-                                <div className="flex items-center gap-2">
-                                    <Brain className="h-4 w-4 text-green-600" />
-                                    <span className="text-sm text-muted-foreground">Priorizados:</span>
-                                    <span className="text-lg font-bold text-green-600">{estadisticas.priorizados}</span>
+                                <div className="flex items-center gap-1.5 sm:gap-2 bg-gradient-to-b from-white to-green-50/30 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_8px_rgba(34,197,94,0.15),inset_0_1px_0_rgba(255,255,255,0.8)] touch-manipulation">
+                                    <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
+                                    <span className="text-xs sm:text-sm text-slate-600">Priorizados:</span>
+                                    <span className="text-base sm:text-lg font-bold text-green-600">{estadisticas.priorizados}</span>
                                 </div>
                             )}
                             {estadisticas.no_priorizados > 0 && (
-                                <div className="flex items-center gap-2">
-                                    <FileText className="h-4 w-4 text-blue-600" />
-                                    <span className="text-sm text-muted-foreground">No Priorizados:</span>
-                                    <span className="text-lg font-bold text-blue-600">{estadisticas.no_priorizados}</span>
+                                <div className="flex items-center gap-1.5 sm:gap-2 bg-gradient-to-b from-white to-blue-50/30 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_8px_rgba(59,130,246,0.15),inset_0_1px_0_rgba(255,255,255,0.8)] touch-manipulation">
+                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
+                                    <span className="text-xs sm:text-sm text-slate-600">No Priorizados:</span>
+                                    <span className="text-base sm:text-lg font-bold text-blue-600">{estadisticas.no_priorizados}</span>
                                 </div>
                             )}
                         </div>
@@ -191,16 +191,16 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
                 </div>
 
                 {/* Tabla de registros con buscador integrado */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Registros Enviados</CardTitle>
-                        <CardDescription>
+                <Card className="bg-gradient-to-b from-white to-slate-50/30 border-0 shadow-[0_1px_3px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.9)]">
+                    <CardHeader className="border-b border-slate-100 bg-gradient-to-b from-slate-50/50 to-white">
+                        <CardTitle className="text-slate-900 text-xl sm:text-2xl">Registros Enviados</CardTitle>
+                        <CardDescription className="text-slate-600">
                             Consulta el estado de los registros médicos que has enviado
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {/* Buscador integrado */}
-                        <div className="flex gap-4">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                             <div className="flex-1">
                                 <div className="relative">
                                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -220,6 +220,7 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
                             <Button
                                 onClick={() => handleSearch(searchTerm)}
                                 disabled={isSearching}
+                                className="w-full sm:w-auto touch-manipulation"
                             >
                                 {isSearching ? (
                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -235,8 +236,10 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
                                         setSearchTerm('');
                                         handleSearch('');
                                     }}
+                                    className="w-full sm:w-auto touch-manipulation"
                                 >
-                                    Limpiar
+                                    <X className="h-4 w-4 sm:mr-2" />
+                                    <span className="hidden sm:inline">Limpiar</span>
                                 </Button>
                             )}
                         </div>
@@ -244,10 +247,10 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
                         {/* Tabla */}
                         {registros.data.length > 0 ? (
                             <div className="space-y-4">
-                                <div className="rounded-md border">
+                                <div className="rounded-lg bg-gradient-to-b from-slate-50 to-slate-100/50 border-0 overflow-x-auto shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]">
                                     <Table>
-                                        <TableHeader>
-                                            <TableRow>
+                                        <TableHeader className="bg-slate-100 border-0">
+                                            <TableRow className="border-0 hover:bg-slate-100">
                                                 <TableHead>ID</TableHead>
                                                 <TableHead>Nombre</TableHead>
                                                 <TableHead>Fecha solicitud</TableHead>
@@ -260,7 +263,7 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
                                         </TableHeader>
                                         <TableBody>
                                             {registros.data.map((registro) => (
-                                                <TableRow key={registro.id}>
+                                                <TableRow key={registro.id} className="bg-gradient-to-b from-white to-white border-0 border-b border-slate-100 last:border-b-0 hover:from-slate-50 hover:to-white hover:shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200">
                                                     <TableCell>
                                                         <div className="font-mono text-sm font-medium">
                                                             #{registro.id}
@@ -333,13 +336,13 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
 
                 {/* Paginación */}
                 {registros.last_page > 1 && (
-                    <Card>
+                    <Card className="bg-gradient-to-b from-white to-slate-50/30 border-0 shadow-[0_1px_3px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.9)]">
                         <CardContent className="pt-6">
-                            <div className="flex items-center justify-between">
-                                <div className="text-sm text-muted-foreground">
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div className="text-sm text-slate-600 text-center sm:text-left">
                                     Mostrando {registros.from || 0} a {registros.to || 0} de {registros.total} registros
                                 </div>
-                                <div className="flex items-center space-x-2">
+                                <div className="flex items-center space-x-2 flex-wrap justify-center">
                                     <Button
                                         variant="outline"
                                         size="sm"

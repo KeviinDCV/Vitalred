@@ -36,10 +36,10 @@ export default function AuthSimpleLayout({ children, title, description }: Props
 
                         <div className="space-y-2 sm:space-y-2.5 md:space-y-3">
                             <h1 className="text-3xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-primary tracking-tight leading-tight drop-shadow-sm">
-                                Vital Red
+                                HERMES
                             </h1>
                             <p className="text-xs sm:text-sm md:text-base text-slate-600 font-medium tracking-wide uppercase leading-relaxed max-w-xs sm:max-w-sm mx-auto px-4 sm:px-0">
-                                Sistema de Referencia y Contrareferencia
+                                Herramienta Estandarizada de Referencia y Contrarreferencia Médica Sistematizada
                             </p>
                         </div>
                     </div>
@@ -72,7 +72,7 @@ export default function AuthSimpleLayout({ children, title, description }: Props
                         <div className="mb-8 lg:mb-10 xl:mb-12">
                             <h2 className="text-3xl lg:text-4xl xl:text-4xl font-bold mb-4 lg:mb-6 leading-tight">
                                 Bienvenido a
-                                <span className="text-white/90"> Vital Red</span>
+                                <span className="text-white/90"> HERMES</span>
                             </h2>
                         </div>
 
@@ -86,7 +86,7 @@ export default function AuthSimpleLayout({ children, title, description }: Props
                                     <div key={index} className="w-full h-full flex-shrink-0 relative">
                                         <img
                                             src={image}
-                                            alt={`Imagen ${index + 1} de Vital Red`}
+                                            alt={`Imagen ${index + 1} de HERMES`}
                                             className="w-full h-full object-cover"
                                             loading={index === 0 ? "eager" : "lazy"}
                                             decoding="async"
