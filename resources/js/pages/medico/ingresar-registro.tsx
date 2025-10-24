@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, useForm, router, usePage } from '@inertiajs/react';
-import { Edit, Calendar, Upload, ChevronRight } from 'lucide-react';
+import { Edit, Calendar, Upload, ChevronRight, X } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -1503,6 +1503,7 @@ export default function IngresarRegistro() {
     const [validationErrors, setValidationErrors] = useState<string[]>([]);
     const [isAnalyzingWithAI, setIsAnalyzingWithAI] = useState(false);
     const [aiAnalysisResult, setAiAnalysisResult] = useState<any>(null);
+    const [isSavingRecord, setIsSavingRecord] = useState(false);
     const [searchCIE10, setSearchCIE10] = useState('');
     const [debouncedSearchCIE10, setDebouncedSearchCIE10] = useState('');
     const [searchCIE10_1, setSearchCIE10_1] = useState('');
@@ -2680,10 +2681,7 @@ export default function IngresarRegistro() {
                 // ANTECEDENTES: El médico debe revisarlo manualmente de la HC
                 console.log('   ⚠️ Antecedentes NO se auto-llena (debe revisarse manualmente)');
 
-                toast.success("🤖 ¡Datos extraídos automáticamente!", {
-                    description: "Los campos sociodemográficos y clínicos se han llenado. ⚠️ IMPORTANTE: Los diagnósticos CIE-10 deben ser llenados manualmente por el médico.",
-                    duration: 8000,
-                });
+                toast.success("Datos extraídos automáticamente");
             } else {
                 throw new Error(result.message || 'Error desconocido');
             }
@@ -3453,13 +3451,23 @@ export default function IngresarRegistro() {
                                                             
                                                             {/* Mostrar código seleccionado */}
                                                             {data.diagnostico_principal && (
-                                                                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
-                                                                    <p className="text-sm font-medium text-green-800">
-                                                                        Código seleccionado: {data.diagnostico_principal}
-                                                                    </p>
-                                                                    <p className="text-xs text-green-600">
-                                                                        {codigosCIE10.find(c => c.value === data.diagnostico_principal)?.label}
-                                                                    </p>
+                                                                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md flex items-start justify-between gap-2">
+                                                                    <div className="flex-1">
+                                                                        <p className="text-sm font-medium text-green-800">
+                                                                            Código seleccionado: {data.diagnostico_principal}
+                                                                        </p>
+                                                                        <p className="text-xs text-green-600">
+                                                                            {codigosCIE10.find(c => c.value === data.diagnostico_principal)?.label}
+                                                                        </p>
+                                                                    </div>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setData('diagnostico_principal', '')}
+                                                                        className="text-green-600 hover:text-red-600 hover:bg-red-50 p-1 rounded transition-colors"
+                                                                        title="Eliminar diagnóstico"
+                                                                    >
+                                                                        <X className="h-4 w-4" />
+                                                                    </button>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -3519,13 +3527,23 @@ export default function IngresarRegistro() {
                                                                 
                                                                 {/* Mostrar código seleccionado */}
                                                                 {data.diagnostico_1 && (
-                                                                    <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
-                                                                        <p className="text-sm font-medium text-green-800">
-                                                                            Código seleccionado: {data.diagnostico_1}
-                                                                        </p>
-                                                                        <p className="text-xs text-green-600">
-                                                                            {codigosCIE10.find(c => c.value === data.diagnostico_1)?.label}
-                                                                        </p>
+                                                                    <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md flex items-start justify-between gap-2">
+                                                                        <div className="flex-1">
+                                                                            <p className="text-sm font-medium text-green-800">
+                                                                                Código seleccionado: {data.diagnostico_1}
+                                                                            </p>
+                                                                            <p className="text-xs text-green-600">
+                                                                                {codigosCIE10.find(c => c.value === data.diagnostico_1)?.label}
+                                                                            </p>
+                                                                        </div>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setData('diagnostico_1', '')}
+                                                                            className="text-green-600 hover:text-red-600 hover:bg-red-50 p-1 rounded transition-colors"
+                                                                            title="Eliminar diagnóstico"
+                                                                        >
+                                                                            <X className="h-4 w-4" />
+                                                                        </button>
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -3584,13 +3602,23 @@ export default function IngresarRegistro() {
                                                                 
                                                                 {/* Mostrar código seleccionado */}
                                                                 {data.diagnostico_2 && (
-                                                                    <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
-                                                                        <p className="text-sm font-medium text-green-800">
-                                                                            Código seleccionado: {data.diagnostico_2}
-                                                                        </p>
-                                                                        <p className="text-xs text-green-600">
-                                                                            {codigosCIE10.find(c => c.value === data.diagnostico_2)?.label}
-                                                                        </p>
+                                                                    <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md flex items-start justify-between gap-2">
+                                                                        <div className="flex-1">
+                                                                            <p className="text-sm font-medium text-green-800">
+                                                                                Código seleccionado: {data.diagnostico_2}
+                                                                            </p>
+                                                                            <p className="text-xs text-green-600">
+                                                                                {codigosCIE10.find(c => c.value === data.diagnostico_2)?.label}
+                                                                            </p>
+                                                                        </div>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setData('diagnostico_2', '')}
+                                                                            className="text-green-600 hover:text-red-600 hover:bg-red-50 p-1 rounded transition-colors"
+                                                                            title="Eliminar diagnóstico"
+                                                                        >
+                                                                            <X className="h-4 w-4" />
+                                                                        </button>
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -4022,7 +4050,7 @@ export default function IngresarRegistro() {
                                                 <Button
                                                     variant="outline"
                                                     onClick={handlePrevious}
-                                                    disabled={isTransitioning}
+                                                    disabled={isTransitioning || isSavingRecord}
                                                 >
                                                     Anterior
                                                 </Button>
@@ -4045,17 +4073,21 @@ export default function IngresarRegistro() {
 
                                                             // Usar la ruta correcta según el rol del usuario
                                                             const storeRoute = userRole === 'ips' ? 'ips.ingresar-registro.store' : 'medico.ingresar-registro.store';
+                                                            
                                                             router.post(route(storeRoute), transformedData, {
                                                                 onStart: () => {
-                                                                    console.log('Iniciando envío...');
+                                                                    setIsSavingRecord(true);
+                                                                    console.log('Iniciando envío y análisis con IA...');
+                                                                    toast.info("Guardando registro", {
+                                                                        description: "Analizando con IA y guardando datos del paciente...",
+                                                                        duration: 3000,
+                                                                    });
                                                                 },
                                                                 onSuccess: () => {
                                                                     toast.success("¡Registro médico guardado exitosamente!", {
                                                                         description: "El paciente ha sido registrado. Redirigiendo a consulta de pacientes...",
                                                                         duration: 3000,
                                                                     });
-                                                                    // El controlador ya hace redirect a consulta-pacientes
-                                                                    // No necesitamos hacer nada más aquí
                                                                 },
                                                                 onError: (errors) => {
                                                                     console.error('Errores de validación:', errors);
@@ -4065,18 +4097,19 @@ export default function IngresarRegistro() {
                                                                     });
                                                                 },
                                                                 onFinish: () => {
+                                                                    setIsSavingRecord(false);
                                                                     console.log('Envío finalizado');
                                                                 }
                                                             });
                                                         }
                                                     }}
-                                                    disabled={isTransitioning}
+                                                    disabled={isSavingRecord}
                                                     className="bg-green-600 hover:bg-green-700"
                                                 >
-                                                    {isTransitioning ? (
+                                                    {isSavingRecord ? (
                                                         <>
                                                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                                            Enviando...
+                                                            Guardando y analizando...
                                                         </>
                                                     ) : (
                                                         <>

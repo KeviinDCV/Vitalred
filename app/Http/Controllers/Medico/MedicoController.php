@@ -24,6 +24,14 @@ class MedicoController extends Controller
      */
     public function storeRegistro(Request $request)
     {
+        // Aumentar tiempo de ejecución para procesamiento con IA
+        set_time_limit(180); // 3 minutos
+        
+        // ✅ CRÍTICO: LIBERAR SESIÓN - Evita bloqueo para otros usuarios/pestañas
+        // El análisis de priorización con IA (líneas 114-139) puede tardar 30-60s
+        // Sin liberar la sesión, bloquea todas las peticiones del usuario
+        session_write_close();
+        
         // ✅ SEGURIDAD: No loguear todos los datos del request
         \Log::info('Médico guardando registro', [
             'user_id' => auth()->id(),

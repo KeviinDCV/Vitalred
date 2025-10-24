@@ -25,6 +25,14 @@ class AIController extends Controller
      */
     public function extractPatientData(Request $request)
     {
+        // Aumentar tiempo de ejecución para procesamiento con IA
+        set_time_limit(180); // 3 minutos
+        
+        // ✅ CRÍTICO: LIBERAR SESIÓN - Evita bloqueo para otros usuarios/pestañas
+        // Sin esto, la sesión queda bloqueada durante todo el análisis de IA (30-60s)
+        // y ninguna otra petición del usuario puede procesarse
+        session_write_close();
+        
         try {
             // Validar que se haya subido un archivo
             $request->validate([
@@ -86,6 +94,12 @@ class AIController extends Controller
      */
     public function testTextExtraction(Request $request)
     {
+        // Aumentar tiempo de ejecución para procesamiento con IA
+        set_time_limit(180); // 3 minutos
+        
+        // ✅ CRÍTICO: LIBERAR SESIÓN - Evita bloqueo durante extracción de texto
+        session_write_close();
+        
         try {
             $request->validate([
                 'file' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240'
@@ -94,7 +108,7 @@ class AIController extends Controller
             $file = $request->file('file');
             $tempPath = $file->store('temp/test_extraction', 'public');
 
-            $extractedText = $this->geminiService->extractTextFromFile($tempPath);
+            $extractedText = $this->aiService->extractTextFromFile($tempPath);
 
             // Limpiar archivo temporal
             Storage::disk('public')->delete($tempPath);
@@ -123,10 +137,16 @@ class AIController extends Controller
     }
 
     /**
-     * Probar la API de Gemini directamente (para debugging)
+     * Probar la API de OpenRouter directamente (para debugging)
      */
     public function testGeminiAPI(Request $request)
     {
+        // Aumentar tiempo de ejecución para procesamiento con IA
+        set_time_limit(180); // 3 minutos
+        
+        // ✅ CRÍTICO: LIBERAR SESIÓN - Evita bloqueo durante análisis de IA
+        session_write_close();
+        
         try {
             $request->validate([
                 'text' => 'required|string|max:5000'
