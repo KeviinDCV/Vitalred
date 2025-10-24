@@ -1,4 +1,4 @@
-import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
+import { AppHeaderFloating } from '@/components/app-header-floating';
 import { type BreadcrumbItem } from '@/types';
 import { type ReactNode } from 'react';
 
@@ -8,7 +8,12 @@ interface AppLayoutProps {
 }
 
 export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => (
-    <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
-        {children}
-    </AppLayoutTemplate>
+    <div className="min-h-screen bg-slate-50">
+        <AppHeaderFloating />
+        
+        {/* Main Content with top padding for floating navbar */}
+        <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
+            {children}
+        </main>
+    </div>
 );

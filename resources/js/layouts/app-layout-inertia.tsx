@@ -1,8 +1,5 @@
 import { Head } from '@inertiajs/react'
-import { AppShell } from '@/components/app-shell'
-import { AppSidebar } from '@/components/app-sidebar'
-import { AppContent } from '@/components/app-content'
-import { AppSidebarHeader } from '@/components/app-sidebar-header'
+import { AppHeaderFloating } from '@/components/app-header-floating'
 import { type BreadcrumbItem } from '@/types'
 import { useNotifications } from '@/hooks/useNotifications'
 
@@ -33,13 +30,14 @@ export default function AppLayoutInertia({
     <>
       <Head title={title} />
       
-      <AppShell variant="sidebar">
-        <AppSidebar />
-        <AppContent variant="sidebar" className="overflow-x-hidden">
-          <AppSidebarHeader breadcrumbs={breadcrumbs} />
+      <div className="min-h-screen bg-slate-50">
+        <AppHeaderFloating />
+        
+        {/* Main Content with top padding for floating navbar */}
+        <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
           {children}
-        </AppContent>
-      </AppShell>
+        </main>
+      </div>
     </>
   )
 }

@@ -273,7 +273,7 @@ export default function AnalisisPriorizacion() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Análisis de Priorización IA - Prueba - HERMES" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 p-4 sm:gap-5 sm:p-5 md:gap-6 md:p-6 bg-slate-50">
+            <div className="flex h-full flex-1 flex-col gap-4 p-4 sm:gap-5 sm:p-5 md:gap-6 md:p-6">
                 {/* Header Compacto */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                     <Button

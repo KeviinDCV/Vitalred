@@ -161,7 +161,7 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
         <AppLayoutInertia breadcrumbs={breadcrumbs} user={userForLayout}>
             <Head title="Consulta Pacientes - HERMES" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 p-4 sm:gap-5 sm:p-5 md:gap-6 md:p-6 bg-slate-50">
+            <div className="flex h-full flex-1 flex-col gap-4 p-4 sm:gap-5 sm:p-5 md:gap-6 md:p-6">
                 {/* Header con estadísticas inline */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-start sm:justify-between gap-4">
                     <div>

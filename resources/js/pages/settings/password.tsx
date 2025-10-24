@@ -206,12 +206,7 @@ export default function Password() {
                                             {/* Primary Action: Button - Most prominent element */}
                                             <Button 
                                                 disabled={processing}
-                                                className="
-                                                    w-full sm:w-auto
-                                                    min-w-[140px] sm:min-w-[160px]
-                                                    px-4 sm:px-5 md:px-6
-                                                    py-2 sm:py-2.5
-                                                    text-sm sm:text-base
+                                                className="w-full sm:w-auto
                                                     shadow-[0_1px_2px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.12),0_6px_20px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.25)]
                                                     hover:shadow-[0_2px_4px_rgba(0,0,0,0.1),0_4px_12px_rgba(0,0,0,0.14),0_8px_24px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.3)]
                                                     active:shadow-[inset_0_2px_6px_rgba(0,0,0,0.2),inset_0_-1px_0_rgba(255,255,255,0.1)]
@@ -236,22 +231,18 @@ export default function Password() {
                                             <Transition
                                                 show={recentlySuccessful}
                                                 enter="transition ease-out duration-200"
-                                                enterFrom="opacity-0 scale-95 translate-y-1 sm:translate-y-0 sm:translate-x-2"
+                                                enterFrom="opacity-0 scale-95 translate-y-1"
                                                 leave="transition ease-in duration-150"
-                                                leaveTo="opacity-0 scale-95 translate-y-1 sm:translate-y-0 sm:translate-x-2"
+                                                leaveTo="opacity-0 scale-95 translate-y-1"
                                             >
-                                                <div className="
-                                                    bg-gradient-to-b from-green-50 to-green-100/50 
-                                                    px-3 sm:px-4 py-2 sm:py-1.5
-                                                    rounded-md sm:rounded-lg
-                                                    shadow-[0_1px_3px_rgba(0,0,0,0.06),0_2px_6px_rgba(34,197,94,0.1),inset_0_1px_0_rgba(255,255,255,0.6)]
-                                                    w-full sm:w-auto
-                                                    flex items-center justify-center sm:justify-start">
-                                                    <p className="text-sm sm:text-base font-medium text-green-700 flex items-center gap-1.5 sm:gap-2">
-                                                        <svg className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                                                <div className="bg-gradient-to-b from-green-50 to-green-100/50 
+                                                    px-3 py-1.5 rounded-md
+                                                    shadow-[0_1px_3px_rgba(0,0,0,0.06),0_2px_6px_rgba(34,197,94,0.1),inset_0_1px_0_rgba(255,255,255,0.6)]">
+                                                    <p className="text-sm font-medium text-green-700 flex items-center gap-1.5">
+                                                        <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                         </svg>
-                                                        <span className="whitespace-nowrap">Contraseña actualizada</span>
+                                                        <span>Contraseña actualizada</span>
                                                     </p>
                                                 </div>
                                             </Transition>

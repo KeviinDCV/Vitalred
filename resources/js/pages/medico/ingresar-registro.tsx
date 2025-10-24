@@ -2844,7 +2844,7 @@ export default function IngresarRegistro() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Ingresar Registro - HERMES" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 p-4 sm:gap-5 sm:p-5 md:gap-6 md:p-6 bg-slate-50">
+            <div className="flex h-full flex-1 flex-col gap-4 p-4 sm:gap-5 sm:p-5 md:gap-6 md:p-6">
                 <div className="max-w-7xl mx-auto w-full px-2 sm:px-0">
                     {/* Header con información de consulta */}
                     <Card className="bg-gradient-to-br from-primary via-primary to-primary/95 text-primary-foreground mb-4 sm:mb-5 md:mb-6 border-0 shadow-[0_2px_4px_rgba(0,0,0,0.1),0_8px_16px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.2)]">
