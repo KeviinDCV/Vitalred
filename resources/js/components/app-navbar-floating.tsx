@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { FileText, Search, LayoutGrid, Users, Shield, BarChart3, Activity, Brain, Settings } from 'lucide-react';
 import { type NavItem, type SharedData } from '@/types';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 // Navegación para Médico
 const medicoNavItems: NavItem[] = [
@@ -115,47 +116,69 @@ export function AppNavbarFloating() {
                         <Link
                             key={item.href}
                             href={item.href}
-                            className={cn(
-                                "relative flex items-center justify-center",
-                                "w-10 h-10 sm:w-12 sm:h-12",
-                                "rounded-full",
-                                "transition-all duration-200",
-                                "group",
-                                // Active state - Prominent shadow with gradient
-                                isActive && [
-                                    "bg-gradient-to-b from-[#042077] to-[#031852]",
-                                    "shadow-[0_2px_4px_rgba(4,32,119,0.3),0_4px_12px_rgba(4,32,119,0.2),inset_0_1px_0_rgba(255,255,255,0.2)]",
-                                    "scale-110",
-                                ],
-                                // Inactive state - Subtle hover
-                                !isActive && [
-                                    "hover:bg-slate-100/80",
-                                    "hover:shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.8)]",
-                                    "hover:scale-105",
-                                ]
-                            )}
+                            className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full group"
                         >
-                            <Icon 
-                                className={cn(
-                                    "w-5 h-5 sm:w-6 sm:h-6",
-                                    "transition-colors duration-200",
-                                    isActive && "text-white",
-                                    !isActive && "text-slate-600 group-hover:text-slate-900"
-                                )}
-                            />
+                            {/* Animated Background - Only shows for active state */}
+                            {isActive && (
+                                <motion.div
+                                    layoutId="navbar-active-pill"
+                                    className="absolute inset-0 bg-gradient-to-b from-[#042077] to-[#031852] rounded-full shadow-[0_2px_4px_rgba(4,32,119,0.3),0_4px_12px_rgba(4,32,119,0.2),inset_0_1px_0_rgba(255,255,255,0.2)]"
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 350,
+                                        damping: 30,
+                                    }}
+                                />
+                            )}
                             
-                            {/* Tooltip */}
-                            <span className="
-                                absolute -bottom-8 left-1/2 -translate-x-1/2
-                                px-2 py-1 
-                                bg-slate-900 text-white text-xs rounded-md
-                                opacity-0 group-hover:opacity-100
-                                pointer-events-none
-                                transition-opacity duration-200
-                                whitespace-nowrap
-                                shadow-lg">
+                            {/* Hover Effect - Only shows for inactive state */}
+                            {!isActive && (
+                                <motion.div
+                                    className="absolute inset-0 bg-slate-100/80 rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.8)]"
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    whileHover={{ 
+                                        opacity: 1, 
+                                        scale: 1,
+                                        transition: { 
+                                            type: "spring", 
+                                            stiffness: 400, 
+                                            damping: 20 
+                                        }
+                                    }}
+                                />
+                            )}
+                            
+                            {/* Icon */}
+                            <motion.div
+                                className="relative z-10"
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                            >
+                                <Icon 
+                                    className={cn(
+                                        "w-5 h-5 sm:w-6 sm:h-6 transition-colors duration-200",
+                                        isActive && "text-white",
+                                        !isActive && "text-slate-600 group-hover:text-slate-900"
+                                    )}
+                                />
+                            </motion.div>
+                            
+                            {/* Tooltip with smooth fade */}
+                            <motion.span 
+                                className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-900 text-white text-xs rounded-md pointer-events-none whitespace-nowrap shadow-lg"
+                                initial={{ opacity: 0, y: -5 }}
+                                whileHover={{ 
+                                    opacity: 1, 
+                                    y: 0,
+                                    transition: { 
+                                        duration: 0.2,
+                                        ease: "easeOut"
+                                    }
+                                }}
+                            >
                                 {item.title}
-                            </span>
+                            </motion.span>
                         </Link>
                     );
                 })}
