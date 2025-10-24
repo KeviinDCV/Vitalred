@@ -2975,7 +2975,7 @@ export default function IngresarRegistro() {
                             <CardContent className="space-y-6">
                                 {/* Cargar historia clínica */}
                                 <div className="space-y-1.5 sm:space-y-2">
-                                    <Label className="text-sm sm:text-base font-medium">
+                                    <Label htmlFor="historia-clinica-upload" className="text-sm sm:text-base font-medium">
                                         Cargar historia clínica con nota de ingreso
                                     </Label>
                                     <div className="bg-gradient-to-b from-slate-50 to-slate-100/50 border-2 border-dashed border-slate-200 rounded-lg p-4 sm:p-6 text-center hover:from-slate-100 hover:to-slate-50 hover:border-slate-300 hover:shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] transition-all duration-200 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] touch-manipulation">
@@ -3052,7 +3052,7 @@ export default function IngresarRegistro() {
                                             Tipo de identificación *
                                         </Label>
                                         <Select value={data.tipo_identificacion} onValueChange={(value) => setData('tipo_identificacion', value)}>
-                                            <SelectTrigger className={hasFieldError('tipo_identificacion') ? 'border-red-500' : ''}>
+                                            <SelectTrigger id="tipo_identificacion" className={hasFieldError('tipo_identificacion') ? 'border-red-500' : ''}>
                                                 <SelectValue placeholder="Seleccione" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -3149,7 +3149,7 @@ export default function IngresarRegistro() {
                                             Sexo *
                                         </Label>
                                         <Select value={data.sexo} onValueChange={(value) => setData('sexo', value)}>
-                                            <SelectTrigger className={`w-full md:w-1/2 ${hasFieldError('sexo') ? 'border-red-500' : ''}`}>
+                                            <SelectTrigger id="sexo" className={hasFieldError('sexo') ? 'border-red-500' : ''}>
                                                 <SelectValue placeholder="Seleccione" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -3203,7 +3203,7 @@ export default function IngresarRegistro() {
                                                 <div className="space-y-2">
                                                     <Label htmlFor="asegurador">Asegurador *</Label>
                                                     <Select value={data.asegurador} onValueChange={handleAseguradorChange}>
-                                                        <SelectTrigger>
+                                                        <SelectTrigger id="asegurador">
                                                             <SelectValue placeholder="Seleccione" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -3228,7 +3228,7 @@ export default function IngresarRegistro() {
                                                             value={data.asegurador_secundario} 
                                                             onValueChange={(value) => setData('asegurador_secundario', value)}
                                                         >
-                                                            <SelectTrigger>
+                                                            <SelectTrigger id="asegurador_secundario">
                                                                 <SelectValue placeholder="Seleccione" />
                                                             </SelectTrigger>
                                                             <SelectContent>
@@ -3246,7 +3246,7 @@ export default function IngresarRegistro() {
                                                 <div className="space-y-2">
                                                     <Label htmlFor="departamento">Departamento *</Label>
                                                     <Select value={data.departamento} onValueChange={handleDepartamentoChange}>
-                                                        <SelectTrigger>
+                                                        <SelectTrigger id="departamento">
                                                             <SelectValue placeholder="Seleccione" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -3267,7 +3267,7 @@ export default function IngresarRegistro() {
                                                         onValueChange={(value) => setData('ciudad', value)}
                                                         disabled={!data.departamento}
                                                     >
-                                                        <SelectTrigger>
+                                                        <SelectTrigger id="ciudad">
                                                             <SelectValue placeholder={data.departamento ? "Seleccione" : "Primero seleccione un departamento"} />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -3338,7 +3338,7 @@ export default function IngresarRegistro() {
                                                 <div className="space-y-2">
                                                     <Label htmlFor="tipo_paciente">Tipo de paciente *</Label>
                                                     <Select value={data.tipo_paciente} onValueChange={(value) => setData('tipo_paciente', value)}>
-                                                        <SelectTrigger>
+                                                        <SelectTrigger id="tipo_paciente">
                                                             <SelectValue placeholder="Seleccione" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -3355,7 +3355,7 @@ export default function IngresarRegistro() {
                                                 <div className="space-y-2">
                                                     <Label htmlFor="clasificacion_triage">Clasificación Triage *</Label>
                                                     <Select value={data.clasificacion_triage} onValueChange={(value) => setData('clasificacion_triage', value)}>
-                                                        <SelectTrigger>
+                                                        <SelectTrigger id="clasificacion_triage">
                                                             <SelectValue placeholder="Seleccione" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -3927,35 +3927,35 @@ export default function IngresarRegistro() {
                                                             </SelectTrigger>
                                                             <SelectContent className="max-h-60 overflow-y-auto">
                                                                 {especialidades.map((especialidad) => (
-                                                                    <div
+                                                                    <label
                                                                         key={especialidad.value}
-                                                                        className="flex items-center space-x-2 px-3 py-2 cursor-pointer hover:bg-blue-50"
-                                                                        onClick={(e) => {
-                                                                            e.preventDefault();
-                                                                            const currentValues = data.especialidad_solicitada;
-                                                                            const isSelected = currentValues.includes(especialidad.value);
-                                                                            
-                                                                            if (isSelected) {
-                                                                                // Remover si ya está seleccionado
-                                                                                setData('especialidad_solicitada', 
-                                                                                    currentValues.filter(val => val !== especialidad.value)
-                                                                                );
-                                                                            } else {
-                                                                                // Agregar si no está seleccionado
-                                                                                setData('especialidad_solicitada', 
-                                                                                    [...currentValues, especialidad.value]
-                                                                                );
-                                                                            }
-                                                                        }}
+                                                                        className="flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer rounded"
                                                                     >
                                                                         <input
                                                                             type="checkbox"
+                                                                            id={`especialidad_${especialidad.value}`}
                                                                             checked={data.especialidad_solicitada.includes(especialidad.value)}
-                                                                            onChange={() => {}} // Manejado por el onClick del div
+                                                                            onChange={() => {
+                                                                                const currentValues = Array.isArray(data.especialidad_solicitada) 
+                                                                                    ? data.especialidad_solicitada 
+                                                                                    : [];
+                                                                                
+                                                                                if (currentValues.includes(especialidad.value)) {
+                                                                                    // Remover si ya está seleccionado
+                                                                                    setData('especialidad_solicitada', 
+                                                                                        currentValues.filter(val => val !== especialidad.value)
+                                                                                    );
+                                                                                } else {
+                                                                                    // Agregar si no está seleccionado
+                                                                                    setData('especialidad_solicitada', 
+                                                                                        [...currentValues, especialidad.value]
+                                                                                    );
+                                                                                }
+                                                                            }}
                                                                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                                                         />
                                                                         <span className="text-sm">{especialidad.label}</span>
-                                                                    </div>
+                                                                    </label>
                                                                 ))}
                                                             </SelectContent>
                                                         </Select>
@@ -4001,7 +4001,7 @@ export default function IngresarRegistro() {
                                                 <div className="space-y-2">
                                                     <Label htmlFor="requerimiento_oxigeno">Requerimiento de oxígeno *</Label>
                                                     <Select value={data.requerimiento_oxigeno} onValueChange={(value) => setData('requerimiento_oxigeno', value)}>
-                                                        <SelectTrigger>
+                                                        <SelectTrigger id="requerimiento_oxigeno">
                                                             <SelectValue placeholder="Seleccione" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -4014,7 +4014,7 @@ export default function IngresarRegistro() {
                                                 <div className="space-y-2">
                                                     <Label htmlFor="tipo_servicio">Tipo de servicio *</Label>
                                                     <Select value={data.tipo_servicio} onValueChange={(value) => setData('tipo_servicio', value)}>
-                                                        <SelectTrigger>
+                                                        <SelectTrigger id="tipo_servicio">
                                                             <SelectValue placeholder="Seleccione" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -4032,7 +4032,7 @@ export default function IngresarRegistro() {
                                             <div className="space-y-2">
                                                 <Label htmlFor="tipo_apoyo">Tipo de apoyo</Label>
                                                 <Select value={data.tipo_apoyo} onValueChange={(value) => setData('tipo_apoyo', value)}>
-                                                    <SelectTrigger>
+                                                    <SelectTrigger id="tipo_apoyo">
                                                         <SelectValue placeholder="Seleccione" />
                                                     </SelectTrigger>
                                                     <SelectContent>

@@ -232,6 +232,12 @@ class PriorizacionController extends Controller
      */
     public function analizarLote(Request $request)
     {
+        // Aumentar tiempo de ejecución para análisis en lote
+        set_time_limit(300); // 5 minutos (múltiples pacientes)
+        
+        // ✅ CRÍTICO: LIBERAR SESIÓN - Análisis en lote puede tardar mucho
+        session_write_close();
+        
         $request->validate([
             'registro_ids' => 'required|array',
             'registro_ids.*' => 'integer|exists:registros_medicos,id'
@@ -2364,6 +2370,12 @@ $textoCompleto
      */
     public function analizarHistoriaClinicaCompleta(Request $request)
     {
+        // Aumentar tiempo de ejecución para procesamiento con IA
+        set_time_limit(180); // 3 minutos
+        
+        // ✅ CRÍTICO: LIBERAR SESIÓN - Evita bloqueo durante análisis completo con IA
+        session_write_close();
+        
         try {
             $request->validate([
                 'historia_clinica' => 'required|file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx,txt'
@@ -2918,6 +2930,12 @@ $textoCompleto
      */
     public function debugAnalisis(Request $request)
     {
+        // Aumentar tiempo de ejecución para procesamiento
+        set_time_limit(180); // 3 minutos
+        
+        // ✅ CRÍTICO: LIBERAR SESIÓN - Debugging puede tardar procesando archivos
+        session_write_close();
+        
         try {
             $debug = [];
             
@@ -3119,6 +3137,12 @@ $textoCompleto
      */
     public function testGeminiIA(Request $request)
     {
+        // Aumentar tiempo de ejecución para procesamiento con IA
+        set_time_limit(180); // 3 minutos
+        
+        // ✅ CRÍTICO: LIBERAR SESIÓN - Test de IA puede tardar
+        session_write_close();
+        
         try {
             \Log::info('INICIANDO PRUEBA SIMPLE DE OPENROUTER (DeepSeek 3.1)');
             
@@ -3190,6 +3214,12 @@ $textoCompleto
      */
     public function analizarDocumentoDirecto(Request $request)
     {
+        // Aumentar tiempo de ejecución para procesamiento con IA
+        set_time_limit(180); // 3 minutos
+        
+        // ✅ CRÍTICO: LIBERAR SESIÓN - Análisis directo con IA puede tardar
+        session_write_close();
+        
         try {
             $request->validate([
                 'historia_clinica' => 'required|file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx,txt'
