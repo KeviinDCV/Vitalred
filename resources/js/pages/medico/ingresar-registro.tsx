@@ -2844,17 +2844,19 @@ export default function IngresarRegistro() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Ingresar Registro - HERMES" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 p-4 sm:gap-5 sm:p-5 md:gap-6 md:p-6">
+            <div className="flex h-full flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-4 md:gap-4 md:p-5">
                 <div className="max-w-7xl mx-auto w-full px-2 sm:px-0">
-                    {/* Header con información de consulta */}
-                    <Card className="bg-gradient-to-br from-primary via-primary to-primary/95 text-primary-foreground mb-4 sm:mb-5 md:mb-6 border-0 shadow-[0_2px_4px_rgba(0,0,0,0.1),0_8px_16px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.2)]">
-                        <CardContent className="p-4 sm:p-5 md:p-6">
-                            <div className="flex items-center gap-2 sm:gap-3">
-                                <Edit className="h-5 w-5 sm:h-6 sm:w-6" />
-                                <div>
-                                    <h2 className="text-lg sm:text-xl font-semibold">Ingreso de datos</h2>
-                                    <p className="text-xs sm:text-sm text-primary-foreground/80">Fecha de consulta:</p>
-                                    <p className="text-base sm:text-lg font-medium">
+                    {/* Header compacto con información inline */}
+                    <Card className="bg-gradient-to-br from-primary via-primary to-primary/95 text-primary-foreground mb-3 sm:mb-4 border-0 shadow-[0_2px_4px_rgba(0,0,0,0.1),0_8px_16px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.2)]">
+                        <CardContent className="p-3 sm:p-4">
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-2 sm:gap-3">
+                                    <Edit className="h-5 w-5 flex-shrink-0" />
+                                    <h2 className="text-base sm:text-lg font-semibold">Ingreso de datos</h2>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-xs text-primary-foreground/70">Fecha:</p>
+                                    <p className="text-sm sm:text-base font-medium">
                                         {new Date().toLocaleDateString('es-ES', {
                                             day: '2-digit',
                                             month: '2-digit',
@@ -2867,23 +2869,23 @@ export default function IngresarRegistro() {
                     </Card>
 
                     {/* Layout principal con stepper y contenido */}
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-                        {/* Stepper - Columna izquierda */}
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4">
+                        {/* Stepper compacto - Columna izquierda */}
                         <div className="lg:col-span-1">
-                            <div className="lg:sticky lg:top-6 bg-gradient-to-b from-white to-slate-50/30 rounded-lg sm:rounded-xl p-4 sm:p-5 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.8)] relative before:absolute before:inset-0 before:rounded-lg sm:before:rounded-xl before:pointer-events-none">
-                                <div className="space-y-1 relative z-10">
+                            <div className="lg:sticky lg:top-20 bg-gradient-to-b from-white to-slate-50/30 rounded-lg p-3 sm:p-4 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.8)] relative before:absolute before:inset-0 before:rounded-lg before:pointer-events-none">
+                                <div className="space-y-0.5 relative z-10">
                                     {steps.map((step, index) => (
                                         <div key={step.number} className="relative">
                                             <div className="flex items-center group">
-                                                {/* Círculo del paso con animaciones */}
+                                                {/* Círculo compacto del paso */}
                                                 <div className={`
-                                                    flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white text-sm sm:text-base font-semibold
+                                                    flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-semibold
                                                     transition-all duration-500 ease-in-out transform
                                                     ${step.number === currentStep
-                                                        ? 'bg-gradient-to-b from-primary to-primary/90 scale-110 shadow-[0_2px_4px_rgba(0,0,0,0.1),0_8px_16px_rgba(59,130,246,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] ring-4 ring-primary/20'
+                                                        ? 'bg-gradient-to-b from-primary to-primary/90 scale-105 shadow-[0_2px_4px_rgba(0,0,0,0.1),0_6px_12px_rgba(59,130,246,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] ring-2 ring-primary/20'
                                                         : step.number < currentStep
-                                                            ? 'bg-gradient-to-b from-green-500 to-green-600 scale-105 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_4px_12px_rgba(34,197,94,0.3)]'
-                                                            : 'bg-gradient-to-b from-gray-300 to-gray-400 scale-100 hover:scale-105 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
+                                                            ? 'bg-gradient-to-b from-green-500 to-green-600 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_3px_8px_rgba(34,197,94,0.3)]'
+                                                            : 'bg-gradient-to-b from-gray-300 to-gray-400 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
                                                     }
                                                 `}>
                                                     <span className={`
@@ -2894,12 +2896,12 @@ export default function IngresarRegistro() {
                                                     </span>
                                                 </div>
 
-                                                {/* Texto del paso con animaciones */}
-                                                <div className="ml-3 sm:ml-4 flex-1 overflow-hidden">
+                                                {/* Texto compacto del paso */}
+                                                <div className="ml-2.5 flex-1 overflow-hidden">
                                                     <p className={`
-                                                        font-medium text-xs sm:text-sm transition-all duration-300 ease-in-out
+                                                        font-medium text-xs transition-all duration-300 ease-in-out
                                                         ${step.number === currentStep
-                                                            ? 'text-primary font-semibold transform translate-x-1'
+                                                            ? 'text-primary font-semibold'
                                                             : step.number < currentStep
                                                                 ? 'text-green-600'
                                                                 : 'text-gray-600'
@@ -2907,17 +2909,12 @@ export default function IngresarRegistro() {
                                                     `}>
                                                         {step.title}
                                                     </p>
-
-                                                    {/* Barra de progreso debajo del texto activo */}
-                                                    {step.number === currentStep && (
-                                                        <div className="mt-1 h-0.5 bg-primary rounded-full transform origin-left animate-in slide-in-from-left-full duration-500"></div>
-                                                    )}
                                                 </div>
                                             </div>
 
-                                            {/* Línea conectora con animación */}
+                                            {/* Línea conectora compacta */}
                                             {index < steps.length - 1 && (
-                                                <div className="ml-5 w-px h-8 relative">
+                                                <div className="ml-4 w-px h-6 relative">
                                                     {/* Línea base */}
                                                     <div className="absolute inset-0 bg-gray-300 transition-colors duration-300"></div>
 
@@ -2936,8 +2933,8 @@ export default function IngresarRegistro() {
                                     ))}
                                 </div>
 
-                                {/* Indicador de progreso general */}
-                                <div className="mt-6 p-3 bg-gradient-to-b from-slate-50 to-slate-100/50 rounded-lg border-0 shadow-[0_1px_2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)]">
+                                {/* Indicador de progreso compacto */}
+                                <div className="mt-4 p-2.5 bg-gradient-to-b from-slate-50 to-slate-100/50 rounded-lg border-0 shadow-[0_1px_2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)]">
                                     <div className="flex items-center justify-between text-xs text-slate-600 mb-2">
                                         <span className="font-medium">Progreso</span>
                                         <span className="font-semibold text-primary">{Math.round((currentStep / steps.length) * 100)}%</span>
@@ -2961,25 +2958,21 @@ export default function IngresarRegistro() {
                                 ${isTransitioning ? 'opacity-0 transform translate-x-4' : 'opacity-100 transform translate-x-0'}
                             `}>
                                 {currentStep === 1 && (
-                        <Card className="bg-gradient-to-b from-white to-slate-50/20 border-0 shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_20px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)] rounded-lg sm:rounded-xl relative before:absolute before:inset-0 before:rounded-lg sm:before:rounded-xl before:pointer-events-none">
-                            <CardHeader className="border-b border-slate-100 pb-3 sm:pb-4 relative z-10 p-4 sm:p-6">
-                                <CardTitle className="text-lg sm:text-xl text-slate-900">Información Personal</CardTitle>
-                                <CardDescription className="space-y-2">
-                                    <p><strong>Datos Personales</strong></p>
-                                    <p>Escriba los datos solicitados tal como aparecen en su documento de identidad.</p>
-                                    <p>Escriba el número de su documento de identidad sin puntos ni comas.</p>
-                                    <p>Escriba la fecha separada por guión (-), o haga uso del calendario ubicando el cursor dentro del campo.</p>
-                                    <p>Los campos marcados con (*) son obligatorios</p>
+                        <Card className="bg-gradient-to-b from-white to-slate-50/20 border-0 shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_20px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)] rounded-lg relative before:absolute before:inset-0 before:rounded-lg before:pointer-events-none">
+                            <CardHeader className="border-b border-slate-100 pb-2.5 relative z-10 p-3 sm:p-4">
+                                <CardTitle className="text-base sm:text-lg text-slate-900">Información Personal</CardTitle>
+                                <CardDescription className="text-xs sm:text-sm mt-1">
+                                    <strong>Importante:</strong> Complete los datos tal como aparecen en el documento de identidad. Los campos con (*) son obligatorios.
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-6">
-                                {/* Cargar historia clínica */}
-                                <div className="space-y-1.5 sm:space-y-2">
-                                    <Label htmlFor="historia-clinica-upload" className="text-sm sm:text-base font-medium">
+                            <CardContent className="space-y-4 p-3 sm:p-4">
+                                {/* Cargar historia clínica compacto */}
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="historia-clinica-upload" className="text-xs sm:text-sm font-medium">
                                         Cargar historia clínica con nota de ingreso
                                     </Label>
-                                    <div className="bg-gradient-to-b from-slate-50 to-slate-100/50 border-2 border-dashed border-slate-200 rounded-lg p-4 sm:p-6 text-center hover:from-slate-100 hover:to-slate-50 hover:border-slate-300 hover:shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] transition-all duration-200 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] touch-manipulation">
-                                        <Upload className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-slate-400" />
+                                    <div className="bg-gradient-to-b from-slate-50 to-slate-100/50 border-2 border-dashed border-slate-200 rounded-lg p-3 text-center hover:from-slate-100 hover:to-slate-50 hover:border-slate-300 hover:shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] transition-all duration-200 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] touch-manipulation">
+                                        <Upload className="h-5 w-5 mx-auto mb-1.5 text-slate-400" />
                                         <p className="text-xs sm:text-sm text-slate-600 mb-2">
                                             Haga clic para cargar documentos o arrastre archivos aquí
                                         </p>
@@ -3045,8 +3038,8 @@ export default function IngresarRegistro() {
                                     </div>
                                 </div>
 
-                                {/* Formulario de datos personales */}
-                                <div className="grid gap-6 md:grid-cols-2">
+                                {/* Formulario de datos personales - 3 columnas en desktop */}
+                                <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
                                     <div className="space-y-2">
                                         <Label htmlFor="tipo_identificacion" className={hasFieldError('tipo_identificacion') ? 'text-red-600' : ''}>
                                             Tipo de identificación *
@@ -3190,15 +3183,15 @@ export default function IngresarRegistro() {
 
                                 {/* Paso 2: Datos Sociodemográficos */}
                                 {currentStep === 2 && (
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle className="text-xl">Datos Sociodemográficos</CardTitle>
-                                            <CardDescription>
-                                                Los campos marcados con (*) son obligatorios
+                                    <Card className="bg-gradient-to-b from-white to-slate-50/20 border-0 shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_20px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)] rounded-lg">
+                                        <CardHeader className="border-b border-slate-100 pb-2.5 p-3 sm:p-4">
+                                            <CardTitle className="text-base sm:text-lg text-slate-900">Datos Sociodemográficos</CardTitle>
+                                            <CardDescription className="text-xs sm:text-sm mt-1">
+                                                Los campos con (*) son obligatorios
                                             </CardDescription>
                                         </CardHeader>
-                                        <CardContent className="space-y-6">
-                                            <div className="grid gap-6 md:grid-cols-2">
+                                        <CardContent className="space-y-4 p-3 sm:p-4">
+                                            <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
                                                 {/* Asegurador */}
                                                 <div className="space-y-2">
                                                     <Label htmlFor="asegurador">Asegurador *</Label>
@@ -3324,14 +3317,14 @@ export default function IngresarRegistro() {
 
                                 {/* Paso 3: Datos Clínicos */}
                                 {currentStep === 3 && (
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle className="text-xl">Datos Clínicos</CardTitle>
-                                            <CardDescription>
-                                                Los campos marcados con (*) son obligatorios
+                                    <Card className="bg-gradient-to-b from-white to-slate-50/20 border-0 shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_20px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)] rounded-lg">
+                                        <CardHeader className="border-b border-slate-100 pb-2.5 p-3 sm:p-4">
+                                            <CardTitle className="text-base sm:text-lg text-slate-900">Datos Clínicos</CardTitle>
+                                            <CardDescription className="text-xs sm:text-sm mt-1">
+                                                Los campos con (*) son obligatorios
                                             </CardDescription>
                                         </CardHeader>
-                                        <CardContent className="space-y-6">
+                                        <CardContent className="space-y-4 p-3 sm:p-4">
                                             {/* Primera sección: Información básica */}
                                             <div className="grid gap-6 md:grid-cols-2">
                                                 {/* Tipo de paciente */}
@@ -3872,14 +3865,14 @@ export default function IngresarRegistro() {
 
                                 {/* Paso 4: Datos De Remisión */}
                                 {currentStep === 4 && (
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle className="text-xl">Datos De Remisión</CardTitle>
-                                            <CardDescription>
-                                                Los campos marcados con (*) son obligatorios
+                                    <Card className="bg-gradient-to-b from-white to-slate-50/20 border-0 shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_20px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)] rounded-lg">
+                                        <CardHeader className="border-b border-slate-100 pb-2.5 p-3 sm:p-4">
+                                            <CardTitle className="text-base sm:text-lg text-slate-900">Datos De Remisión</CardTitle>
+                                            <CardDescription className="text-xs sm:text-sm mt-1">
+                                                Los campos con (*) son obligatorios
                                             </CardDescription>
                                         </CardHeader>
-                                        <CardContent className="space-y-6">
+                                        <CardContent className="space-y-4 p-3 sm:p-4">
                                             {/* Primera sección: Información de remisión */}
                                             <div className="space-y-4">
                                                 <div className="space-y-2">
