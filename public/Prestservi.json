@@ -1,0 +1,242 @@
+[
+    {
+        "Codigo": "HOSP001",
+        "Nombre": "HOSPITAL UNIVERSITARIO SAN IGNACIO"
+    },
+    {
+        "Codigo": "HOSP002",
+        "Nombre": "FUNDACIÓN SANTA FE DE BOGOTÁ"
+    },
+    {
+        "Codigo": "HOSP003",
+        "Nombre": "CLÍNICA SHAIO"
+    },
+    {
+        "Codigo": "HOSP004",
+        "Nombre": "HOSPITAL SAN JOSÉ"
+    },
+    {
+        "Codigo": "HOSP005",
+        "Nombre": "CLÍNICA DEL COUNTRY"
+    },
+    {
+        "Codigo": "HOSP006",
+        "Nombre": "HOSPITAL UNIVERSITARIO FUNDACIÓN SANTAFE"
+    },
+    {
+        "Codigo": "HOSP007",
+        "Nombre": "CLÍNICA COLOMBIA"
+    },
+    {
+        "Codigo": "HOSP008",
+        "Nombre": "HOSPITAL UNIVERSITARIO MAYOR - MEDERI"
+    },
+    {
+        "Codigo": "HOSP009",
+        "Nombre": "HOSPITAL UNIVERSITARIO CLÍNICA SAN RAFAEL"
+    },
+    {
+        "Codigo": "HOSP010",
+        "Nombre": "CLÍNICA REINA SOFÍA"
+    },
+    {
+        "Codigo": "HOSP011",
+        "Nombre": "HOSPITAL UNIVERSITARIO DE LA SAMARITANA"
+    },
+    {
+        "Codigo": "HOSP012",
+        "Nombre": "HOSPITAL UNIVERSITARIO SAN VICENTE DE PAUL"
+    },
+    {
+        "Codigo": "HOSP013",
+        "Nombre": "CLÍNICA LAS AMÉRICAS"
+    },
+    {
+        "Codigo": "HOSP014",
+        "Nombre": "CLÍNICA SOMA"
+    },
+    {
+        "Codigo": "HOSP015",
+        "Nombre": "HOSPITAL PABLO TOBÓN URIBE"
+    },
+    {
+        "Codigo": "HOSP016",
+        "Nombre": "CLÍNICA CARDIOVASCULAR"
+    },
+    {
+        "Codigo": "HOSP017",
+        "Nombre": "CLÍNICA EL ROSARIO"
+    },
+    {
+        "Codigo": "HOSP018",
+        "Nombre": "HOSPITAL GENERAL DE MEDELLÍN"
+    },
+    {
+        "Codigo": "HOSP019",
+        "Nombre": "HOSPITAL UNIVERSITARIO DEL VALLE"
+    },
+    {
+        "Codigo": "HOSP020",
+        "Nombre": "FUNDACIÓN VALLE DEL LILI"
+    },
+    {
+        "Codigo": "HOSP021",
+        "Nombre": "CLÍNICA IMBANACO"
+    },
+    {
+        "Codigo": "HOSP022",
+        "Nombre": "CLÍNICA RAFAEL URIBE URIBE"
+    },
+    {
+        "Codigo": "HOSP023",
+        "Nombre": "HOSPITAL UNIVERSITARIO ERASMO MEOZ"
+    },
+    {
+        "Codigo": "HOSP024",
+        "Nombre": "HOSPITAL UNIVERSITARIO DEL CARIBE"
+    },
+    {
+        "Codigo": "HOSP025",
+        "Nombre": "CLÍNICA LA MISERICORDIA"
+    },
+    {
+        "Codigo": "HOSP026",
+        "Nombre": "HOSPITAL INFANTIL UNIVERSITARIO DE SAN JOSÉ"
+    },
+    {
+        "Codigo": "HOSP027",
+        "Nombre": "FUNDACIÓN CARDIOINFANTIL"
+    },
+    {
+        "Codigo": "HOSP028",
+        "Nombre": "HOSPITAL MILITAR CENTRAL"
+    },
+    {
+        "Codigo": "HOSP029",
+        "Nombre": "HOSPITAL CENTRAL DE LA POLICÍA"
+    },
+    {
+        "Codigo": "HOSP030",
+        "Nombre": "CLÍNICA MARLY"
+    },
+    {
+        "Codigo": "HOSP031",
+        "Nombre": "CLÍNICA PALERMO"
+    },
+    {
+        "Codigo": "HOSP032",
+        "Nombre": "CLÍNICA JUAN N. CORPAS"
+    },
+    {
+        "Codigo": "HOSP033",
+        "Nombre": "HOSPITAL OCCIDENTE DE KENNEDY"
+    },
+    {
+        "Codigo": "HOSP034",
+        "Nombre": "HOSPITAL DE SUBA"
+    },
+    {
+        "Codigo": "HOSP035",
+        "Nombre": "HOSPITAL DE ENGATIVÁ"
+    },
+    {
+        "Codigo": "HOSP036",
+        "Nombre": "HOSPITAL DE USME"
+    },
+    {
+        "Codigo": "HOSP037",
+        "Nombre": "HOSPITAL SIMÓN BOLÍVAR"
+    },
+    {
+        "Codigo": "HOSP038",
+        "Nombre": "HOSPITAL DE BOSA"
+    },
+    {
+        "Codigo": "HOSP039",
+        "Nombre": "HOSPITAL SANTA CLARA"
+    },
+    {
+        "Codigo": "HOSP040",
+        "Nombre": "HOSPITAL EL TUNAL"
+    },
+    {
+        "Codigo": "HOSP041",
+        "Nombre": "CLÍNICA UNIVERSITARIA COLOMBIA"
+    },
+    {
+        "Codigo": "HOSP042",
+        "Nombre": "CLÍNICA DE MARLY S.A."
+    },
+    {
+        "Codigo": "HOSP043",
+        "Nombre": "CLÍNICA NUESTRA SEÑORA DE LA PAZ"
+    },
+    {
+        "Codigo": "HOSP044",
+        "Nombre": "HOSPITAL SAN RAFAEL DE TUNJA"
+    },
+    {
+        "Codigo": "HOSP045",
+        "Nombre": "HOSPITAL REGIONAL DE SOGAMOSO"
+    },
+    {
+        "Codigo": "HOSP046",
+        "Nombre": "HOSPITAL DEPARTAMENTAL DE VILLAVICENCIO"
+    },
+    {
+        "Codigo": "HOSP047",
+        "Nombre": "HOSPITAL SAN JUAN DE DIOS DE ARMENIA"
+    },
+    {
+        "Codigo": "HOSP048",
+        "Nombre": "HOSPITAL SAN JORGE DE PEREIRA"
+    },
+    {
+        "Codigo": "HOSP049",
+        "Nombre": "HOSPITAL UNIVERSITARIO SAN JORGE DE PEREIRA"
+    },
+    {
+        "Codigo": "HOSP050",
+        "Nombre": "HOSPITAL ROSARIO PUMAREJO DE LÓPEZ - VALLEDUPAR"
+    },
+    {
+        "Codigo": "HOSP051",
+        "Nombre": "CLÍNICA PORTOAZUL"
+    },
+    {
+        "Codigo": "HOSP052",
+        "Nombre": "HOSPITAL UNIVERSITARIO DE SANTANDER"
+    },
+    {
+        "Codigo": "HOSP053",
+        "Nombre": "CLÍNICA CHICAMOCHA"
+    },
+    {
+        "Codigo": "HOSP054",
+        "Nombre": "HOSPITAL FEDERICO LLERAS ACOSTA - IBAGUÉ"
+    },
+    {
+        "Codigo": "HOSP055",
+        "Nombre": "HOSPITAL DEPARTAMENTAL DE NEIVA"
+    },
+    {
+        "Codigo": "HOSP056",
+        "Nombre": "HOSPITAL UNIVERSITARIO SAN JOSÉ DE POPAYÁN"
+    },
+    {
+        "Codigo": "HOSP057",
+        "Nombre": "HOSPITAL DEPARTAMENTAL DE NARIÑO"
+    },
+    {
+        "Codigo": "HOSP058",
+        "Nombre": "HOSPITAL NIÑO JESÚS DE BARRANQUILLA"
+    },
+    {
+        "Codigo": "HOSP059",
+        "Nombre": "CLÍNICA GENERAL DEL NORTE"
+    },
+    {
+        "Codigo": "HOSP060",
+        "Nombre": "ESE HOSPITAL SAN RAFAEL DE FACATATIVÁ"
+    }
+]

@@ -1512,6 +1512,10 @@ export default function IngresarRegistro() {
     const [debouncedSearchCIE10_2, setDebouncedSearchCIE10_2] = useState('');
     const [codigosCIE10, setCodigosCIE10] = useState<Array<{value: string, label: string}>>([]);
     const [loadingCIE10, setLoadingCIE10] = useState(true);
+    const [searchInstitucion, setSearchInstitucion] = useState('');
+    const [debouncedSearchInstitucion, setDebouncedSearchInstitucion] = useState('');
+    const [instituciones, setInstituciones] = useState<Array<{value: string, label: string}>>([]);
+    const [loadingInstituciones, setLoadingInstituciones] = useState(true);
 
     // 📥 Cargar códigos CIE-10 desde JSON
     useEffect(() => {
@@ -1554,6 +1558,47 @@ export default function IngresarRegistro() {
         cargarCodigosCIE10();
     }, []);
 
+    // 📥 Cargar instituciones desde JSON
+    useEffect(() => {
+        const cargarInstituciones = async () => {
+            try {
+                setLoadingInstituciones(true);
+                console.log('🔄 Cargando instituciones desde /Prestservi.json...');
+                
+                const response = await fetch('/Prestservi.json');
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const datos = await response.json();
+                console.log(`✅ ${datos.length} instituciones cargadas exitosamente`);
+                
+                // Transformar datos del JSON al formato requerido
+                const institucionesFormateadas = datos.map((item: any) => ({
+                    value: item.Codigo,
+                    label: `${item.Codigo} - ${item.Nombre}`
+                }));
+                
+                setInstituciones(institucionesFormateadas);
+                
+            } catch (error) {
+                console.error('❌ Error cargando instituciones:', error);
+                toast.error('Error al cargar instituciones. Por favor recarga la página.');
+                
+                // Instituciones de respaldo en caso de error
+                setInstituciones([
+                    { value: 'HOSP001', label: 'HOSP001 - HOSPITAL UNIVERSITARIO SAN IGNACIO' },
+                    { value: 'HOSP002', label: 'HOSP002 - FUNDACIÓN SANTA FE DE BOGOTÁ' },
+                    { value: 'HOSP003', label: 'HOSP003 - CLÍNICA SHAIO' }
+                ]);
+            } finally {
+                setLoadingInstituciones(false);
+            }
+        };
+        
+        cargarInstituciones();
+    }, []);
+
     // 🔄 Debounce para búsquedas CIE-10 (mejor rendimiento)
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -1576,6 +1621,14 @@ export default function IngresarRegistro() {
         return () => clearTimeout(timer);
     }, [searchCIE10_2]);
 
+    // 🔄 Debounce para búsqueda de instituciones
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchInstitucion(searchInstitucion);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchInstitucion]);
+
     // 📱 Cerrar dropdowns al hacer clic fuera
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -1584,6 +1637,9 @@ export default function IngresarRegistro() {
                 setSearchCIE10('');
                 setSearchCIE10_1('');
                 setSearchCIE10_2('');
+            }
+            if (!target.closest('[data-institucion-dropdown]')) {
+                setSearchInstitucion('');
             }
         };
 
@@ -1907,6 +1963,29 @@ export default function IngresarRegistro() {
     const filteredCIE10 = createCIE10Filter(debouncedSearchCIE10);
     const filteredCIE10_1 = createCIE10Filter(debouncedSearchCIE10_1);
     const filteredCIE10_2 = createCIE10Filter(debouncedSearchCIE10_2);
+
+    // Filtrado de instituciones con búsqueda OPTIMIZADO y DEBOUNCED
+    const filteredInstituciones = useMemo(() => {
+        // Si no hay búsqueda, mostrar solo las primeras 50 instituciones
+        if (!debouncedSearchInstitucion) {
+            return instituciones.slice(0, 50);
+        }
+        
+        // Si hay búsqueda, filtrar y limitar a 100 resultados máximo
+        const searchLower = debouncedSearchInstitucion.toLowerCase().trim();
+        if (searchLower.length < 2) {
+            // Si la búsqueda es muy corta, mostrar solo algunos resultados
+            return instituciones.slice(0, 20);
+        }
+        
+        const filtered = instituciones.filter(institucion => 
+            institucion.label.toLowerCase().includes(searchLower) ||
+            institucion.value.toLowerCase().includes(searchLower)
+        );
+        
+        // Limitar a máximo 100 resultados para mantener fluidez
+        return filtered.slice(0, 100);
+    }, [debouncedSearchInstitucion, instituciones]);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         // Paso 1: Información Personal
@@ -2618,9 +2697,29 @@ export default function IngresarRegistro() {
                     }
                 }
 
+                // Buscar y mapear institución remitente desde la lista
                 if (extractedData.institucion_remitente) {
-                    setData('institucion_remitente', extractedData.institucion_remitente);
-                    console.log('Institución remitente llenada:', extractedData.institucion_remitente);
+                    const institucionBuscada = extractedData.institucion_remitente.toLowerCase().trim();
+                    
+                    // Buscar en la lista de instituciones cargadas
+                    const institucionEncontrada = instituciones.find(inst => {
+                        const labelLower = inst.label.toLowerCase();
+                        const nombreLower = labelLower.split(' - ')[1] || labelLower; // Obtener solo el nombre sin código
+                        
+                        // Búsqueda por coincidencia parcial o exacta
+                        return nombreLower.includes(institucionBuscada) || 
+                               institucionBuscada.includes(nombreLower) ||
+                               inst.value.toLowerCase().includes(institucionBuscada);
+                    });
+                    
+                    if (institucionEncontrada) {
+                        setData('institucion_remitente', institucionEncontrada.value);
+                        console.log('✅ Institución remitente encontrada y mapeada:', extractedData.institucion_remitente, '-> mapeada a:', institucionEncontrada.value, '-', institucionEncontrada.label);
+                    } else {
+                        // Si no se encuentra en la lista, dejar vacío para que el usuario busque manualmente
+                        console.log('⚠️ Institución remitente extraida por IA no encontrada en la lista:', extractedData.institucion_remitente);
+                        console.log('👉 El usuario debe buscarla manualmente o agregarla al JSON');
+                    }
                 }
 
                 // 🔥 NUEVOS CAMPOS CLÍNICOS - SECCIÓN 3 "DATOS CLÍNICOS"
@@ -3276,12 +3375,78 @@ export default function IngresarRegistro() {
                                                 {/* Institución remitente */}
                                                 <div className="space-y-2">
                                                     <Label htmlFor="institucion_remitente">Institución remitente *</Label>
-                                                    <Input
-                                                        id="institucion_remitente"
-                                                        value={data.institucion_remitente}
-                                                        onChange={(e) => setData('institucion_remitente', e.target.value)}
-                                                        placeholder="Nombre de la institución que remite"
-                                                    />
+                                                    <div className="relative" data-institucion-dropdown>
+                                                        {/* Campo unificado: búsqueda + selección */}
+                                                        <div className="space-y-2">
+                                                            <Input
+                                                                id="institucion_remitente"
+                                                                type="text"
+                                                                placeholder={loadingInstituciones ? "Cargando instituciones..." : "Busque y seleccione una institución..."}
+                                                                value={searchInstitucion}
+                                                                onChange={(e) => setSearchInstitucion(e.target.value)}
+                                                                disabled={loadingInstituciones}
+                                                                className="pr-10"
+                                                            />
+                                                            
+                                                            {/* Dropdown de resultados (solo si hay búsqueda) */}
+                                                            {(searchInstitucion.length >= 2 || loadingInstituciones) && (
+                                                                <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-lg">
+                                                                    {loadingInstituciones ? (
+                                                                        <div className="p-3 flex items-center text-sm text-gray-500">
+                                                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                                                                            Cargando instituciones...
+                                                                        </div>
+                                                                    ) : debouncedSearchInstitucion && filteredInstituciones.length > 0 ? (
+                                                                        <>
+                                                                            {filteredInstituciones.map((institucion) => (
+                                                                                <div
+                                                                                    key={institucion.value}
+                                                                                    className="px-3 py-2 cursor-pointer hover:bg-blue-50 text-sm border-b border-gray-100 last:border-b-0"
+                                                                                    onClick={() => {
+                                                                                        setData('institucion_remitente', institucion.value);
+                                                                                        setSearchInstitucion('');
+                                                                                    }}
+                                                                                >
+                                                                                    {institucion.label}
+                                                                                </div>
+                                                                            ))}
+                                                                            {filteredInstituciones.length === 100 && (
+                                                                                <div className="px-3 py-2 text-xs text-amber-600 bg-amber-50 border-t">
+                                                                                    ⚠️ Hay más resultados. Refine su búsqueda.
+                                                                                </div>
+                                                                            )}
+                                                                        </>
+                                                                    ) : (
+                                                                        <div className="px-3 py-2 text-sm text-gray-500">
+                                                                            No se encontraron instituciones que coincidan
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        
+                                                        {/* Mostrar institución seleccionada */}
+                                                        {data.institucion_remitente && (
+                                                            <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md flex items-start justify-between gap-2">
+                                                                <div className="flex-1">
+                                                                    <p className="text-sm font-medium text-green-800">
+                                                                        Institución seleccionada: {data.institucion_remitente}
+                                                                    </p>
+                                                                    <p className="text-xs text-green-600">
+                                                                        {instituciones.find(i => i.value === data.institucion_remitente)?.label}
+                                                                    </p>
+                                                                </div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setData('institucion_remitente', '')}
+                                                                    className="text-green-600 hover:text-red-600 hover:bg-red-50 p-1 rounded transition-colors"
+                                                                    title="Eliminar institución"
+                                                                >
+                                                                    <X className="h-4 w-4" />
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
 

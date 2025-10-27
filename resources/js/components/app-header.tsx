@@ -27,11 +27,6 @@ const adminNavItems: NavItem[] = [
         href: '/admin/usuarios',
         icon: Users,
     },
-    {
-        title: 'Panel de Supervisión',
-        href: '/admin/supervision',
-        icon: Shield,
-    },
 ];
 
 // Navegación para Médico

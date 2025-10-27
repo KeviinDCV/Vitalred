@@ -28,12 +28,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('usuarios/{usuario}/toggle-status', [App\Http\Controllers\Admin\UsuarioController::class, 'toggleStatus'])->name('usuarios.toggle-status');
         Route::delete('usuarios/{usuario}', [App\Http\Controllers\Admin\UsuarioController::class, 'destroy'])->name('usuarios.destroy');
 
-        Route::get('supervision', fn() => Inertia::render('admin/supervision'))->name('supervision');
         Route::get('referencias', fn() => Inertia::render('admin/referencias'))->name('referencias');
         Route::get('reportes', fn() => Inertia::render('admin/reportes'))->name('reportes');
-        Route::get('monitoreo', fn() => Inertia::render('admin/monitoreo'))->name('monitoreo');
-        Route::get('ia', fn() => Inertia::render('admin/ia'))->name('ia');
-        Route::get('configuracion', fn() => Inertia::render('admin/configuracion'))->name('configuracion');
+        // Route::get('ia', fn() => Inertia::render('admin/ia'))->name('ia');
+        // Route::get('configuracion', fn() => Inertia::render('admin/configuracion'))->name('configuracion');
 
         Route::get('buscar-registros', [App\Http\Controllers\Admin\DashboardController::class, 'buscarRegistros'])->name('buscar-registros');
         Route::get('descargar-historia/{registro}', [App\Http\Controllers\Admin\DashboardController::class, 'descargarHistoria'])->name('descargar-historia');
