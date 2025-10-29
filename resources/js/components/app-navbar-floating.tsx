@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { FileText, Search, LayoutGrid, Users, BarChart3, Settings } from 'lucide-react';
+import { FileText, Search, LayoutGrid, Users, Settings } from 'lucide-react';
 import { type NavItem, type SharedData } from '@/types';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -53,11 +53,6 @@ const adminNavItems: NavItem[] = [
         title: 'Usuarios',
         href: '/admin/usuarios',
         icon: Users,
-    },
-    {
-        title: 'Reportes',
-        href: '/admin/reportes',
-        icon: BarChart3,
     },
     {
         title: 'Configuración',

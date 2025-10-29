@@ -29,7 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('usuarios/{usuario}', [App\Http\Controllers\Admin\UsuarioController::class, 'destroy'])->name('usuarios.destroy');
 
         Route::get('referencias', fn() => Inertia::render('admin/referencias'))->name('referencias');
-        Route::get('reportes', fn() => Inertia::render('admin/reportes'))->name('reportes');
+        // Route::get('reportes', fn() => Inertia::render('admin/reportes'))->name('reportes'); // No se usa por ahora
         
         // Módulo de Configuración - Gestión de Catálogos
         Route::get('configuracion', [App\Http\Controllers\Admin\ConfiguracionController::class, 'index'])->name('configuracion');
@@ -39,6 +39,42 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('configuracion/especialidades', [App\Http\Controllers\Admin\ConfiguracionController::class, 'especialidades'])->name('configuracion.especialidades');
         Route::get('configuracion/servicios', [App\Http\Controllers\Admin\ConfiguracionController::class, 'servicios'])->name('configuracion.servicios');
         Route::get('configuracion/apoyos', [App\Http\Controllers\Admin\ConfiguracionController::class, 'apoyos'])->name('configuracion.apoyos');
+        
+        // CRUD CIE-10
+        Route::post('configuracion/cie10', [App\Http\Controllers\Admin\CIE10Controller::class, 'store'])->name('configuracion.cie10.store');
+        Route::put('configuracion/cie10/{id}', [App\Http\Controllers\Admin\CIE10Controller::class, 'update'])->name('configuracion.cie10.update');
+        Route::patch('configuracion/cie10/{id}/toggle', [App\Http\Controllers\Admin\CIE10Controller::class, 'toggleStatus'])->name('configuracion.cie10.toggle');
+        Route::delete('configuracion/cie10/{id}', [App\Http\Controllers\Admin\CIE10Controller::class, 'destroy'])->name('configuracion.cie10.destroy');
+        
+        // CRUD Instituciones
+        Route::post('configuracion/instituciones', [App\Http\Controllers\Admin\InstitucionController::class, 'store'])->name('configuracion.instituciones.store');
+        Route::put('configuracion/instituciones/{id}', [App\Http\Controllers\Admin\InstitucionController::class, 'update'])->name('configuracion.instituciones.update');
+        Route::patch('configuracion/instituciones/{id}/toggle', [App\Http\Controllers\Admin\InstitucionController::class, 'toggleStatus'])->name('configuracion.instituciones.toggle');
+        Route::delete('configuracion/instituciones/{id}', [App\Http\Controllers\Admin\InstitucionController::class, 'destroy'])->name('configuracion.instituciones.destroy');
+        
+        // CRUD Aseguradores
+        Route::post('configuracion/aseguradores', [App\Http\Controllers\Admin\AseguradorController::class, 'store'])->name('configuracion.aseguradores.store');
+        Route::put('configuracion/aseguradores/{id}', [App\Http\Controllers\Admin\AseguradorController::class, 'update'])->name('configuracion.aseguradores.update');
+        Route::patch('configuracion/aseguradores/{id}/toggle', [App\Http\Controllers\Admin\AseguradorController::class, 'toggleStatus'])->name('configuracion.aseguradores.toggle');
+        Route::delete('configuracion/aseguradores/{id}', [App\Http\Controllers\Admin\AseguradorController::class, 'destroy'])->name('configuracion.aseguradores.destroy');
+        
+        // CRUD Especialidades
+        Route::post('configuracion/especialidades', [App\Http\Controllers\Admin\EspecialidadController::class, 'store'])->name('configuracion.especialidades.store');
+        Route::put('configuracion/especialidades/{id}', [App\Http\Controllers\Admin\EspecialidadController::class, 'update'])->name('configuracion.especialidades.update');
+        Route::patch('configuracion/especialidades/{id}/toggle', [App\Http\Controllers\Admin\EspecialidadController::class, 'toggleStatus'])->name('configuracion.especialidades.toggle');
+        Route::delete('configuracion/especialidades/{id}', [App\Http\Controllers\Admin\EspecialidadController::class, 'destroy'])->name('configuracion.especialidades.destroy');
+        
+        // CRUD Tipos de Servicio
+        Route::post('configuracion/servicios', [App\Http\Controllers\Admin\TipoServicioController::class, 'store'])->name('configuracion.servicios.store');
+        Route::put('configuracion/servicios/{id}', [App\Http\Controllers\Admin\TipoServicioController::class, 'update'])->name('configuracion.servicios.update');
+        Route::patch('configuracion/servicios/{id}/toggle', [App\Http\Controllers\Admin\TipoServicioController::class, 'toggleStatus'])->name('configuracion.servicios.toggle');
+        Route::delete('configuracion/servicios/{id}', [App\Http\Controllers\Admin\TipoServicioController::class, 'destroy'])->name('configuracion.servicios.destroy');
+        
+        // CRUD Tipos de Apoyo
+        Route::post('configuracion/apoyos', [App\Http\Controllers\Admin\TipoApoyoController::class, 'store'])->name('configuracion.apoyos.store');
+        Route::put('configuracion/apoyos/{id}', [App\Http\Controllers\Admin\TipoApoyoController::class, 'update'])->name('configuracion.apoyos.update');
+        Route::patch('configuracion/apoyos/{id}/toggle', [App\Http\Controllers\Admin\TipoApoyoController::class, 'toggleStatus'])->name('configuracion.apoyos.toggle');
+        Route::delete('configuracion/apoyos/{id}', [App\Http\Controllers\Admin\TipoApoyoController::class, 'destroy'])->name('configuracion.apoyos.destroy');
 
         Route::get('buscar-registros', [App\Http\Controllers\Admin\DashboardController::class, 'buscarRegistros'])->name('buscar-registros');
         Route::get('descargar-historia/{registro}', [App\Http\Controllers\Admin\DashboardController::class, 'descargarHistoria'])->name('descargar-historia');
