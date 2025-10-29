@@ -1514,7 +1514,14 @@ export default function IngresarRegistro() {
     const [loadingCIE10, setLoadingCIE10] = useState(true);
     const [searchInstitucion, setSearchInstitucion] = useState('');
     const [debouncedSearchInstitucion, setDebouncedSearchInstitucion] = useState('');
-    const [instituciones, setInstituciones] = useState<Array<{value: string, label: string}>>([]);
+    const [instituciones, setInstituciones] = useState<Array<{
+        value: string;
+        label: string;
+        tipo?: 'nacional' | 'policia';
+        codigo?: number;
+        departamento?: string;
+        municipio?: string;
+    }>>([]);
     const [loadingInstituciones, setLoadingInstituciones] = useState(true);
 
     // 📥 Cargar códigos CIE-10 desde JSON
@@ -1558,7 +1565,7 @@ export default function IngresarRegistro() {
         cargarCodigosCIE10();
     }, []);
 
-    // 📥 Cargar instituciones desde JSON
+    // 📥 Cargar instituciones desde JSON (IPS Nacional + IPS Policía)
     useEffect(() => {
         const cargarInstituciones = async () => {
             try {
@@ -1571,15 +1578,38 @@ export default function IngresarRegistro() {
                 }
                 
                 const datos = await response.json();
-                console.log(`✅ ${datos.length} instituciones cargadas exitosamente`);
                 
-                // Transformar datos del JSON al formato requerido
-                const institucionesFormateadas = datos.map((item: any) => ({
-                    value: item.Codigo,
-                    label: `${item.Codigo} - ${item.Nombre}`
+                // Procesar IPS Nacional (usan "sede_nombre" y "codigo_habilitacion")
+                const ipsNacional = datos['IPS Nacional'] || [];
+                const institucionesNacionales = ipsNacional.map((item: any) => ({
+                    value: item.sede_nombre,
+                    label: item.sede_nombre,
+                    codigo: item.codigo_habilitacion,
+                    departamento: item.depa_nombre,
+                    municipio: item.muni_nombre,
+                    tipo: 'nacional'
                 }));
                 
-                setInstituciones(institucionesFormateadas);
+                // Procesar IPS Policía Nacional (usan "NOMBRE" y "DEPARTAMENTO")
+                const ipsPolicia = datos['IPS Policia Nacional'] || [];
+                const institucionesPolicia = ipsPolicia.map((item: any) => ({
+                    value: item.NOMBRE,
+                    label: item.NOMBRE,
+                    departamento: item.DEPARTAMENTO,
+                    tipo: 'policia'
+                }));
+                
+                // Combinar ambas listas
+                const todasLasInstituciones = [...institucionesNacionales, ...institucionesPolicia];
+                
+                // Ordenar alfabéticamente por label
+                todasLasInstituciones.sort((a, b) => a.label.localeCompare(b.label));
+                
+                console.log(`✅ ${institucionesNacionales.length} IPS Nacionales cargadas`);
+                console.log(`✅ ${institucionesPolicia.length} IPS Policía cargadas`);
+                console.log(`✅ Total: ${todasLasInstituciones.length} instituciones disponibles`);
+                
+                setInstituciones(todasLasInstituciones);
                 
             } catch (error) {
                 console.error('❌ Error cargando instituciones:', error);
@@ -1587,9 +1617,9 @@ export default function IngresarRegistro() {
                 
                 // Instituciones de respaldo en caso de error
                 setInstituciones([
-                    { value: 'HOSP001', label: 'HOSP001 - HOSPITAL UNIVERSITARIO SAN IGNACIO' },
-                    { value: 'HOSP002', label: 'HOSP002 - FUNDACIÓN SANTA FE DE BOGOTÁ' },
-                    { value: 'HOSP003', label: 'HOSP003 - CLÍNICA SHAIO' }
+                    { value: 'HOSPITAL UNIVERSITARIO SAN IGNACIO', label: 'HOSPITAL UNIVERSITARIO SAN IGNACIO', tipo: 'nacional' },
+                    { value: 'FUNDACIÓN SANTA FE DE BOGOTÁ', label: 'FUNDACIÓN SANTA FE DE BOGOTÁ', tipo: 'nacional' },
+                    { value: 'CLÍNICA SHAIO', label: 'CLÍNICA SHAIO', tipo: 'nacional' }
                 ]);
             } finally {
                 setLoadingInstituciones(false);

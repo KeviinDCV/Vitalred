@@ -656,7 +656,112 @@ class OpenRouterAIService
     }
 
     /**
-     * Extraer institución remitente directamente del texto
+     * Cargar instituciones desde el JSON público
+     */
+    private function loadInstituciones(): array
+    {
+        try {
+            $jsonPath = public_path('Prestservi.json');
+            
+            if (!file_exists($jsonPath)) {
+                Log::warning('❌ Archivo Prestservi.json no encontrado en public/');
+                return [];
+            }
+            
+            $jsonContent = file_get_contents($jsonPath);
+            $data = json_decode($jsonContent, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                Log::error('❌ Error decodificando Prestservi.json: ' . json_last_error_msg());
+                return [];
+            }
+            
+            $instituciones = [];
+            
+            // Cargar IPS Nacional (usan "sede_nombre")
+            if (isset($data['IPS Nacional']) && is_array($data['IPS Nacional'])) {
+                foreach ($data['IPS Nacional'] as $ips) {
+                    if (!empty($ips['sede_nombre'])) {
+                        $instituciones[] = [
+                            'nombre' => $ips['sede_nombre'],
+                            'tipo' => 'nacional',
+                            'departamento' => $ips['depa_nombre'] ?? '',
+                            'municipio' => $ips['muni_nombre'] ?? ''
+                        ];
+                    }
+                }
+            }
+            
+            // Cargar IPS Policía (usan "NOMBRE")
+            if (isset($data['IPS Policia Nacional']) && is_array($data['IPS Policia Nacional'])) {
+                foreach ($data['IPS Policia Nacional'] as $ips) {
+                    if (!empty($ips['NOMBRE'])) {
+                        $instituciones[] = [
+                            'nombre' => $ips['NOMBRE'],
+                            'tipo' => 'policia',
+                            'departamento' => $ips['DEPARTAMENTO'] ?? ''
+                        ];
+                    }
+                }
+            }
+            
+            Log::info("✅ Cargadas " . count($instituciones) . " instituciones desde Prestservi.json");
+            return $instituciones;
+            
+        } catch (\Exception $e) {
+            Log::error('❌ Error cargando instituciones: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Buscar institución en el JSON usando fuzzy matching
+     */
+    private function buscarInstitucionEnJSON(string $textoBusqueda, array $instituciones): ?string
+    {
+        if (empty($textoBusqueda) || empty($instituciones)) {
+            return null;
+        }
+        
+        $textoBusqueda = strtolower(trim($textoBusqueda));
+        $mejorCoincidencia = null;
+        $mejorSimilitud = 0;
+        
+        foreach ($instituciones as $institucion) {
+            $nombreInstitucion = strtolower($institucion['nombre']);
+            
+            // Coincidencia exacta (prioridad máxima)
+            if ($nombreInstitucion === $textoBusqueda) {
+                return $institucion['nombre'];
+            }
+            
+            // Coincidencia parcial (contiene)
+            if (str_contains($nombreInstitucion, $textoBusqueda) || str_contains($textoBusqueda, $nombreInstitucion)) {
+                $similitud = similar_text($textoBusqueda, $nombreInstitucion);
+                if ($similitud > $mejorSimilitud) {
+                    $mejorSimilitud = $similitud;
+                    $mejorCoincidencia = $institucion['nombre'];
+                }
+            }
+            
+            // Similitud de texto (threshold: 70%)
+            $porcentaje = 0;
+            similar_text($textoBusqueda, $nombreInstitucion, $porcentaje);
+            if ($porcentaje > 70 && $porcentaje > $mejorSimilitud) {
+                $mejorSimilitud = $porcentaje;
+                $mejorCoincidencia = $institucion['nombre'];
+            }
+        }
+        
+        if ($mejorCoincidencia) {
+            Log::info("✅ Institución encontrada en JSON: '{$textoBusqueda}' → '{$mejorCoincidencia}' (similitud: {$mejorSimilitud})");
+        }
+        
+        return $mejorCoincidencia;
+    }
+
+    /**
+     * Extraer institución remitente directamente del texto y buscarla en el JSON
      */
     private function extractInstitucionFromText(string $text): ?string
     {
@@ -667,11 +772,26 @@ class OpenRouterAIService
             '/Centro\s+([^\n\r\t]+)/i',
             '/IPS\s+([^\n\r\t]+)/i',
             '/Remitente:\s*([^\n\r\t]+)/i',
+            '/E\.S\.E\.\s+([^\n\r\t]+)/i',
+            '/ESE\s+([^\n\r\t]+)/i',
         ];
         
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $text, $matches)) {
-                return trim($matches[1]);
+                $institucionExtraida = trim($matches[1]);
+                
+                // Intentar buscarla en el JSON
+                $instituciones = $this->loadInstituciones();
+                $institucionEncontrada = $this->buscarInstitucionEnJSON($institucionExtraida, $instituciones);
+                
+                if ($institucionEncontrada) {
+                    Log::info("✅ Institución extraída y mapeada desde JSON: '{$institucionExtraida}' → '{$institucionEncontrada}'");
+                    return $institucionEncontrada;
+                }
+                
+                // Si no se encuentra en el JSON, retornar lo que se extrajo
+                Log::warning("⚠️ Institución extraída pero no encontrada en JSON: '{$institucionExtraida}'");
+                return $institucionExtraida;
             }
         }
         
@@ -701,9 +821,11 @@ class OpenRouterAIService
         $prompt .= "   - Categoría: EPS/ARL/SOAT/ADRES/PARTICULAR/SECRETARIA_SALUD\n";
         $prompt .= "2. CIUDAD: Busca 'Lugar Residencia:', 'POPAYAN', 'Procedencia:', cualquier mención de ciudad\n";
         $prompt .= "3. DEPARTAMENTO: Si encuentras ciudad, infiere departamento (POPAYAN = Cauca)\n";
-        $prompt .= "4. INSTITUCIÓN REMITENTE: Busca el nombre del hospital/clínica en encabezado\n";
-        $prompt .= "   - Busca 'E.S.E.', 'HOSPITAL', 'CLÍNICA', 'CENTRO MÉDICO', 'IPS', 'ESE'\n";
-        $prompt .= "   - Extrae nombre completo de la institución médica que emite el documento\n\n";
+        $prompt .= "4. INSTITUCIÓN REMITENTE: Busca el nombre del hospital/clínica en encabezado o membrete\n";
+        $prompt .= "   - Busca palabras clave: 'E.S.E.', 'HOSPITAL', 'CLÍNICA', 'CENTRO MÉDICO', 'IPS', 'ESE', 'UNIDAD PRESTADORA'\n";
+        $prompt .= "   - Extrae el NOMBRE COMPLETO Y EXACTO de la institución médica\n";
+        $prompt .= "   - Ejemplos: 'HOSPITAL UNIVERSITARIO SAN IGNACIO', 'E.S.E. HOSPITAL SAN VICENTE', 'CLÍNICA SHAIO'\n";
+        $prompt .= "   - El nombre será verificado contra una base de datos nacional de IPS\n\n";
         $prompt .= "🔥 RESPONDE ÚNICAMENTE CON JSON - INCLUYE TODOS LOS CAMPOS:\n";
         $prompt .= "{\n";
         $prompt .= '  "asegurador": "OBLIGATORIO - categoría: eps/arl/soat/adres/particular/secretaria_salud_departamental/secretaria_salud_distrital o null",' . "\n";
