@@ -174,26 +174,11 @@ export function AppNavbarFloating() {
                                 </motion.div>
                                 
                                 {/* Expandable Text Label - Only shows when active */}
-                                <AnimatePresence mode="wait">
+                                <AnimatePresence mode="wait" initial={false}>
                                     {isActive && (
                                         <motion.span
                                             className="relative z-10 text-white font-medium text-sm sm:text-base whitespace-nowrap pr-1"
-                                            initial={{ opacity: 0, width: 0 }}
-                                            animate={{ 
-                                                opacity: 1, 
-                                                width: "auto",
-                                                transition: {
-                                                    width: {
-                                                        type: "spring",
-                                                        stiffness: 400,
-                                                        damping: 30,
-                                                    },
-                                                    opacity: {
-                                                        duration: 0.2,
-                                                        delay: 0.1,
-                                                    }
-                                                }
-                                            }}
+                                            initial={false}
                                             exit={{ 
                                                 opacity: 0, 
                                                 width: 0,
