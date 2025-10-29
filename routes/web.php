@@ -30,8 +30,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('referencias', fn() => Inertia::render('admin/referencias'))->name('referencias');
         Route::get('reportes', fn() => Inertia::render('admin/reportes'))->name('reportes');
-        // Route::get('ia', fn() => Inertia::render('admin/ia'))->name('ia');
-        // Route::get('configuracion', fn() => Inertia::render('admin/configuracion'))->name('configuracion');
+        
+        // Módulo de Configuración - Gestión de Catálogos
+        Route::get('configuracion', [App\Http\Controllers\Admin\ConfiguracionController::class, 'index'])->name('configuracion');
+        Route::get('configuracion/cie10', [App\Http\Controllers\Admin\ConfiguracionController::class, 'cie10'])->name('configuracion.cie10');
+        Route::get('configuracion/instituciones', [App\Http\Controllers\Admin\ConfiguracionController::class, 'instituciones'])->name('configuracion.instituciones');
+        Route::get('configuracion/aseguradores', [App\Http\Controllers\Admin\ConfiguracionController::class, 'aseguradores'])->name('configuracion.aseguradores');
+        Route::get('configuracion/especialidades', [App\Http\Controllers\Admin\ConfiguracionController::class, 'especialidades'])->name('configuracion.especialidades');
+        Route::get('configuracion/servicios', [App\Http\Controllers\Admin\ConfiguracionController::class, 'servicios'])->name('configuracion.servicios');
+        Route::get('configuracion/apoyos', [App\Http\Controllers\Admin\ConfiguracionController::class, 'apoyos'])->name('configuracion.apoyos');
 
         Route::get('buscar-registros', [App\Http\Controllers\Admin\DashboardController::class, 'buscarRegistros'])->name('buscar-registros');
         Route::get('descargar-historia/{registro}', [App\Http\Controllers\Admin\DashboardController::class, 'descargarHistoria'])->name('descargar-historia');

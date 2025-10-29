@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { FileText, Search, LayoutGrid, Users, BarChart3 } from 'lucide-react';
+import { FileText, Search, LayoutGrid, Users, BarChart3, Settings } from 'lucide-react';
 import { type NavItem, type SharedData } from '@/types';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -32,12 +32,22 @@ const ipsNavItems: NavItem[] = [
     },
 ];
 
-// Navegación para Administrador
+// Navegación para Administrador (acceso completo)
 const adminNavItems: NavItem[] = [
     {
         title: 'Tablero',
         href: '/dashboard',
         icon: LayoutGrid,
+    },
+    {
+        title: 'Ingresar Registro',
+        href: '/medico/ingresar-registro',
+        icon: FileText,
+    },
+    {
+        title: 'Consulta Pacientes',
+        href: '/medico/consulta-pacientes',
+        icon: Search,
     },
     {
         title: 'Usuarios',
@@ -48,6 +58,11 @@ const adminNavItems: NavItem[] = [
         title: 'Reportes',
         href: '/admin/reportes',
         icon: BarChart3,
+    },
+    {
+        title: 'Configuración',
+        href: '/admin/configuracion',
+        icon: Settings,
     },
 ];
 
