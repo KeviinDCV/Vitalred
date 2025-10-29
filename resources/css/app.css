@@ -190,6 +190,11 @@
         @apply border-border;
     }
 
+    html {
+        /* Reservar espacio para scrollbar siempre - evita layout shift */
+        scrollbar-gutter: stable;
+    }
+
     body {
         @apply bg-background text-foreground;
     }
