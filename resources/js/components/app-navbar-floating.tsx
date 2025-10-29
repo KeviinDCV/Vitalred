@@ -1,8 +1,8 @@
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { FileText, Search, LayoutGrid, Users, Settings } from 'lucide-react';
 import { type NavItem } from '@/types';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 // Navegación para Médico
 const medicoNavItems: NavItem[] = [
@@ -63,10 +63,21 @@ const adminNavItems: NavItem[] = [
 
 interface AppNavbarFloatingProps {
     userRole: 'administrador' | 'medico' | 'ips';
-    currentUrl: string;
 }
 
-export function AppNavbarFloating({ userRole, currentUrl }: AppNavbarFloatingProps) {
+export function AppNavbarFloating({ userRole }: AppNavbarFloatingProps) {
+    // Usar useState para que el active pill se actualice cuando cambia la URL
+    const [currentUrl, setCurrentUrl] = useState(window.location.pathname);
+    
+    // Escuchar navegación de Inertia para actualizar active pill
+    useEffect(() => {
+        const handleNavigate = () => {
+            setCurrentUrl(window.location.pathname);
+        };
+        
+        router.on('navigate', handleNavigate);
+    }, []);
+    
     // Determinar qué navegación mostrar según el rol
     const navItems = 
         userRole === 'administrador' 
@@ -90,7 +101,7 @@ export function AppNavbarFloating({ userRole, currentUrl }: AppNavbarFloatingPro
                     - Responsive: Adapts spacing and size
                     - Global Persistence: Never unmounts, always rendered
                 */}
-                    <motion.div 
+                    <div 
                         className="
                             flex items-center gap-1 sm:gap-2
                             px-3 sm:px-4 py-2 sm:py-3
@@ -99,8 +110,6 @@ export function AppNavbarFloating({ userRole, currentUrl }: AppNavbarFloatingPro
                             shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_20px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)]
                             border border-slate-200/60
                             backdrop-blur-sm"
-                        layout="position"
-                        initial={false}
                     >
                 {navItems.map((item) => {
                     const Icon = item.icon;
@@ -113,62 +122,32 @@ export function AppNavbarFloating({ userRole, currentUrl }: AppNavbarFloatingPro
                             key={item.href}
                             href={item.href}
                         >
-                            <motion.div
+                            <div
                                 className={cn(
-                                    "relative flex items-center gap-2 rounded-full group",
+                                    "group relative flex items-center justify-center rounded-full transition-all duration-200",
                                     isActive ? "px-3 sm:px-4" : "px-0"
                                 )}
-                                layout
-                                initial={false}
-                                transition={{
-                                    layout: {
-                                        type: "spring",
-                                        stiffness: 400,
-                                        damping: 30,
-                                    }
-                                }}
                             >
                                 {/* Animated Background - Only shows for active state */}
                                 {isActive && (
-                                    <motion.div
-                                        layoutId="navbar-active-pill"
+                                    <div
                                         className="absolute inset-0 bg-gradient-to-b from-[#042077] to-[#031852] rounded-full shadow-[0_2px_4px_rgba(4,32,119,0.3),0_4px_12px_rgba(4,32,119,0.2),inset_0_1px_0_rgba(255,255,255,0.2)]"
-                                        initial={false}
-                                        transition={{
-                                            type: "spring",
-                                            stiffness: 350,
-                                            damping: 30,
-                                        }}
                                     />
                                 )}
                                 
                                 {/* Hover Effect - Only shows for inactive state */}
                                 {!isActive && (
-                                    <motion.div
-                                        className="absolute inset-0 bg-slate-100/80 rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.8)]"
-                                        initial={false}
-                                        whileHover={{ 
-                                            opacity: 1, 
-                                            scale: 1,
-                                            transition: { 
-                                                type: "spring", 
-                                                stiffness: 400, 
-                                                damping: 20 
-                                            }
-                                        }}
+                                    <div
+                                        className="absolute inset-0 bg-slate-100/80 rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.8)] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                                     />
                                 )}
                                 
                                 {/* Icon Container */}
-                                <motion.div
+                                <div
                                     className={cn(
                                         "relative z-10 flex items-center justify-center rounded-full",
                                         "w-10 h-10 sm:w-12 sm:h-12"
                                     )}
-                                    initial={false}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
                                 >
                                     <Icon 
                                         className={cn(
@@ -177,47 +156,28 @@ export function AppNavbarFloating({ userRole, currentUrl }: AppNavbarFloatingPro
                                             !isActive && "text-slate-600 group-hover:text-slate-900"
                                         )}
                                     />
-                                </motion.div>
+                                </div>
                                 
                                 {/* Expandable Text Label - Only shows when active */}
-                                <AnimatePresence mode="wait" initial={false}>
-                                    {isActive && (
-                                        <motion.span
-                                            className="relative z-10 text-white font-medium text-sm sm:text-base whitespace-nowrap pr-1"
-                                            initial={false}
-                                            exit={{ 
-                                                opacity: 0, 
-                                                width: 0,
-                                                transition: {
-                                                    width: {
-                                                        type: "spring",
-                                                        stiffness: 400,
-                                                        damping: 30,
-                                                    },
-                                                    opacity: {
-                                                        duration: 0.15,
-                                                    }
-                                                }
-                                            }}
-                                        >
-                                            {item.title}
-                                        </motion.span>
-                                    )}
-                                </AnimatePresence>
+                                {isActive && (
+                                    <span className="relative z-10 text-white font-medium text-sm sm:text-base whitespace-nowrap pr-1">
+                                        {item.title}
+                                    </span>
+                                )}
 
                                 {/* Tooltip - Only shows on hover for inactive items */}
                                 {!isActive && (
-                                    <motion.span 
+                                    <span 
                                         className="absolute -bottom-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-900 text-white text-xs rounded-md pointer-events-none whitespace-nowrap shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                                     >
                                         {item.title}
-                                    </motion.span>
+                                    </span>
                                 )}
-                            </motion.div>
+                            </div>
                         </Link>
                     );
                 })}
-                    </motion.div>
+                    </div>
                 </nav>
             </div>
         </div>
