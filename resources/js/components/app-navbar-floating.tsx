@@ -1,6 +1,6 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { FileText, Search, LayoutGrid, Users, Settings } from 'lucide-react';
-import { type NavItem, type SharedData } from '@/types';
+import { type NavItem } from '@/types';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -61,43 +61,47 @@ const adminNavItems: NavItem[] = [
     },
 ];
 
-export function AppNavbarFloating() {
-    const page = usePage<SharedData>();
-    const { auth } = page.props;
-    const currentUrl = page.url;
-    const user = auth.user;
+interface AppNavbarFloatingProps {
+    userRole: 'administrador' | 'medico' | 'ips';
+    currentUrl: string;
+}
 
+export function AppNavbarFloating({ userRole, currentUrl }: AppNavbarFloatingProps) {
     // Determinar qué navegación mostrar según el rol
     const navItems = 
-        user.role === 'administrador' 
+        userRole === 'administrador' 
             ? adminNavItems 
-            : user.role === 'medico' 
+            : userRole === 'medico' 
             ? medicoNavItems 
             : ipsNavItems;
 
     return (
-        <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
-            {/* 
-                FLOATING NAVBAR - Professional Design with Expanding Active Item
-                
-                Design Principles Applied:
-                - Two-Layer Shadows: Light top + dark bottom for realism
-                - Gradient Enhancement: Subtle gradient + inner light shadow
-                - Light from Above: Inset light on top simulates natural lighting
-                - Layout Animations: Auto-rearrange items when active item expands
-                - Responsive: Adapts spacing and size
-            */}
-            <motion.div 
-                className="
-                    flex items-center gap-1 sm:gap-2
-                    px-3 sm:px-4 py-2 sm:py-3
-                    bg-gradient-to-b from-white to-slate-50/30
-                    rounded-full
-                    shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_20px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)]
-                    border border-slate-200/60
-                    backdrop-blur-sm"
-                layout="position"
-            >
+        <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
+            <div className="flex justify-center pt-4 pointer-events-none">
+                <nav className="pointer-events-auto">
+                    {/* 
+                        FLOATING NAVBAR - Professional Design with Expanding Active Item
+                    
+                    Design Principles Applied:
+                    - Two-Layer Shadows: Light top + dark bottom for realism
+                    - Gradient Enhancement: Subtle gradient + inner light shadow
+                    - Light from Above: Inset light on top simulates natural lighting
+                    - Layout Animations: Auto-rearrange items when active item expands
+                    - Responsive: Adapts spacing and size
+                    - Global Persistence: Never unmounts, always rendered
+                */}
+                    <motion.div 
+                        className="
+                            flex items-center gap-1 sm:gap-2
+                            px-3 sm:px-4 py-2 sm:py-3
+                            bg-gradient-to-b from-white to-slate-50/30
+                            rounded-full
+                            shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_20px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)]
+                            border border-slate-200/60
+                            backdrop-blur-sm"
+                        layout="position"
+                        initial={false}
+                    >
                 {navItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = currentUrl.startsWith(item.href);
@@ -129,6 +133,7 @@ export function AppNavbarFloating() {
                                     <motion.div
                                         layoutId="navbar-active-pill"
                                         className="absolute inset-0 bg-gradient-to-b from-[#042077] to-[#031852] rounded-full shadow-[0_2px_4px_rgba(4,32,119,0.3),0_4px_12px_rgba(4,32,119,0.2),inset_0_1px_0_rgba(255,255,255,0.2)]"
+                                        initial={false}
                                         transition={{
                                             type: "spring",
                                             stiffness: 350,
@@ -141,7 +146,7 @@ export function AppNavbarFloating() {
                                 {!isActive && (
                                     <motion.div
                                         className="absolute inset-0 bg-slate-100/80 rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.8)]"
-                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        initial={false}
                                         whileHover={{ 
                                             opacity: 1, 
                                             scale: 1,
@@ -160,6 +165,7 @@ export function AppNavbarFloating() {
                                         "relative z-10 flex items-center justify-center rounded-full",
                                         "w-10 h-10 sm:w-12 sm:h-12"
                                     )}
+                                    initial={false}
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -211,7 +217,9 @@ export function AppNavbarFloating() {
                         </Link>
                     );
                 })}
-            </motion.div>
-        </nav>
+                    </motion.div>
+                </nav>
+            </div>
+        </div>
     );
 }

@@ -35,6 +35,9 @@
         @inertiaHead
     </head>
     <body class="font-sans antialiased">
+        {{-- Navbar global persistente (NUNCA se desmonta) --}}
+        <div id="global-navbar"></div>
+        
         @inertia
     </body>
 </html>
