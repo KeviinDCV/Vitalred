@@ -156,59 +156,6 @@ export default function ConfiguracionIndex() {
                         );
                     })}
                 </div>
-
-                {/* Footer de estadísticas compacto */}
-                <Card className="bg-gradient-to-b from-white to-slate-50/20 border-0 shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_20px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)] rounded-lg">
-                    <CardContent className="p-3 sm:p-4">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <CheckCircle2 className="h-4 w-4 text-slate-600" />
-                                <span className="text-sm font-medium text-slate-900">Estado del Sistema</span>
-                            </div>
-                            <div className="flex items-center gap-4 sm:gap-6 text-xs">
-                                <div>
-                                    <span className="text-slate-500">Total:</span>
-                                    <span className="font-semibold text-slate-900 ml-1.5">
-                                        {(
-                                            estadisticas.cie10.total +
-                                            estadisticas.instituciones.total +
-                                            estadisticas.aseguradores.total +
-                                            estadisticas.especialidades.total +
-                                            estadisticas.servicios.total +
-                                            estadisticas.apoyos.total
-                                        ).toLocaleString()}
-                                    </span>
-                                </div>
-                                <div>
-                                    <span className="text-green-600">Activos:</span>
-                                    <span className="font-semibold text-green-600 ml-1.5">
-                                        {(
-                                            estadisticas.cie10.activos +
-                                            estadisticas.instituciones.activos +
-                                            estadisticas.aseguradores.activos +
-                                            estadisticas.especialidades.activos +
-                                            estadisticas.servicios.activos +
-                                            estadisticas.apoyos.activos
-                                        ).toLocaleString()}
-                                    </span>
-                                </div>
-                                <div className="hidden sm:flex items-center gap-1.5">
-                                    <span className="text-slate-400">Inactivos:</span>
-                                    <span className="font-semibold text-slate-500">
-                                        {(
-                                            estadisticas.cie10.inactivos +
-                                            estadisticas.instituciones.inactivos +
-                                            estadisticas.aseguradores.inactivos +
-                                            estadisticas.especialidades.inactivos +
-                                            estadisticas.servicios.inactivos +
-                                            estadisticas.apoyos.inactivos
-                                        ).toLocaleString()}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
             </div>
         </AppLayout>
     );

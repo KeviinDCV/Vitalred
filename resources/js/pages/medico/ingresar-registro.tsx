@@ -1338,14 +1338,6 @@ const determinarTipoPaciente = (edad: number, sexo?: string): string => {
     return 'adulto';
 };
 
-const clasificacionesTriage = [
-    { value: 'triage_1', label: 'Triage I - Resucitación (Rojo)' },
-    { value: 'triage_2', label: 'Triage II - Emergencia (Naranja)' },
-    { value: 'triage_3', label: 'Triage III - Urgencia (Amarillo)' },
-    { value: 'triage_4', label: 'Triage IV - Urgencia Menor (Verde)' },
-    { value: 'triage_5', label: 'Triage V - Sin Urgencia (Azul)' },
-];
-
 const escalasGlasgow = [
     { value: '15', label: '15 - Normal' },
     { value: '14', label: '14 - Leve' },
@@ -1523,6 +1515,7 @@ export default function IngresarRegistro() {
         municipio?: string;
     }>>([]);
     const [loadingInstituciones, setLoadingInstituciones] = useState(true);
+    const [searchEspecialidad, setSearchEspecialidad] = useState('');
 
     // 📥 Cargar códigos CIE-10 desde JSON
     useEffect(() => {
@@ -2043,7 +2036,6 @@ export default function IngresarRegistro() {
         fecha_ingreso: '',
         dias_hospitalizados: 0,
         motivo_consulta: '',
-        clasificacion_triage: '',
         enfermedad_actual: '',
         antecedentes: '',
         frecuencia_cardiaca: 0,
@@ -2055,7 +2047,6 @@ export default function IngresarRegistro() {
         glucometria: 0,
         escala_glasgow: '',
         examen_fisico: '',
-        tratamiento: '',
         plan_terapeutico: '',
 
         // Paso 4: Datos De Remisión
@@ -2881,7 +2872,6 @@ export default function IngresarRegistro() {
             'diagnostico_principal',
             'fecha_ingreso',
             'motivo_consulta',
-            'clasificacion_triage',
             'enfermedad_actual',
             'antecedentes',
             'frecuencia_cardiaca',
@@ -2892,7 +2882,7 @@ export default function IngresarRegistro() {
             'saturacion_oxigeno',
             'escala_glasgow',
             'examen_fisico',
-            'tratamiento'
+            'requerimiento_oxigeno'
         ];
 
         const missingFields = requiredFields.filter(field => !data[field as keyof typeof data]);
@@ -2903,7 +2893,6 @@ export default function IngresarRegistro() {
                 diagnostico_principal: 'Diagnóstico principal',
                 fecha_ingreso: 'Fecha de ingreso',
                 motivo_consulta: 'Motivo consulta',
-                clasificacion_triage: 'Clasificación Triage',
                 enfermedad_actual: 'Enfermedad actual',
                 antecedentes: 'Antecedentes',
                 frecuencia_cardiaca: 'Frecuencia Cardíaca',
@@ -2914,7 +2903,7 @@ export default function IngresarRegistro() {
                 saturacion_oxigeno: 'Saturación de Oxígeno',
                 escala_glasgow: 'Escala de Glasgow',
                 examen_fisico: 'Examen físico',
-                tratamiento: 'Tratamiento'
+                requerimiento_oxigeno: 'Requerimiento de oxígeno'
             };
 
             const missingFieldNames = missingFields.map(field => fieldNames[field]);
@@ -2934,7 +2923,6 @@ export default function IngresarRegistro() {
             'motivo_remision',
             'tipo_solicitud',
             'especialidad_solicitada',
-            'requerimiento_oxigeno',
             'tipo_servicio'
         ];
 
@@ -2953,7 +2941,6 @@ export default function IngresarRegistro() {
                 motivo_remision: 'Motivo de remisión',
                 tipo_solicitud: 'Tipo solicitud',
                 especialidad_solicitada: 'Especialidad solicitada',
-                requerimiento_oxigeno: 'Requerimiento de oxígeno',
                 tipo_servicio: 'Tipo de servicio'
             };
 
@@ -3539,23 +3526,6 @@ export default function IngresarRegistro() {
                                                     </Select>
                                                 </div>
 
-                                                {/* Clasificación Triage */}
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="clasificacion_triage">Clasificación Triage *</Label>
-                                                    <Select value={data.clasificacion_triage} onValueChange={(value) => setData('clasificacion_triage', value)}>
-                                                        <SelectTrigger id="clasificacion_triage">
-                                                            <SelectValue placeholder="Seleccione" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {clasificacionesTriage.map((triage) => (
-                                                                <SelectItem key={triage.value} value={triage.value}>
-                                                                    {triage.label}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-
                                                 {/* Fecha de ingreso */}
                                                 <div className="space-y-2">
                                                     <Label htmlFor="fecha_ingreso">Fecha de ingreso *</Label>
@@ -3989,9 +3959,9 @@ export default function IngresarRegistro() {
                                                 </div>
                                             </div>
 
-                                            {/* Quinta sección: Examen físico y tratamiento */}
+                                            {/* Quinta sección: Examen físico */}
                                             <div className="space-y-4">
-                                                <h3 className="text-lg font-medium">Examen Físico y Tratamiento</h3>
+                                                <h3 className="text-lg font-medium">Examen Físico</h3>
                                                 <div className="grid gap-4">
                                                     <div className="space-y-2">
                                                         <Label htmlFor="examen_fisico">Examen físico *</Label>
@@ -4005,17 +3975,6 @@ export default function IngresarRegistro() {
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="tratamiento">Tratamiento *</Label>
-                                                        <textarea
-                                                            id="tratamiento"
-                                                            value={data.tratamiento}
-                                                            onChange={(e) => setData('tratamiento', e.target.value)}
-                                                            placeholder="Describa el tratamiento administrado"
-                                                            className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
-                                                        />
-                                                    </div>
-
-                                                    <div className="space-y-2">
                                                         <Label htmlFor="plan_terapeutico">Plan terapéutico</Label>
                                                         <textarea
                                                             id="plan_terapeutico"
@@ -4025,6 +3984,23 @@ export default function IngresarRegistro() {
                                                             className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
                                                         />
                                                     </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Sexta sección: Requerimiento de oxígeno */}
+                                            <div className="space-y-4">
+                                                <h3 className="text-lg font-medium">Requerimientos</h3>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="requerimiento_oxigeno">Requerimiento de oxígeno *</Label>
+                                                    <Select value={data.requerimiento_oxigeno} onValueChange={(value) => setData('requerimiento_oxigeno', value)}>
+                                                        <SelectTrigger id="requerimiento_oxigeno">
+                                                            <SelectValue placeholder="Seleccione" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="NO">NO</SelectItem>
+                                                            <SelectItem value="SI">SÍ</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
                                                 </div>
                                             </div>
 
@@ -4113,38 +4089,65 @@ export default function IngresarRegistro() {
                                                                     }
                                                                 />
                                                             </SelectTrigger>
-                                                            <SelectContent className="max-h-60 overflow-y-auto">
-                                                                {especialidades.map((especialidad) => (
-                                                                    <label
-                                                                        key={especialidad.value}
-                                                                        className="flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer rounded"
-                                                                    >
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            id={`especialidad_${especialidad.value}`}
-                                                                            checked={data.especialidad_solicitada.includes(especialidad.value)}
-                                                                            onChange={() => {
-                                                                                const currentValues = Array.isArray(data.especialidad_solicitada) 
-                                                                                    ? data.especialidad_solicitada 
-                                                                                    : [];
-                                                                                
-                                                                                if (currentValues.includes(especialidad.value)) {
-                                                                                    // Remover si ya está seleccionado
-                                                                                    setData('especialidad_solicitada', 
-                                                                                        currentValues.filter(val => val !== especialidad.value)
-                                                                                    );
-                                                                                } else {
-                                                                                    // Agregar si no está seleccionado
-                                                                                    setData('especialidad_solicitada', 
-                                                                                        [...currentValues, especialidad.value]
-                                                                                    );
-                                                                                }
-                                                                            }}
-                                                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                                                        />
-                                                                        <span className="text-sm">{especialidad.label}</span>
-                                                                    </label>
-                                                                ))}
+                                                            <SelectContent className="max-h-80">
+                                                                {/* Campo de búsqueda */}
+                                                                <div className="px-2 pb-2 sticky top-0 bg-white border-b">
+                                                                    <Input
+                                                                        type="text"
+                                                                        placeholder="Buscar especialidad..."
+                                                                        value={searchEspecialidad}
+                                                                        onChange={(e) => setSearchEspecialidad(e.target.value)}
+                                                                        className="h-9 text-sm"
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                    />
+                                                                </div>
+                                                                
+                                                                {/* Lista filtrada */}
+                                                                <div className="max-h-60 overflow-y-auto">
+                                                                    {especialidades
+                                                                        .filter(especialidad => 
+                                                                            especialidad.label.toLowerCase().includes(searchEspecialidad.toLowerCase())
+                                                                        )
+                                                                        .map((especialidad) => (
+                                                                            <label
+                                                                                key={especialidad.value}
+                                                                                className="flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer rounded"
+                                                                            >
+                                                                                <input
+                                                                                    type="checkbox"
+                                                                                    id={`especialidad_${especialidad.value}`}
+                                                                                    checked={data.especialidad_solicitada.includes(especialidad.value)}
+                                                                                    onChange={() => {
+                                                                                        const currentValues = Array.isArray(data.especialidad_solicitada) 
+                                                                                            ? data.especialidad_solicitada 
+                                                                                            : [];
+                                                                                        
+                                                                                        if (currentValues.includes(especialidad.value)) {
+                                                                                            // Remover si ya está seleccionado
+                                                                                            setData('especialidad_solicitada', 
+                                                                                                currentValues.filter(val => val !== especialidad.value)
+                                                                                            );
+                                                                                        } else {
+                                                                                            // Agregar si no está seleccionado
+                                                                                            setData('especialidad_solicitada', 
+                                                                                                [...currentValues, especialidad.value]
+                                                                                            );
+                                                                                        }
+                                                                                    }}
+                                                                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                                                                />
+                                                                                <span className="text-sm">{especialidad.label}</span>
+                                                                            </label>
+                                                                        ))
+                                                                    }
+                                                                    {especialidades.filter(especialidad => 
+                                                                        especialidad.label.toLowerCase().includes(searchEspecialidad.toLowerCase())
+                                                                    ).length === 0 && (
+                                                                        <div className="p-4 text-sm text-center text-gray-500">
+                                                                            No se encontraron especialidades
+                                                                        </div>
+                                                                    )}
+                                                                </div>
                                                             </SelectContent>
                                                         </Select>
                                                         
@@ -4184,21 +4187,8 @@ export default function IngresarRegistro() {
                                                 </div>
                                             </div>
 
-                                            {/* Tercera sección: Requerimientos */}
+                                            {/* Tercera sección: Tipos de servicio y apoyo */}
                                             <div className="grid gap-6 md:grid-cols-2">
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="requerimiento_oxigeno">Requerimiento de oxígeno *</Label>
-                                                    <Select value={data.requerimiento_oxigeno} onValueChange={(value) => setData('requerimiento_oxigeno', value)}>
-                                                        <SelectTrigger id="requerimiento_oxigeno">
-                                                            <SelectValue placeholder="Seleccione" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="NO">NO</SelectItem>
-                                                            <SelectItem value="SI">SÍ</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-
                                                 <div className="space-y-2">
                                                     <Label htmlFor="tipo_servicio">Tipo de servicio *</Label>
                                                     <Select value={data.tipo_servicio} onValueChange={(value) => setData('tipo_servicio', value)}>

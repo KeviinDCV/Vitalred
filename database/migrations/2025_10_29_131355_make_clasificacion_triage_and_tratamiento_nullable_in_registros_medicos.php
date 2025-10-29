@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('registros_medicos', function (Blueprint $table) {
+            $table->string('clasificacion_triage')->nullable()->change();
+            $table->text('tratamiento')->nullable()->change();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('registros_medicos', function (Blueprint $table) {
+            $table->string('clasificacion_triage')->nullable(false)->change();
+            $table->text('tratamiento')->nullable(false)->change();
+        });
+    }
+};

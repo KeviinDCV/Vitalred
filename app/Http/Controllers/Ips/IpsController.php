@@ -100,7 +100,6 @@ class IpsController extends Controller
             'fecha_ingreso' => 'required|date',
             'dias_hospitalizados' => 'required|integer|min:0',
             'motivo_consulta' => 'required|string',
-            'clasificacion_triage' => 'required|string|max:255',
             'enfermedad_actual' => 'required|string',
             'antecedentes' => 'required|string',
             'frecuencia_cardiaca' => 'required|integer|min:30|max:300',
@@ -112,14 +111,13 @@ class IpsController extends Controller
             'glucometria' => 'nullable|integer|min:0|max:600',
             'escala_glasgow' => 'required|string',
             'examen_fisico' => 'required|string',
-            'tratamiento' => 'required|string',
             'plan_terapeutico' => 'nullable|string',
+            'requerimiento_oxigeno' => 'required|in:SI,NO',
 
             // Paso 4: Datos De Remisión
             'motivo_remision' => 'required|string',
             'tipo_solicitud' => 'required|string|max:255',
             'especialidad_solicitada' => 'required|string|max:255',
-            'requerimiento_oxigeno' => 'required|in:SI,NO',
             'tipo_servicio' => 'required|string|max:255',
             'tipo_apoyo' => 'nullable|string|max:255',
         ]);
@@ -138,6 +136,10 @@ class IpsController extends Controller
         $aseguradorFinal = $validatedData['asegurador_secundario'] ?? $validatedData['asegurador'];
         $validatedData['asegurador'] = $aseguradorFinal;
         unset($validatedData['asegurador_secundario']); // Remover el campo secundario
+
+        // Agregar valores por defecto para campos eliminados del formulario
+        $validatedData['clasificacion_triage'] = null;
+        $validatedData['tratamiento'] = null;
 
         // Crear el registro médico con el user_id del IPS
         $registro = RegistroMedico::create([
