@@ -1522,7 +1522,6 @@ export default function IngresarRegistro() {
         const cargarCodigosCIE10 = async () => {
             try {
                 setLoadingCIE10(true);
-                console.log('🔄 Cargando códigos CIE-10 desde /TablaCIE10.json...');
                 
                 const response = await fetch('/TablaCIE10.json');
                 if (!response.ok) {
@@ -1530,7 +1529,6 @@ export default function IngresarRegistro() {
                 }
                 
                 const datos = await response.json();
-                console.log(`✅ ${datos.length} códigos CIE-10 cargados exitosamente`);
                 
                 // Transformar datos del JSON al formato requerido
                 const codigosFormateados = datos.map((item: any) => ({
@@ -1563,7 +1561,6 @@ export default function IngresarRegistro() {
         const cargarInstituciones = async () => {
             try {
                 setLoadingInstituciones(true);
-                console.log('🔄 Cargando instituciones desde /Prestservi.json...');
                 
                 const response = await fetch('/Prestservi.json');
                 if (!response.ok) {
@@ -1597,10 +1594,6 @@ export default function IngresarRegistro() {
                 
                 // Ordenar alfabéticamente por label
                 todasLasInstituciones.sort((a, b) => a.label.localeCompare(b.label));
-                
-                console.log(`✅ ${institucionesNacionales.length} IPS Nacionales cargadas`);
-                console.log(`✅ ${institucionesPolicia.length} IPS Policía cargadas`);
-                console.log(`✅ Total: ${todasLasInstituciones.length} instituciones disponibles`);
                 
                 setInstituciones(todasLasInstituciones);
                 

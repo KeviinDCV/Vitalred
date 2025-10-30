@@ -1,9 +1,10 @@
 import '../css/app.css';
 
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, router } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { Toaster } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 import ErrorBoundary from '@/components/error-boundary';
 import { route } from 'ziggy-js';
 import { GlobalNavbar } from '@/components/global-navbar';
@@ -27,6 +28,23 @@ console.error = (...args: any[]) => {
 };
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+// Manejador de errores personalizado para errores HTTP
+router.on('exception', (event: any) => {
+    const error = event.detail.exception;
+    
+    // Error 429: Too Many Requests (axios error structure)
+    if (error?.response?.status === 429) {
+        toast.error('Demasiados intentos de inicio de sesión', {
+            description: 'Por seguridad, debes esperar unos minutos antes de volver a intentar. Has excedido el límite de intentos permitidos.',
+            duration: 6000,
+        });
+        
+        // Prevenir que se muestre el error en consola
+        event.preventDefault();
+        return false;
+    }
+});
 
 createInertiaApp({
     title: (title) => title ? `${title} - ${appName}` : appName,

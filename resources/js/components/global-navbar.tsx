@@ -31,7 +31,6 @@ export function GlobalNavbar({ initialUser }: GlobalNavbarProps) {
                 currentUser = page?.props?.auth?.user;
             }
             
-            console.log('[GlobalNavbar] Actualizando usuario:', currentUser ? 'Usuario encontrado' : 'No hay usuario');
             setUser(currentUser || null);
         };
 
@@ -43,8 +42,6 @@ export function GlobalNavbar({ initialUser }: GlobalNavbarProps) {
             navigateListener();
         };
     }, []);
-
-    console.log('[GlobalNavbar] Renderizando con usuario:', user ? 'Sí' : 'No');
 
     // Si no hay usuario autenticado, no renderizar nada
     if (!user) {
