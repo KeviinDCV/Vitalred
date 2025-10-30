@@ -87,7 +87,7 @@ export function AppNavbarFloating({ userRole }: AppNavbarFloatingProps) {
             : ipsNavItems;
 
     return (
-        <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
+        <div className="fixed top-0 left-0 right-0 z-[60] pointer-events-none">
             <div className="flex justify-center pt-4 pointer-events-none">
                 <nav className="pointer-events-auto">
                     {/* 

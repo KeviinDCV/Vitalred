@@ -7,7 +7,7 @@ export default function AppHeaderLayout({ children, breadcrumbs }: PropsWithChil
         <div className="min-h-screen bg-slate-50">
             <AppHeaderFloating />
             
-            {/* Main Content with top padding for floating navbar */}
+            {/* Main Content with top padding for fixed header + floating navbar */}
             <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
                 {children}
             </main>

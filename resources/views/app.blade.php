@@ -35,8 +35,8 @@
         @inertiaHead
     </head>
     <body class="font-sans antialiased">
-        {{-- Navbar global persistente (NUNCA se desmonta) --}}
-        <div id="global-navbar"></div>
+        {{-- Navbar global persistente (solo se renderiza si hay usuario autenticado) --}}
+        <div id="global-navbar" style="display: contents;"></div>
         
         @inertia
     </body>

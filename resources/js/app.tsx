@@ -6,7 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { Toaster } from '@/components/ui/sonner';
 import ErrorBoundary from '@/components/error-boundary';
 import { route } from 'ziggy-js';
-import { AppNavbarFloating } from '@/components/app-navbar-floating';
+import { GlobalNavbar } from '@/components/global-navbar';
 
 // Suprimir warning conocido de Inertia Form con atributo inert
 const originalError = console.error.bind(console);
@@ -35,12 +35,13 @@ createInertiaApp({
         // Hacer la función route disponible globalmente
         (window as any).route = route;
         
-        // Renderizar navbar global UNA SOLA VEZ
+        // Renderizar navbar global reactivo que escucha cambios de autenticación
         const navbarEl = document.getElementById('global-navbar');
         if (navbarEl) {
-            const userRole = (props.initialPage.props as any).auth?.user?.role || 'medico';
             const navbarRoot = createRoot(navbarEl);
-            navbarRoot.render(<AppNavbarFloating userRole={userRole} />);
+            // Pasar los props iniciales
+            const initialUser = (props.initialPage.props as any).auth?.user;
+            navbarRoot.render(<GlobalNavbar initialUser={initialUser} />);
         }
         
         const root = createRoot(el);

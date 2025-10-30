@@ -193,10 +193,12 @@
     html {
         /* Reservar espacio para scrollbar siempre - evita layout shift */
         scrollbar-gutter: stable;
+        overflow-x: hidden;
     }
 
     body {
         @apply bg-background text-foreground;
+        min-height: 100vh;
     }
 }
 

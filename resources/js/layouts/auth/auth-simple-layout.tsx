@@ -21,9 +21,9 @@ export default function AuthSimpleLayout({ children, title, description }: Props
     }, [images.length]);
 
     return (
-        <div className="flex min-h-screen bg-slate-50">
+        <div className="flex min-h-screen w-full max-w-full bg-slate-50 overflow-hidden">
             {/* Lado izquierdo - Formulario de Login */}
-            <div className="flex flex-1 flex-col px-5 py-8 sm:px-8 sm:py-12 md:px-12 md:py-16 lg:flex-none lg:px-16 lg:py-12 xl:px-24 bg-slate-100">
+            <div className="flex flex-1 flex-col px-5 py-8 sm:px-8 sm:py-12 md:px-12 md:py-16 lg:flex-none lg:px-16 lg:py-12 xl:px-24 bg-slate-100 overflow-y-auto">
                 <div className="mx-auto w-full max-w-[420px] sm:max-w-md md:max-w-lg lg:max-w-md lg:w-full">
                     {/* Header con Logo y Título Principal - Responsive sizing */}
                     <div className="mb-8 sm:mb-10 md:mb-12 text-center">
