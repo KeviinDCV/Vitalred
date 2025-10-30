@@ -3,32 +3,72 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayoutInertia from '@/layouts/app-layout-inertia';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import { Search, Users, FileText, Eye, ChevronLeft, ChevronRight, Download, Brain, Stethoscope, X, CheckCircle, Clock } from 'lucide-react';
+import { Search, Users, FileText, Eye, ChevronLeft, ChevronRight, Download, Brain, Stethoscope, X, CheckCircle, Clock, Info } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import PDFViewer from '@/components/pdf-viewer';
 
 interface RegistroMedico {
     id: number;
+    // Paso 1: Información Personal
+    tipo_identificacion?: string;
     numero_identificacion: string;
     nombre: string;
     apellidos: string;
+    fecha_nacimiento: string;
     edad: number;
     sexo: string;
-    fecha_nacimiento: string;
+    historia_clinica_path?: string;
+
+    // Paso 2: Datos Sociodemográficos
     asegurador: string;
     departamento: string;
     ciudad: string;
     institucion_remitente: string;
-    diagnostico_principal: string;
-    fecha_ingreso: string;
-    estado: string;
+
+    // Paso 3: Datos Clínicos
     tipo_paciente: string;
+    diagnostico_principal: string;
+    diagnostico_1?: string;
+    diagnostico_2?: string;
+    fecha_ingreso: string;
+    dias_hospitalizados?: number;
+    motivo_consulta?: string;
     clasificacion_triage: string;
-    prioriza_ia?: boolean; // Resultado de análisis IA
-    historia_clinica_path?: string;
+    enfermedad_actual?: string;
+    antecedentes?: string;
+    frecuencia_cardiaca?: number;
+    frecuencia_respiratoria?: number;
+    temperatura?: number;
+    tension_sistolica?: number;
+    tension_diastolica?: number;
+    saturacion_oxigeno?: number;
+    glucometria?: number;
+    escala_glasgow?: string;
+    examen_fisico?: string;
+    tratamiento?: string;
+    plan_terapeutico?: string;
+
+    // Paso 4: Datos De Remisión
+    motivo_remision?: string;
+    tipo_solicitud?: string;
+    especialidad_solicitada?: string;
+    requerimiento_oxigeno?: string;
+    tipo_servicio?: string;
+    tipo_apoyo?: string;
+
+    // Campos de control
+    estado: string;
+    fecha_envio?: string;
+    prioriza_ia?: boolean;
+    medico_asignado_id?: number;
+    fecha_atencion?: string;
+    motivo_rechazo?: string;
     created_at: string;
     updated_at: string;
     user?: {
@@ -76,6 +116,10 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
     };
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [isSearching, setIsSearching] = useState(false);
+    const [selectedRegistro, setSelectedRegistro] = useState<RegistroMedico | null>(null);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [isPDFViewerOpen, setIsPDFViewerOpen] = useState(false);
+    const [pdfUrl, setPdfUrl] = useState<string>('');
     const { props } = usePage();
 
     // Mostrar mensajes flash
@@ -210,6 +254,22 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
             month: '2-digit',
             day: '2-digit'
         });
+    };
+
+    const handleVerMas = (registro: RegistroMedico) => {
+        setSelectedRegistro(registro);
+        setIsDetailModalOpen(true);
+    };
+
+    const handleVerPDF = (registro: RegistroMedico) => {
+        if (registro.historia_clinica_path) {
+            // Construir URL del PDF usando la ruta protegida del controlador
+            const url = route('medico.descargar-historia', registro.id);
+            setPdfUrl(url);
+            setIsPDFViewerOpen(true);
+            // Cerrar el modal de detalles cuando se abre el PDF
+            setIsDetailModalOpen(false);
+        }
     };
 
     return (
@@ -388,30 +448,39 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
                                                         {getEstadoBadge(registro.estado)}
                                                     </TableCell>
                                                     <TableCell>
-                                                        {registro.estado === 'enviado' ? (
-                                                            <div className="flex items-center gap-1">
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    onClick={() => handleAtender(registro)}
-                                                                    className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                                                    title="Atender caso"
-                                                                >
-                                                                    <Stethoscope className="h-4 w-4" />
-                                                                </Button>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    onClick={() => handleDerivar(registro)}
-                                                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                                    title="Rechazar/Derivar caso"
-                                                                >
-                                                                    <X className="h-4 w-4" />
-                                                                </Button>
-                                                            </div>
-                                                        ) : (
-                                                            <span className="text-sm text-muted-foreground">-</span>
-                                                        )}
+                                                        <div className="flex items-center gap-1">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleVerMas(registro)}
+                                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                                title="Ver información completa"
+                                                            >
+                                                                <Info className="h-4 w-4" />
+                                                            </Button>
+                                                            {registro.estado === 'enviado' && (
+                                                                <>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => handleAtender(registro)}
+                                                                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                                        title="Atender caso"
+                                                                    >
+                                                                        <Stethoscope className="h-4 w-4" />
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => handleDerivar(registro)}
+                                                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                        title="Rechazar/Derivar caso"
+                                                                    >
+                                                                        <X className="h-4 w-4" />
+                                                                    </Button>
+                                                                </>
+                                                            )}
+                                                        </div>
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
@@ -501,6 +570,334 @@ export default function ConsultaPacientes({ registros, filters, stats, auth }: P
                             </div>
                         </CardContent>
                     </Card>
+                )}
+
+                {/* Modal de Detalles Completos del Paciente */}
+                <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
+                    <DialogContent className="max-w-[96vw] w-full h-[90vh] overflow-hidden flex flex-col p-0">
+                        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4 border-b">
+                            <DialogTitle className="text-2xl font-bold text-blue-700">
+                                Información Completa del Paciente
+                            </DialogTitle>
+                            <DialogDescription>
+                                Detalles del registro médico #{selectedRegistro?.id} - {selectedRegistro?.nombre} {selectedRegistro?.apellidos}
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        {selectedRegistro && (
+                            <Tabs defaultValue="personal" className="flex-1 flex flex-col overflow-hidden">
+                                <TabsList className="mx-6 mt-4 grid w-auto grid-cols-4 bg-slate-100">
+                                    <TabsTrigger value="personal" className="text-sm">📋 Personal</TabsTrigger>
+                                    <TabsTrigger value="clinico" className="text-sm">🩺 Clínico</TabsTrigger>
+                                    <TabsTrigger value="remision" className="text-sm">📤 Remisión</TabsTrigger>
+                                    <TabsTrigger value="control" className="text-sm">ℹ️ Control</TabsTrigger>
+                                </TabsList>
+
+                                <div className="flex-1 overflow-y-auto px-6 py-4" style={{
+                                    scrollbarWidth: 'thin',
+                                    scrollbarColor: '#cbd5e1 transparent'
+                                }}>
+                                {/* Pestaña: Información Personal y Sociodemográfica */}
+                                <TabsContent value="personal" className="mt-0 space-y-6">
+                                    <div className="space-y-4">
+                                        <h3 className="text-lg font-semibold text-blue-600 border-b pb-2">
+                                            Información Personal
+                                        </h3>
+                                        <div className="grid grid-cols-3 gap-4">
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Tipo de Identificación</p>
+                                            <p className="font-medium">{selectedRegistro.tipo_identificacion || 'No especificado'}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Número de Identificación</p>
+                                            <p className="font-medium">{selectedRegistro.numero_identificacion}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Nombre Completo</p>
+                                            <p className="font-medium">{selectedRegistro.nombre} {selectedRegistro.apellidos}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Fecha de Nacimiento</p>
+                                            <p className="font-medium">{formatDate(selectedRegistro.fecha_nacimiento)}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Edad</p>
+                                            <p className="font-medium">{selectedRegistro.edad} años</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Sexo</p>
+                                            <p className="font-medium">{selectedRegistro.sexo}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-semibold text-blue-600 border-b pb-2">
+                                        Datos Sociodemográficos
+                                    </h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Asegurador</p>
+                                            <p className="font-medium">{selectedRegistro.asegurador}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Departamento</p>
+                                            <p className="font-medium">{selectedRegistro.departamento}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Ciudad</p>
+                                            <p className="font-medium">{selectedRegistro.ciudad}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Institución Remitente</p>
+                                            <p className="font-medium">{selectedRegistro.institucion_remitente}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                </TabsContent>
+
+                                {/* Pestaña: Datos Clínicos */}
+                                <TabsContent value="clinico" className="mt-0 space-y-4">
+                                    <h3 className="text-lg font-semibold text-blue-600 border-b pb-2">
+                                        Datos Clínicos
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Tipo de Paciente</p>
+                                            <p className="font-medium">{selectedRegistro.tipo_paciente}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Clasificación Triage</p>
+                                            <p className="font-medium">{selectedRegistro.clasificacion_triage}</p>
+                                        </div>
+                                        <div className="md:col-span-2 lg:col-span-3">
+                                            <p className="text-sm text-muted-foreground">Diagnóstico Principal</p>
+                                            <p className="font-medium">{selectedRegistro.diagnostico_principal}</p>
+                                        </div>
+                                        {selectedRegistro.diagnostico_1 && (
+                                            <div className="md:col-span-2 lg:col-span-3">
+                                                <p className="text-sm text-muted-foreground">Diagnóstico Secundario 1</p>
+                                                <p className="font-medium">{selectedRegistro.diagnostico_1}</p>
+                                            </div>
+                                        )}
+                                        {selectedRegistro.diagnostico_2 && (
+                                            <div className="md:col-span-2 lg:col-span-3">
+                                                <p className="text-sm text-muted-foreground">Diagnóstico Secundario 2</p>
+                                                <p className="font-medium">{selectedRegistro.diagnostico_2}</p>
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Fecha de Ingreso</p>
+                                            <p className="font-medium">{formatDate(selectedRegistro.fecha_ingreso)}</p>
+                                        </div>
+                                        {selectedRegistro.dias_hospitalizados && (
+                                            <div>
+                                                <p className="text-sm text-muted-foreground">Días Hospitalizados</p>
+                                                <p className="font-medium">{selectedRegistro.dias_hospitalizados} días</p>
+                                            </div>
+                                        )}
+                                        {selectedRegistro.motivo_consulta && (
+                                            <div className="md:col-span-2 lg:col-span-3">
+                                                <p className="text-sm text-muted-foreground">Motivo de Consulta</p>
+                                                <p className="font-medium">{selectedRegistro.motivo_consulta}</p>
+                                            </div>
+                                        )}
+                                        {selectedRegistro.enfermedad_actual && (
+                                            <div className="md:col-span-2 lg:col-span-3">
+                                                <p className="text-sm text-muted-foreground">Enfermedad Actual</p>
+                                                <p className="font-medium whitespace-pre-wrap">{selectedRegistro.enfermedad_actual}</p>
+                                            </div>
+                                        )}
+                                        {selectedRegistro.antecedentes && (
+                                            <div className="md:col-span-2 lg:col-span-3">
+                                                <p className="text-sm text-muted-foreground">Antecedentes</p>
+                                                <p className="font-medium whitespace-pre-wrap">{selectedRegistro.antecedentes}</p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Signos Vitales */}
+                                    {(selectedRegistro.frecuencia_cardiaca || selectedRegistro.frecuencia_respiratoria || selectedRegistro.temperatura) && (
+                                        <div className="mt-4">
+                                            <h4 className="font-semibold text-sm mb-2">Signos Vitales</h4>
+                                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                                {selectedRegistro.frecuencia_cardiaca && (
+                                                    <div>
+                                                        <p className="text-xs text-muted-foreground">FC</p>
+                                                        <p className="font-medium">{selectedRegistro.frecuencia_cardiaca} lpm</p>
+                                                    </div>
+                                                )}
+                                                {selectedRegistro.frecuencia_respiratoria && (
+                                                    <div>
+                                                        <p className="text-xs text-muted-foreground">FR</p>
+                                                        <p className="font-medium">{selectedRegistro.frecuencia_respiratoria} rpm</p>
+                                                    </div>
+                                                )}
+                                                {selectedRegistro.temperatura && (
+                                                    <div>
+                                                        <p className="text-xs text-muted-foreground">Temperatura</p>
+                                                        <p className="font-medium">{selectedRegistro.temperatura}°C</p>
+                                                    </div>
+                                                )}
+                                                {selectedRegistro.tension_sistolica && (
+                                                    <div>
+                                                        <p className="text-xs text-muted-foreground">Tensión Arterial</p>
+                                                        <p className="font-medium">{selectedRegistro.tension_sistolica}/{selectedRegistro.tension_diastolica} mmHg</p>
+                                                    </div>
+                                                )}
+                                                {selectedRegistro.saturacion_oxigeno && (
+                                                    <div>
+                                                        <p className="text-xs text-muted-foreground">Saturación O2</p>
+                                                        <p className="font-medium">{selectedRegistro.saturacion_oxigeno}%</p>
+                                                    </div>
+                                                )}
+                                                {selectedRegistro.glucometria && (
+                                                    <div>
+                                                        <p className="text-xs text-muted-foreground">Glucometría</p>
+                                                        <p className="font-medium">{selectedRegistro.glucometria} mg/dL</p>
+                                                    </div>
+                                                )}
+                                                {selectedRegistro.escala_glasgow && (
+                                                    <div>
+                                                        <p className="text-xs text-muted-foreground">Escala Glasgow</p>
+                                                        <p className="font-medium">{selectedRegistro.escala_glasgow}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {selectedRegistro.examen_fisico && (
+                                        <div className="mt-4">
+                                            <p className="text-sm text-muted-foreground">Examen Físico</p>
+                                            <p className="font-medium whitespace-pre-wrap">{selectedRegistro.examen_fisico}</p>
+                                        </div>
+                                    )}
+                                    {selectedRegistro.tratamiento && (
+                                        <div className="mt-4">
+                                            <p className="text-sm text-muted-foreground">Tratamiento</p>
+                                            <p className="font-medium whitespace-pre-wrap">{selectedRegistro.tratamiento}</p>
+                                        </div>
+                                    )}
+                                    {selectedRegistro.plan_terapeutico && (
+                                        <div className="mt-4">
+                                            <p className="text-sm text-muted-foreground">Plan Terapéutico</p>
+                                            <p className="font-medium whitespace-pre-wrap">{selectedRegistro.plan_terapeutico}</p>
+                                        </div>
+                                    )}
+                                </TabsContent>
+
+                                {/* Pestaña: Datos De Remisión */}
+                                <TabsContent value="remision" className="mt-0 space-y-4">
+                                    <h3 className="text-lg font-semibold text-blue-600 border-b pb-2">
+                                        Datos De Remisión
+                                    </h3>
+                                    <div className="space-y-4">
+                                        {selectedRegistro.motivo_remision && (
+                                            <div>
+                                                <p className="text-sm text-muted-foreground">Motivo de Remisión</p>
+                                                <p className="font-medium whitespace-pre-wrap break-words">{selectedRegistro.motivo_remision}</p>
+                                            </div>
+                                        )}
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-hidden">
+                                            {selectedRegistro.tipo_solicitud && (
+                                                <div className="min-w-0">
+                                                    <p className="text-sm text-muted-foreground">Tipo de Solicitud</p>
+                                                    <p className="font-medium break-words">{selectedRegistro.tipo_solicitud}</p>
+                                                </div>
+                                            )}
+                                            {selectedRegistro.especialidad_solicitada && (
+                                                <div className="min-w-0">
+                                                    <p className="text-sm text-muted-foreground">Especialidad Solicitada</p>
+                                                    <p className="font-medium break-words">{selectedRegistro.especialidad_solicitada}</p>
+                                                </div>
+                                            )}
+                                            {selectedRegistro.requerimiento_oxigeno && (
+                                                <div className="min-w-0">
+                                                    <p className="text-sm text-muted-foreground">Requerimiento de Oxígeno</p>
+                                                    <p className="font-medium break-words">{selectedRegistro.requerimiento_oxigeno}</p>
+                                                </div>
+                                            )}
+                                            {selectedRegistro.tipo_servicio && (
+                                                <div className="min-w-0">
+                                                    <p className="text-sm text-muted-foreground">Tipo de Servicio</p>
+                                                    <p className="font-medium break-words">{selectedRegistro.tipo_servicio}</p>
+                                                </div>
+                                            )}
+                                            {selectedRegistro.tipo_apoyo && (
+                                                <div className="min-w-0">
+                                                    <p className="text-sm text-muted-foreground">Tipo de Apoyo</p>
+                                                    <p className="font-medium break-words">{selectedRegistro.tipo_apoyo}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </TabsContent>
+
+                                {/* Pestaña: Información de Control */}
+                                <TabsContent value="control" className="mt-0 space-y-4">
+                                    <div className="space-y-4 bg-slate-50 p-4 rounded-lg">
+                                        <h3 className="text-lg font-semibold text-blue-600 border-b pb-2">
+                                            Información de Control
+                                        </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Estado</p>
+                                            {getEstadoBadge(selectedRegistro.estado)}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Prioridad IA</p>
+                                            {getPrioridadIABadge(selectedRegistro.prioriza_ia)}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Creado por</p>
+                                            <p className="font-medium">{selectedRegistro.user?.name || 'Desconocido'}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Fecha de Creación</p>
+                                            <p className="font-medium">{formatDate(selectedRegistro.created_at)}</p>
+                                        </div>
+                                        {selectedRegistro.historia_clinica_path && (
+                                            <div className="md:col-span-2 lg:col-span-4">
+                                                <p className="text-sm text-muted-foreground mb-2">Historia Clínica</p>
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleVerPDF(selectedRegistro)}
+                                                        className="flex-1"
+                                                    >
+                                                        <Eye className="h-4 w-4 mr-2" />
+                                                        Ver PDF
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleDownloadHistoria(selectedRegistro)}
+                                                        className="flex-1"
+                                                    >
+                                                        <Download className="h-4 w-4 mr-2" />
+                                                        Descargar
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    </div>
+                                </TabsContent>
+                                </div>
+                            </Tabs>
+                        )}
+                    </DialogContent>
+                </Dialog>
+
+                {/* Visualizador de PDF */}
+                {isPDFViewerOpen && (
+                    <PDFViewer
+                        pdfUrl={pdfUrl}
+                        onClose={() => setIsPDFViewerOpen(false)}
+                    />
                 )}
             </div>
         </AppLayoutInertia>

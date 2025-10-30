@@ -4,14 +4,15 @@ import type { PropsWithChildren } from 'react';
 
 export default function AppHeaderLayout({ children, breadcrumbs }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {
     return (
-        <div className="relative min-h-screen bg-slate-50 z-10">
+        <div className="relative min-h-screen bg-slate-50">
             <AppHeaderFloating />
 
             {/* Background overlay to cover any residual content from previous pages */}
-            <div className="fixed inset-0 bg-slate-50 z-0" />
+            <div className="fixed inset-0 bg-slate-50 -z-10" />
 
-            {/* Main Content with top padding for fixed header + floating navbar */}
-            <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-6">
+            {/* Main Content - Responsive padding matches navbar height (Principle 1 & 2) */}
+            {/* Mobile: pt-20 (h-14 + spacing), Desktop: pt-24 (h-16 + spacing) */}
+            <main className="relative container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-20 sm:pt-24 pb-6">
                 {children}
             </main>
         </div>

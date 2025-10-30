@@ -59,47 +59,52 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const navItems = user.role === 'administrador' ? adminNavItems : medicoNavItems;
     return (
         <>
-            <div className="border-b border-sidebar-border/80">
-                <div className="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
-                    {/* Mobile Menu */}
-                    <div className="lg:hidden">
+            {/* Main Navigation Bar - Responsive Box System (Principle 1) */}
+            <div className="border-b border-sidebar-border/80 bg-white/95 backdrop-blur-sm">
+                {/* Container with responsive constraints - maintains rhythm across breakpoints */}
+                <div className="mx-auto flex h-14 sm:h-16 items-center px-3 sm:px-4 md:px-6 lg:px-8 md:max-w-7xl">
+                    {/* Mobile Menu - Purposeful reorganization for small screens (Principle 2) */}
+                    <div className="lg:hidden flex-shrink-0">
                         <Sheet>
                             <SheetTrigger asChild>
-                                <Button variant="ghost" size="icon" className="mr-2 h-[34px] w-[34px]">
+                                <Button variant="ghost" size="icon" className="mr-1.5 sm:mr-2 h-9 w-9 touch-manipulation">
                                     <Menu className="h-5 w-5" />
                                 </Button>
                             </SheetTrigger>
                             <SheetContent side="left" className="flex h-full w-64 flex-col items-stretch justify-between bg-sidebar">
                                 <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
-                                <SheetHeader className="flex justify-start text-left">
+                                <SheetHeader className="flex justify-start text-left p-4">
                                     <AppLogoIcon className="h-6 w-6 fill-current text-black dark:text-white" />
                                 </SheetHeader>
                                 <div className="flex h-full flex-1 flex-col space-y-4 p-4">
                                     <div className="flex h-full flex-col justify-between text-sm">
-                                        <div className="flex flex-col space-y-4">
+                                        <div className="flex flex-col space-y-3">
                                             {navItems.map((item) => (
-                                                <Link key={item.title} href={item.href} className="flex items-center space-x-2 font-medium">
+                                                <Link
+                                                    key={item.title}
+                                                    href={item.href}
+                                                    className="flex items-center space-x-3 font-medium py-2.5 px-3 rounded-lg hover:bg-sidebar-accent transition-colors touch-manipulation"
+                                                >
                                                     {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
                                                     <span>{item.title}</span>
                                                 </Link>
                                             ))}
                                         </div>
-
-
                                     </div>
                                 </div>
                             </SheetContent>
                         </Sheet>
                     </div>
 
-                    <Link href="/dashboard" prefetch className="flex items-center space-x-2">
+                    {/* Logo - Scales and maintains visual weight */}
+                    <Link href="/dashboard" prefetch className="flex items-center space-x-2 flex-shrink-0 hover:opacity-80 transition-opacity">
                         <AppLogo />
                     </Link>
 
-                    {/* Desktop Navigation */}
-                    <div className="ml-6 hidden h-full items-center space-x-6 lg:flex">
+                    {/* Desktop Navigation - Hidden on mobile, flows naturally on larger screens */}
+                    <div className="ml-4 sm:ml-6 hidden h-full items-center space-x-4 lg:flex">
                         <NavigationMenu className="flex h-full items-stretch">
-                            <NavigationMenuList className="flex h-full items-stretch space-x-2">
+                            <NavigationMenuList className="flex h-full items-stretch space-x-1">
                                 {navItems.map((item, index) => (
                                     <NavigationMenuItem key={index} className="relative flex h-full items-center">
                                         <Link
@@ -107,7 +112,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
                                                 page.url === item.href && activeItemStyles,
-                                                'h-9 cursor-pointer px-3',
+                                                'h-9 cursor-pointer px-3 text-sm',
                                             )}
                                         >
                                             {item.icon && <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />}
@@ -122,19 +127,22 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                         </NavigationMenu>
                     </div>
 
-                    <div className="ml-auto flex items-center space-x-2">
-                        <div className="relative flex items-center space-x-1">
-                            <Button variant="ghost" size="icon" className="group h-9 w-9 cursor-pointer">
+                    {/* Actions Section - Adapts spacing and visibility */}
+                    <div className="ml-auto flex items-center gap-1 sm:gap-2">
+                        {/* Search - Hidden on smallest screens to reduce clutter */}
+                        <div className="relative hidden sm:flex items-center">
+                            <Button variant="ghost" size="icon" className="group h-9 w-9 cursor-pointer touch-manipulation">
                                 <Search className="!size-5 opacity-80 group-hover:opacity-100" />
                             </Button>
-
                         </div>
+
+                        {/* User Menu - Always accessible, adapts size */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="size-10 rounded-full p-1">
-                                    <Avatar className="size-8 overflow-hidden rounded-full">
+                                <Button variant="ghost" className="size-9 sm:size-10 rounded-full p-1 touch-manipulation">
+                                    <Avatar className="size-7 sm:size-8 overflow-hidden rounded-full">
                                         <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
-                                        <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                        <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white text-xs">
                                             {getInitials(auth.user.name)}
                                         </AvatarFallback>
                                     </Avatar>
@@ -147,9 +155,11 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     </div>
                 </div>
             </div>
+
+            {/* Breadcrumbs - Maintains hierarchy, adjusts padding responsively */}
             {breadcrumbs.length > 1 && (
-                <div className="flex w-full border-b border-sidebar-border/70">
-                    <div className="mx-auto flex h-12 w-full items-center justify-start px-4 text-neutral-500 md:max-w-7xl">
+                <div className="flex w-full border-b border-sidebar-border/70 bg-white/95">
+                    <div className="mx-auto flex h-10 sm:h-12 w-full items-center justify-start px-3 sm:px-4 md:px-6 lg:px-8 text-neutral-500 md:max-w-7xl">
                         <Breadcrumbs breadcrumbs={breadcrumbs} />
                     </div>
                 </div>

@@ -247,81 +247,83 @@ export default function GestionUsuarios({ usuarios, stats }: Props) {
                     </Dialog>
                 </div>
 
-                {/* Estadísticas Compactas - Bento Grid */}
-                <div className="grid gap-3 grid-cols-5">
-                    <Card className="p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-muted-foreground">Total</p>
-                                <h3 className="text-2xl font-bold mt-1">{stats.total}</h3>
+                {/* Grid Layout: Estadísticas a la izquierda, Tabla a la derecha */}
+                <div className="grid gap-4 lg:grid-cols-[280px_1fr] flex-1">
+                    {/* Columna de Estadísticas */}
+                    <div className="flex flex-col gap-3">
+                        <Card className="p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs font-medium text-muted-foreground">Total Usuarios</p>
+                                    <h3 className="text-2xl font-bold mt-1">{stats.total}</h3>
+                                </div>
+                                <UserCheck className="h-8 w-8 text-blue-600 dark:text-blue-500 opacity-60" />
                             </div>
-                            <UserCheck className="h-8 w-8 text-muted-foreground opacity-50" />
-                        </div>
-                    </Card>
+                        </Card>
 
-                    <Card className="p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-muted-foreground">Admins</p>
-                                <h3 className="text-2xl font-bold mt-1">{stats.administradores}</h3>
+                        <Card className="p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs font-medium text-muted-foreground">Administradores</p>
+                                    <h3 className="text-2xl font-bold mt-1">{stats.administradores}</h3>
+                                </div>
+                                <UserCheck className="h-8 w-8 text-blue-600 dark:text-blue-500 opacity-60" />
                             </div>
-                            <UserCheck className="h-8 w-8 opacity-60" style={{ color: '#042077' }} />
-                        </div>
-                    </Card>
+                        </Card>
 
-                    <Card className="p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-muted-foreground">Médicos</p>
-                                <h3 className="text-2xl font-bold mt-1">{stats.medicos}</h3>
+                        <Card className="p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs font-medium text-muted-foreground">Médicos</p>
+                                    <h3 className="text-2xl font-bold mt-1">{stats.medicos}</h3>
+                                </div>
+                                <UserCheck className="h-8 w-8 text-blue-600 dark:text-blue-500 opacity-60" />
                             </div>
-                            <UserCheck className="h-8 w-8 text-muted-foreground opacity-50" />
-                        </div>
-                    </Card>
+                        </Card>
 
-                    <Card className="p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-muted-foreground">IPS</p>
-                                <h3 className="text-2xl font-bold mt-1">{stats.ips}</h3>
+                        <Card className="p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs font-medium text-muted-foreground">IPS</p>
+                                    <h3 className="text-2xl font-bold mt-1">{stats.ips}</h3>
+                                </div>
+                                <UserCheck className="h-8 w-8 text-blue-600 dark:text-blue-500 opacity-60" />
                             </div>
-                            <UserCheck className="h-8 w-8 text-muted-foreground opacity-50" />
-                        </div>
-                    </Card>
+                        </Card>
 
-                    <Card className="p-4 bg-green-50 dark:bg-green-950/20">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-green-700 dark:text-green-400">Activos</p>
-                                <h3 className="text-2xl font-bold mt-1 text-green-700 dark:text-green-400">{stats.activos}</h3>
+                        <Card className="p-4 bg-blue-50 dark:bg-blue-950/20">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs font-medium text-blue-700 dark:text-blue-400">Usuarios Activos</p>
+                                    <h3 className="text-2xl font-bold mt-1 text-blue-700 dark:text-blue-400">{stats.activos}</h3>
+                                </div>
+                                <UserCheck className="h-8 w-8 text-blue-600 dark:text-blue-500 opacity-70" />
                             </div>
-                            <UserCheck className="h-8 w-8 text-green-600 dark:text-green-500 opacity-70" />
-                        </div>
-                    </Card>
-                </div>
+                        </Card>
+                    </div>
 
-                {/* Tabla de Usuarios con Buscador Integrado */}
-                <Card className="flex-1">
-                    <CardHeader className="pb-3">
-                        <div className="flex items-center justify-between gap-4">
-                            <div>
-                                <CardTitle className="text-lg">Lista de Usuarios</CardTitle>
-                                <CardDescription>
-                                    {filteredUsuarios.length} usuario{filteredUsuarios.length !== 1 ? 's' : ''} {searchTerm ? 'encontrado' + (filteredUsuarios.length !== 1 ? 's' : '') : ''}
-                                </CardDescription>
+                    {/* Tabla de Usuarios con Buscador Integrado */}
+                    <Card className="flex flex-col overflow-hidden">
+                        <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between gap-4">
+                                <div>
+                                    <CardTitle className="text-lg">Lista de Usuarios</CardTitle>
+                                    <CardDescription>
+                                        {filteredUsuarios.length} usuario{filteredUsuarios.length !== 1 ? 's' : ''} {searchTerm ? 'encontrado' + (filteredUsuarios.length !== 1 ? 's' : '') : ''}
+                                    </CardDescription>
+                                </div>
+                                <div className="relative w-80">
+                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Buscar por nombre, email o rol..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="pl-10"
+                                    />
+                                </div>
                             </div>
-                            <div className="relative w-80">
-                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                <Input
-                                    placeholder="Buscar por nombre, email o rol..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-10"
-                                />
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
+                        </CardHeader>
+                        <CardContent className="pt-0 flex-1 overflow-auto">
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -411,8 +413,9 @@ export default function GestionUsuarios({ usuarios, stats }: Props) {
                                 )}
                             </TableBody>
                         </Table>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
+                </div>
 
                 {/* Modal de Edición */}
                 <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
