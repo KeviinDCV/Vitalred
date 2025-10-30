@@ -20,16 +20,6 @@ export default function AuthSimpleLayout({ children, title, description }: Props
         return () => clearInterval(interval);
     }, [images.length]);
 
-    // Desactivar scrollbar-gutter en páginas de autenticación
-    useEffect(() => {
-        const htmlElement = document.documentElement;
-        htmlElement.classList.add('no-scrollbar-gutter');
-        
-        return () => {
-            htmlElement.classList.remove('no-scrollbar-gutter');
-        };
-    }, []);
-
     return (
         <div className="flex min-h-screen w-full max-w-full bg-slate-50 overflow-hidden">
             {/* Lado izquierdo - Formulario de Login */}

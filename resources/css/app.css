@@ -191,14 +191,8 @@
     }
 
     html {
-        /* Reservar espacio para scrollbar siempre - evita layout shift */
-        scrollbar-gutter: stable;
+        /* Solo evitar scroll horizontal - NO reservar espacio para scrollbar */
         overflow-x: hidden;
-    }
-
-    /* Desactivar scrollbar-gutter en páginas de autenticación */
-    html.no-scrollbar-gutter {
-        scrollbar-gutter: auto;
     }
 
     body {
