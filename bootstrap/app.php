@@ -37,5 +37,22 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Manejar errores de rate limiting (429)
+        $exceptions->render(function (\Illuminate\Http\Exceptions\ThrottleRequestsException $e, $request) {
+            // Si es una petición GET a la página de login
+            if ($request->isMethod('GET') && $request->is('login')) {
+                $seconds = $e->getHeaders()['Retry-After'] ?? 60;
+
+                // Devolver la vista de login con el mensaje de throttle
+                return \Inertia\Inertia::render('auth/login', [
+                    'status' => null,
+                    'throttle_error' => true,
+                    'throttle_seconds' => $seconds,
+                    'throttle_minutes' => ceil($seconds / 60),
+                ])->toResponse($request)->setStatusCode(200); // Devolver 200 para evitar error en navegador
+            }
+
+            // Para peticiones POST/AJAX, dejar que Laravel maneje la respuesta normal (429)
+            // return null;
+        });
     })->create();

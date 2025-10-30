@@ -6,18 +6,30 @@ import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { ErrorModal } from '@/components/error-modal';
 
 interface LoginProps {
     status?: string;
+    throttle_error?: boolean;
+    throttle_seconds?: number;
+    throttle_minutes?: number;
 }
 
-export default function Login({ status }: LoginProps) {
+export default function Login({ status, throttle_error, throttle_seconds, throttle_minutes }: LoginProps) {
     const [showPassword, setShowPassword] = useState(false);
+    const [showThrottleModal, setShowThrottleModal] = useState(false);
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
+
+    // Mostrar modal cuando hay error de rate limiting
+    useEffect(() => {
+        if (throttle_error) {
+            setShowThrottleModal(true);
+        }
+    }, [throttle_error]);
 
     return (
         <AuthLayout title="Iniciar Sesión" description="Accede a tu cuenta de HERMES">
@@ -29,7 +41,20 @@ export default function Login({ status }: LoginProps) {
             </Head>
 
             <Form method="post" action={route('login')} resetOnSuccess={['password']} className="space-y-5 sm:space-y-6">
-                {({ processing, errors }) => (
+                {({ processing, errors }) => {
+                    // Detectar si hay un error de throttle en los errores de validación
+                    useEffect(() => {
+                        if (errors.email && (
+                            errors.email.toLowerCase().includes('too many') ||
+                            errors.email.toLowerCase().includes('throttle') ||
+                            errors.email.toLowerCase().includes('demasiados') ||
+                            errors.email.toLowerCase().includes('intentos')
+                        )) {
+                            setShowThrottleModal(true);
+                        }
+                    }, [errors.email]);
+
+                    return (
                     <>
                         <div className="space-y-4 sm:space-y-5">
                             <div className="space-y-1.5 sm:space-y-2">
@@ -111,7 +136,8 @@ export default function Login({ status }: LoginProps) {
                             )}
                         </Button>
                     </>
-                )}
+                    );
+                }}
             </Form>
 
             {status && (
@@ -119,6 +145,15 @@ export default function Login({ status }: LoginProps) {
                     {status}
                 </div>
             )}
+
+            {/* Modal de error de rate limiting */}
+            <ErrorModal
+                open={showThrottleModal}
+                onClose={() => setShowThrottleModal(false)}
+                type="rate-limit"
+                title="Demasiados intentos de inicio de sesión"
+                description={`Por tu seguridad, hemos bloqueado temporalmente los intentos de inicio de sesión. Por favor, espera ${throttle_minutes || 1} minuto${(throttle_minutes || 1) > 1 ? 's' : ''} antes de volver a intentar.`}
+            />
         </AuthLayout>
     );
 }

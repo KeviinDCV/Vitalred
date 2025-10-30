@@ -187,7 +187,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 require __DIR__.'/settings.php';
 
-// Rutas de autenticación con rate limiting
-Route::middleware('throttle:5,1')->group(function () {
-    require __DIR__.'/auth.php';
-});
+// Rutas de autenticación (el rate limiting se maneja en LoginRequest)
+require __DIR__.'/auth.php';
