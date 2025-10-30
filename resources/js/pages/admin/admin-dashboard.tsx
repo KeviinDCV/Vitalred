@@ -1,10 +1,9 @@
-import { usePage } from '@inertiajs/react';
-import { MetricCard } from "@/components/metric-card";
+import { usePage, router } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Users, FileText, AlertCircle, Activity, RefreshCw, TrendingUp, Clock } from "lucide-react";
+import { Users, FileText, Activity, TrendingUp } from "lucide-react";
 import AppLayoutInertia from '@/layouts/app-layout-inertia';
 import { type BreadcrumbItem } from '@/types';
 
@@ -17,16 +16,22 @@ interface Usuario {
   created_at: string;
 }
 
-interface Stats {
+interface ActividadSistema {
+  nuevos_usuarios_hoy: number;
+  nuevos_usuarios_semana: number;
   total_usuarios: number;
-  referencias_pendientes: number;
-  casos_criticos: number;
-  sistema_activo: string;
+  registros_medicos_total: number;
+  registros_medicos_semana: number;
+  usuarios_por_rol: {
+    administradores: number;
+    medicos: number;
+    ips: number;
+  };
 }
 
 interface Props {
   usuariosRecientes: Usuario[];
-  stats: Stats;
+  actividadSistema: ActividadSistema;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -36,8 +41,20 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function AdminDashboard({ usuariosRecientes, stats }: Props) {
+export default function AdminDashboard({ usuariosRecientes, actividadSistema }: Props) {
   const { auth } = usePage<{ auth: { user: { name: string, role: string } } }>().props;
+
+  // Auto-refresh cada 30 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      router.reload({
+        only: ['usuariosRecientes', 'actividadSistema'],
+        preserveScroll: true,
+      });
+    }, 30000); // 30 segundos
+
+    return () => clearInterval(interval);
+  }, []);
 
   const formatearFecha = (fecha: string) => {
     const date = new Date(fecha);
@@ -66,64 +83,13 @@ export default function AdminDashboard({ usuariosRecientes, stats }: Props) {
           <p className="text-sm text-muted-foreground">Gestión completa del sistema</p>
         </div>
 
-        {/* Bento Grid - Métricas */}
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">Total Usuarios</p>
-                <h3 className="text-2xl font-bold mt-1">{stats.total_usuarios}</h3>
-              </div>
-              <Users className="h-8 w-8 text-muted-foreground opacity-50" />
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">Referencias</p>
-                <h3 className="text-2xl font-bold mt-1">{stats.referencias_pendientes}</h3>
-              </div>
-              <FileText className="h-8 w-8 text-muted-foreground opacity-50" />
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">Casos Críticos</p>
-                <h3 className="text-2xl font-bold mt-1">{stats.casos_criticos}</h3>
-              </div>
-              <AlertCircle className="h-8 w-8 text-red-500 opacity-60" />
-            </div>
-          </Card>
-
-          <Card className="p-4 bg-green-50 dark:bg-green-950/20">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-green-700 dark:text-green-400">Sistema</p>
-                <h3 className="text-2xl font-bold mt-1 text-green-700 dark:text-green-400">{stats.sistema_activo}</h3>
-              </div>
-              <Activity className="h-8 w-8 text-green-600 dark:text-green-500 opacity-70" />
-            </div>
-          </Card>
-        </div>
-
         {/* Grid de Contenido - 2 Columnas */}
         <div className="grid gap-3 lg:grid-cols-3">
           {/* Usuarios Recientes - 2 columnas */}
           <Card className="lg:col-span-2">
             <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg">Usuarios Recientes</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-1">Últimos usuarios registrados</p>
-                </div>
-                <Button variant="outline" size="sm" className="gap-2 h-8">
-                  <RefreshCw className="h-3 w-3" />
-                  Actualizar
-                </Button>
-              </div>
+              <CardTitle className="text-lg">Usuarios Recientes</CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">Últimos usuarios registrados • Actualización automática</p>
             </CardHeader>
             <CardContent className="pt-0">
               <Table>
@@ -183,12 +149,22 @@ export default function AdminDashboard({ usuariosRecientes, stats }: Props) {
             <CardContent className="pt-0">
               <div className="space-y-4">
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-950/30">
-                    <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-500" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/30">
+                    <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">Nuevos Usuarios</p>
-                    <p className="text-xs text-muted-foreground">+{usuariosRecientes.length} registros hoy</p>
+                    <p className="text-sm font-medium">Nuevos Usuarios Hoy</p>
+                    <p className="text-xs text-muted-foreground">+{actividadSistema.nuevos_usuarios_hoy} registrados</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/30">
+                    <Users className="h-5 w-5 text-blue-600 dark:text-blue-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">Usuarios Esta Semana</p>
+                    <p className="text-xs text-muted-foreground">+{actividadSistema.nuevos_usuarios_semana} de {actividadSistema.total_usuarios} totales</p>
                   </div>
                 </div>
 
@@ -197,28 +173,20 @@ export default function AdminDashboard({ usuariosRecientes, stats }: Props) {
                     <FileText className="h-5 w-5 text-blue-600 dark:text-blue-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">Referencias Activas</p>
-                    <p className="text-xs text-muted-foreground">{stats.referencias_pendientes} pendientes de revisión</p>
+                    <p className="text-sm font-medium">Registros Médicos</p>
+                    <p className="text-xs text-muted-foreground">{actividadSistema.registros_medicos_semana} esta semana / {actividadSistema.registros_medicos_total} totales</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-950/30">
-                    <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-500" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/30">
+                    <Activity className="h-5 w-5 text-blue-600 dark:text-blue-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">Casos Prioritarios</p>
-                    <p className="text-xs text-muted-foreground">{stats.casos_criticos} requieren atención</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/30">
-                    <Clock className="h-5 w-5 text-purple-600 dark:text-purple-500" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">Uptime del Sistema</p>
-                    <p className="text-xs text-muted-foreground">{stats.sistema_activo} últimas 24h</p>
+                    <p className="text-sm font-medium">Distribución de Roles</p>
+                    <p className="text-xs text-muted-foreground">
+                      {actividadSistema.usuarios_por_rol.administradores} admins, {actividadSistema.usuarios_por_rol.medicos} médicos, {actividadSistema.usuarios_por_rol.ips} IPS
+                    </p>
                   </div>
                 </div>
               </div>

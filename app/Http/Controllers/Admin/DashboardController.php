@@ -36,19 +36,25 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
 
-        // Estadísticas generales
-        $stats = [
+        // Actividad del sistema con datos reales
+        $actividadSistema = [
+            'nuevos_usuarios_hoy' => User::whereDate('created_at', today())->count(),
+            'nuevos_usuarios_semana' => User::where('created_at', '>=', now()->subDays(7))->count(),
             'total_usuarios' => User::count(),
-            'referencias_pendientes' => 15, // TODO: Implementar cuando tengamos modelo de referencias
-            'casos_criticos' => 3, // TODO: Implementar con lógica real
-            'sistema_activo' => '99.9%',
+            'registros_medicos_total' => RegistroMedico::count(),
+            'registros_medicos_semana' => RegistroMedico::where('created_at', '>=', now()->subDays(7))->count(),
+            'usuarios_por_rol' => [
+                'administradores' => User::where('role', 'administrador')->count(),
+                'medicos' => User::where('role', 'medico')->count(),
+                'ips' => User::where('role', 'ips')->count(),
+            ],
         ];
 
         return Inertia::render('admin/admin-dashboard', [
             'registros' => $registros,
             'search' => $search,
             'usuariosRecientes' => $usuariosRecientes,
-            'stats' => $stats,
+            'actividadSistema' => $actividadSistema,
         ]);
     }
 
