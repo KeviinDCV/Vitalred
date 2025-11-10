@@ -15,7 +15,7 @@ class OpenRouterAIService
 
     public function __construct()
     {
-        $this->apiKey = env('OPENROUTER_API_KEY', '');
+        $this->apiKey = config('services.openrouter.api_key', '');
         
         if (empty($this->apiKey)) {
             Log::error('OPENROUTER API Key no configurada en .env');
