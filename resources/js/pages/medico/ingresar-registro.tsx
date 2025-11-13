@@ -1443,6 +1443,7 @@ const especialidades = [
     { value: 'neumologia_pediatrica_alt', label: 'Neumología pediátrica' },
     { value: 'gastroenterologia_pediatrica', label: 'Gastroenterología pediátrica' },
     { value: 'hematooncologia_pediatrica', label: 'Hematooncología pediátrica' },
+    { value: 'cuidados_intensivos', label: 'Cuidados intensivos' },
 ];
 
 const tiposServicio = [
@@ -1481,10 +1482,36 @@ const tiposServicio = [
 ];
 
 const tiposApoyo = [
-    { value: 'apoyo_diagnostico_imagenologico', label: 'Apoyo Diagnóstico Imagenológico' },
-    { value: 'apoyo_diagnostico_quirurgico', label: 'Apoyo Diagnóstico Quirúrgico' },
-    { value: 'apoyos_diagnosticos', label: 'Apoyos Diagnósticos' },
-    { value: 'otro', label: 'Otro' },
+    { value: 'radiografia', label: 'Radiografía' },
+    { value: 'ecografia', label: 'Ecografía' },
+    { value: 'tomografia_computarizada_simple_contrastada', label: 'Tomografía computarizada simple o contrastada' },
+    { value: 'tomografia_emision_positrones', label: 'Tomografía por emisión de positrones' },
+    { value: 'tomografia_perfusion', label: 'Tomografía con perfusión' },
+    { value: 'resonancia_magnetica_simple', label: 'Resonancia magnética simple' },
+    { value: 'resonancia_magnetica_contrastada', label: 'Resonancia magnética contrastada' },
+    { value: 'resonancia_magnetica_perfusion', label: 'Resonancia magnética con perfusión' },
+    { value: 'colangiorresonancia', label: 'Colangiorresonancia' },
+    { value: 'angiografia', label: 'Angiografía' },
+    { value: 'gammagrafia', label: 'Gammagrafía' },
+    { value: 'ecocardiograma_transtoracico', label: 'Ecocardiograma transtorácico' },
+    { value: 'ecocardiograma_transesofagico', label: 'Ecocardiograma transesofágico' },
+    { value: 'ecocardiograma_estres', label: 'Ecocardiograma estrés' },
+    { value: 'otros_apoyos_imagen', label: 'Otros apoyos de imagen (pregunta abierta)' },
+    { value: 'esofagogastroduodenoscopia', label: 'Esofagogastroduodenoscopia (Endoscopia de vías digestivas altas)' },
+    { value: 'colangiopancreatografia_retrograda_endoscopica', label: 'Colangiopancreatografía retrógrada endoscópica (CPRE)' },
+    { value: 'colonoscopia', label: 'Colonoscopia' },
+    { value: 'nasofibrolaringoscopia', label: 'Nasofibrolaringoscopia' },
+    { value: 'fibrobroncoscopia', label: 'Fibrobroncoscopia' },
+    { value: 'videocapsula_endoscopica', label: 'Videocápsula endoscópica' },
+    { value: 'biopsia_guiada_ecografia', label: 'Biopsia guiada por ecografía' },
+    { value: 'biopsia_guiada_tomografia', label: 'Biopsia guiada por tomografía' },
+    { value: 'cistoscopia', label: 'Cistoscopia' },
+    { value: 'urodinamia', label: 'Urodinamia' },
+    { value: 'biopsia_medula_osea', label: 'Biopsia de médula ósea' },
+    { value: 'otros_apoyos_diagnosticos_quirurgicos', label: 'Otros apoyos diagnósticos quirúrgicos (pregunta abierta)' },
+    { value: 'electromiografia_neuroconduccion', label: 'Electromiografía con neuroconducción' },
+    { value: 'electroencefalografia', label: 'Electroencefalografía' },
+    { value: 'videotelemetria', label: 'Videotelemetría' },
 ];
 
 export default function IngresarRegistro() {
@@ -2042,11 +2069,14 @@ export default function IngresarRegistro() {
         examen_fisico: '',
         plan_terapeutico: '',
 
+        // Paso 3: Signos vitales - Requerimiento de oxígeno
+        requerimiento_oxigeno: 'NO',
+        medio_soporte_oxigeno: '',
+
         // Paso 4: Datos De Remisión
         motivo_remision: '',
         tipo_solicitud: '',
         especialidad_solicitada: [] as string[],
-        requerimiento_oxigeno: 'NO',
         tipo_servicio: '',
         tipo_apoyo: '',
     });
@@ -2112,6 +2142,8 @@ export default function IngresarRegistro() {
     const handlePrevious = () => {
         if (currentStep > 1) {
             setIsTransitioning(true);
+            // Limpiar errores al retroceder
+            setValidationErrors([]);
             setTimeout(() => {
                 setCurrentStep(currentStep - 1);
                 setIsTransitioning(false);
@@ -2829,6 +2861,13 @@ export default function IngresarRegistro() {
             : 'border-gray-300 focus:border-primary focus:ring-primary';
     };
 
+    // Helper para limpiar error de un campo cuando se modifica
+    const clearFieldError = (fieldName: string) => {
+        if (hasFieldError(fieldName)) {
+            setValidationErrors(prev => prev.filter(err => err !== fieldName));
+        }
+    };
+
     const validateStep2 = () => {
         const requiredFields = [
             'asegurador',
@@ -2840,6 +2879,8 @@ export default function IngresarRegistro() {
         const missingFields = requiredFields.filter(field => !data[field as keyof typeof data]);
 
         if (missingFields.length > 0) {
+            setValidationErrors(missingFields);
+
             const fieldNames: Record<string, string> = {
                 asegurador: 'Asegurador',
                 departamento: 'Departamento',
@@ -2856,6 +2897,7 @@ export default function IngresarRegistro() {
             return false;
         }
 
+        setValidationErrors([]);
         return true;
     };
 
@@ -2878,9 +2920,21 @@ export default function IngresarRegistro() {
             'requerimiento_oxigeno'
         ];
 
-        const missingFields = requiredFields.filter(field => !data[field as keyof typeof data]);
+        // Si requerimiento_oxigeno es SI, medio_soporte_oxigeno es requerido
+        if (data.requerimiento_oxigeno === 'SI' && !data.medio_soporte_oxigeno) {
+            requiredFields.push('medio_soporte_oxigeno');
+        }
+
+        const missingFields = requiredFields.filter(field => {
+            if (field === 'medio_soporte_oxigeno') {
+                return data.requerimiento_oxigeno === 'SI' && !data.medio_soporte_oxigeno;
+            }
+            return !data[field as keyof typeof data];
+        });
 
         if (missingFields.length > 0) {
+            setValidationErrors(missingFields);
+
             const fieldNames: Record<string, string> = {
                 tipo_paciente: 'Tipo de paciente',
                 diagnostico_principal: 'Diagnóstico principal',
@@ -2896,7 +2950,8 @@ export default function IngresarRegistro() {
                 saturacion_oxigeno: 'Saturación de Oxígeno',
                 escala_glasgow: 'Escala de Glasgow',
                 examen_fisico: 'Examen físico',
-                requerimiento_oxigeno: 'Requerimiento de oxígeno'
+                requerimiento_oxigeno: 'Requerimiento de oxígeno',
+                medio_soporte_oxigeno: 'Medio de soporte de oxígeno'
             };
 
             const missingFieldNames = missingFields.map(field => fieldNames[field]);
@@ -2908,6 +2963,7 @@ export default function IngresarRegistro() {
             return false;
         }
 
+        setValidationErrors([]);
         return true;
     };
 
@@ -2930,6 +2986,8 @@ export default function IngresarRegistro() {
         });
 
         if (missingFields.length > 0) {
+            setValidationErrors(missingFields);
+
             const fieldNames: Record<string, string> = {
                 motivo_remision: 'Motivo de remisión',
                 tipo_solicitud: 'Tipo solicitud',
@@ -2946,6 +3004,7 @@ export default function IngresarRegistro() {
             return false;
         }
 
+        setValidationErrors([]);
         return true;
     };
 
@@ -3303,9 +3362,12 @@ export default function IngresarRegistro() {
                                             <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
                                                 {/* Asegurador */}
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="asegurador">Asegurador *</Label>
-                                                    <Select value={data.asegurador} onValueChange={handleAseguradorChange}>
-                                                        <SelectTrigger id="asegurador">
+                                                    <Label htmlFor="asegurador" className={hasFieldError('asegurador') ? 'text-red-600' : ''}>Asegurador *</Label>
+                                                    <Select value={data.asegurador} onValueChange={(value) => {
+                                                        clearFieldError('asegurador');
+                                                        handleAseguradorChange(value);
+                                                    }}>
+                                                        <SelectTrigger id="asegurador" className={hasFieldError('asegurador') ? 'border-red-500' : ''}>
                                                             <SelectValue placeholder="Seleccione" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -3316,6 +3378,9 @@ export default function IngresarRegistro() {
                                                             ))}
                                                         </SelectContent>
                                                     </Select>
+                                                    {hasFieldError('asegurador') && (
+                                                        <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                    )}
                                                 </div>
 
                                                 {/* Selector Secundario Condicional - EPS, ARL, SOAT */}
@@ -3346,9 +3411,12 @@ export default function IngresarRegistro() {
 
                                                 {/* Departamento */}
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="departamento">Departamento *</Label>
-                                                    <Select value={data.departamento} onValueChange={handleDepartamentoChange}>
-                                                        <SelectTrigger id="departamento">
+                                                    <Label htmlFor="departamento" className={hasFieldError('departamento') ? 'text-red-600' : ''}>Departamento *</Label>
+                                                    <Select value={data.departamento} onValueChange={(value) => {
+                                                        clearFieldError('departamento');
+                                                        handleDepartamentoChange(value);
+                                                    }}>
+                                                        <SelectTrigger id="departamento" className={hasFieldError('departamento') ? 'border-red-500' : ''}>
                                                             <SelectValue placeholder="Seleccione" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -3359,17 +3427,23 @@ export default function IngresarRegistro() {
                                                             ))}
                                                         </SelectContent>
                                                     </Select>
+                                                    {hasFieldError('departamento') && (
+                                                        <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                    )}
                                                 </div>
 
                                                 {/* Ciudad */}
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="ciudad">Ciudad *</Label>
+                                                    <Label htmlFor="ciudad" className={hasFieldError('ciudad') ? 'text-red-600' : ''}>Ciudad *</Label>
                                                     <Select
                                                         value={data.ciudad}
-                                                        onValueChange={(value) => setData('ciudad', value)}
+                                                        onValueChange={(value) => {
+                                                            clearFieldError('ciudad');
+                                                            setData('ciudad', value);
+                                                        }}
                                                         disabled={!data.departamento}
                                                     >
-                                                        <SelectTrigger id="ciudad">
+                                                        <SelectTrigger id="ciudad" className={hasFieldError('ciudad') ? 'border-red-500' : ''}>
                                                             <SelectValue placeholder={data.departamento ? "Seleccione" : "Primero seleccione un departamento"} />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -3380,11 +3454,14 @@ export default function IngresarRegistro() {
                                                             ))}
                                                         </SelectContent>
                                                     </Select>
+                                                    {hasFieldError('ciudad') && (
+                                                        <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                    )}
                                                 </div>
 
                                                 {/* Institución remitente */}
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="institucion_remitente">Institución remitente *</Label>
+                                                    <Label htmlFor="institucion_remitente" className={hasFieldError('institucion_remitente') ? 'text-red-600' : ''}>Institución remitente *</Label>
                                                     <div className="relative" data-institucion-dropdown>
                                                         {/* Campo unificado: búsqueda + selección */}
                                                         <div className="space-y-2">
@@ -3393,9 +3470,14 @@ export default function IngresarRegistro() {
                                                                 type="text"
                                                                 placeholder={loadingInstituciones ? "Cargando instituciones..." : "Busque y seleccione una institución..."}
                                                                 value={searchInstitucion}
-                                                                onChange={(e) => setSearchInstitucion(e.target.value)}
+                                                                onChange={(e) => {
+                                                                    setSearchInstitucion(e.target.value);
+                                                                    if (data.institucion_remitente) {
+                                                                        clearFieldError('institucion_remitente');
+                                                                    }
+                                                                }}
                                                                 disabled={loadingInstituciones}
-                                                                className="pr-10"
+                                                                className={`pr-10 ${hasFieldError('institucion_remitente') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                                                             />
                                                             
                                                             {/* Dropdown de resultados (solo si hay búsqueda) */}
@@ -3415,6 +3497,7 @@ export default function IngresarRegistro() {
                                                                                     onClick={() => {
                                                                                         setData('institucion_remitente', institucion.value);
                                                                                         setSearchInstitucion('');
+                                                                                        clearFieldError('institucion_remitente');
                                                                                     }}
                                                                                 >
                                                                                     {institucion.label}
@@ -3448,13 +3531,19 @@ export default function IngresarRegistro() {
                                                                 </div>
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => setData('institucion_remitente', '')}
+                                                                    onClick={() => {
+                                                                        setData('institucion_remitente', '');
+                                                                        clearFieldError('institucion_remitente');
+                                                                    }}
                                                                     className="text-green-600 hover:text-red-600 hover:bg-red-50 p-1 rounded transition-colors"
                                                                     title="Eliminar institución"
                                                                 >
                                                                     <X className="h-4 w-4" />
                                                                 </button>
                                                             </div>
+                                                        )}
+                                                        {hasFieldError('institucion_remitente') && (
+                                                            <p className="text-sm text-red-600 mt-1">Este campo es obligatorio</p>
                                                         )}
                                                     </div>
                                                 </div>
@@ -3504,9 +3593,12 @@ export default function IngresarRegistro() {
                                             <div className="grid gap-6 md:grid-cols-2">
                                                 {/* Tipo de paciente */}
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="tipo_paciente">Tipo de paciente *</Label>
-                                                    <Select value={data.tipo_paciente} onValueChange={(value) => setData('tipo_paciente', value)}>
-                                                        <SelectTrigger id="tipo_paciente">
+                                                    <Label htmlFor="tipo_paciente" className={hasFieldError('tipo_paciente') ? 'text-red-600' : ''}>Tipo de paciente *</Label>
+                                                    <Select value={data.tipo_paciente} onValueChange={(value) => {
+                                                        clearFieldError('tipo_paciente');
+                                                        setData('tipo_paciente', value);
+                                                    }}>
+                                                        <SelectTrigger id="tipo_paciente" className={hasFieldError('tipo_paciente') ? 'border-red-500' : ''}>
                                                             <SelectValue placeholder="Seleccione" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -3517,18 +3609,28 @@ export default function IngresarRegistro() {
                                                             ))}
                                                         </SelectContent>
                                                     </Select>
+                                                    {hasFieldError('tipo_paciente') && (
+                                                        <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                    )}
                                                 </div>
 
                                                 {/* Fecha de ingreso */}
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="fecha_ingreso">Fecha de ingreso *</Label>
+                                                    <Label htmlFor="fecha_ingreso" className={hasFieldError('fecha_ingreso') ? 'text-red-600' : ''}>Fecha de ingreso *</Label>
                                                     <Input
                                                         id="fecha_ingreso"
                                                         type="date"
                                                         value={data.fecha_ingreso}
-                                                        onChange={(e) => handleFechaIngresoChange(e.target.value)}
+                                                        onChange={(e) => {
+                                                            clearFieldError('fecha_ingreso');
+                                                            handleFechaIngresoChange(e.target.value);
+                                                        }}
                                                         placeholder="yyyy-mm-dd"
+                                                        className={getFieldErrorClass('fecha_ingreso')}
                                                     />
+                                                    {hasFieldError('fecha_ingreso') && (
+                                                        <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                    )}
                                                 </div>
 
                                                 {/* Días hospitalizados */}
@@ -3549,7 +3651,7 @@ export default function IngresarRegistro() {
                                                 <h3 className="text-lg font-medium">Diagnósticos</h3>
                                                 <div className="grid gap-4">
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="diagnostico_principal">Diagnóstico principal (CIE-10) *</Label>
+                                                        <Label htmlFor="diagnostico_principal" className={hasFieldError('diagnostico_principal') ? 'text-red-600' : ''}>Diagnóstico principal (CIE-10) *</Label>
                                                         <div className="relative" data-cie10-dropdown>
                                                             {/* Campo unificado: búsqueda + selección */}
                                                             <div className="space-y-2">
@@ -3558,9 +3660,14 @@ export default function IngresarRegistro() {
                                                                     type="text"
                                                                     placeholder={loadingCIE10 ? "Cargando códigos..." : "Busque y seleccione un código CIE-10..."}
                                                                     value={searchCIE10}
-                                                                    onChange={(e) => setSearchCIE10(e.target.value)}
+                                                                    onChange={(e) => {
+                                                                        setSearchCIE10(e.target.value);
+                                                                        if (data.diagnostico_principal) {
+                                                                            clearFieldError('diagnostico_principal');
+                                                                        }
+                                                                    }}
                                                                     disabled={loadingCIE10}
-                                                                    className="pr-10"
+                                                                    className={`pr-10 ${hasFieldError('diagnostico_principal') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                                                                 />
                                                                 
                                                                 {/* Dropdown de resultados (solo si hay búsqueda) */}
@@ -3580,6 +3687,7 @@ export default function IngresarRegistro() {
                                                                                         onClick={() => {
                                                                                             setData('diagnostico_principal', codigo.value);
                                                                                             setSearchCIE10('');
+                                                                                            clearFieldError('diagnostico_principal');
                                                                                         }}
                                                                                     >
                                                                                         {codigo.label}
@@ -3613,13 +3721,19 @@ export default function IngresarRegistro() {
                                                                     </div>
                                                                     <button
                                                                         type="button"
-                                                                        onClick={() => setData('diagnostico_principal', '')}
+                                                                        onClick={() => {
+                                                                            setData('diagnostico_principal', '');
+                                                                            clearFieldError('diagnostico_principal');
+                                                                        }}
                                                                         className="text-green-600 hover:text-red-600 hover:bg-red-50 p-1 rounded transition-colors"
                                                                         title="Eliminar diagnóstico"
                                                                     >
                                                                         <X className="h-4 w-4" />
                                                                     </button>
                                                                 </div>
+                                                            )}
+                                                            {hasFieldError('diagnostico_principal') && (
+                                                                <p className="text-sm text-red-600 mt-1">Este campo es obligatorio</p>
                                                             )}
                                                         </div>
                                                     </div>
@@ -3783,36 +3897,54 @@ export default function IngresarRegistro() {
                                                 <h3 className="text-lg font-medium">Información Clínica</h3>
                                                 <div className="grid gap-4">
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="motivo_consulta">Motivo consulta *</Label>
+                                                        <Label htmlFor="motivo_consulta" className={hasFieldError('motivo_consulta') ? 'text-red-600' : ''}>Motivo consulta *</Label>
                                                         <textarea
                                                             id="motivo_consulta"
                                                             value={data.motivo_consulta}
-                                                            onChange={(e) => setData('motivo_consulta', e.target.value)}
+                                                            onChange={(e) => {
+                                                                clearFieldError('motivo_consulta');
+                                                                setData('motivo_consulta', e.target.value);
+                                                            }}
                                                             placeholder="Describa el motivo de la consulta"
-                                                            className="w-full min-h-[80px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
+                                                            className={`w-full min-h-[80px] px-3 py-2 border rounded-md focus:outline-none focus:ring-2 resize-vertical ${hasFieldError('motivo_consulta') ? 'border-red-500 focus:ring-red-500 focus:border-transparent' : 'border-gray-300 focus:ring-primary focus:border-transparent'}`}
                                                         />
+                                                        {hasFieldError('motivo_consulta') && (
+                                                            <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                        )}
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="enfermedad_actual">Enfermedad actual *</Label>
+                                                        <Label htmlFor="enfermedad_actual" className={hasFieldError('enfermedad_actual') ? 'text-red-600' : ''}>Enfermedad actual *</Label>
                                                         <textarea
                                                             id="enfermedad_actual"
                                                             value={data.enfermedad_actual}
-                                                            onChange={(e) => setData('enfermedad_actual', e.target.value)}
+                                                            onChange={(e) => {
+                                                                clearFieldError('enfermedad_actual');
+                                                                setData('enfermedad_actual', e.target.value);
+                                                            }}
                                                             placeholder="Describa la enfermedad actual del paciente"
-                                                            className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
+                                                            className={`w-full min-h-[100px] px-3 py-2 border rounded-md focus:outline-none focus:ring-2 resize-vertical ${hasFieldError('enfermedad_actual') ? 'border-red-500 focus:ring-red-500 focus:border-transparent' : 'border-gray-300 focus:ring-primary focus:border-transparent'}`}
                                                         />
+                                                        {hasFieldError('enfermedad_actual') && (
+                                                            <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                        )}
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="antecedentes">Antecedentes *</Label>
+                                                        <Label htmlFor="antecedentes" className={hasFieldError('antecedentes') ? 'text-red-600' : ''}>Antecedentes *</Label>
                                                         <textarea
                                                             id="antecedentes"
                                                             value={data.antecedentes}
-                                                            onChange={(e) => setData('antecedentes', e.target.value)}
+                                                            onChange={(e) => {
+                                                                clearFieldError('antecedentes');
+                                                                setData('antecedentes', e.target.value);
+                                                            }}
                                                             placeholder="Antecedentes médicos, quirúrgicos, familiares, etc."
-                                                            className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
+                                                            className={`w-full min-h-[100px] px-3 py-2 border rounded-md focus:outline-none focus:ring-2 resize-vertical ${hasFieldError('antecedentes') ? 'border-red-500 focus:ring-red-500 focus:border-transparent' : 'border-gray-300 focus:ring-primary focus:border-transparent'}`}
                                                         />
+                                                        {hasFieldError('antecedentes') && (
+                                                            <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
@@ -3822,97 +3954,139 @@ export default function IngresarRegistro() {
                                                 <h3 className="text-lg font-medium">Signos Vitales</h3>
                                                 <div className="grid gap-4 md:grid-cols-3">
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="frecuencia_cardiaca">Frecuencia Cardíaca (lpm) *</Label>
+                                                        <Label htmlFor="frecuencia_cardiaca" className={hasFieldError('frecuencia_cardiaca') ? 'text-red-600' : ''}>Frecuencia Cardíaca (lpm) *</Label>
                                                         <Input
                                                             id="frecuencia_cardiaca"
                                                             type="number"
-                                                            min="30"
-                                                            max="200"
+                                                            min="40"
+                                                            max="300"
                                                             value={data.frecuencia_cardiaca}
-                                                            onChange={(e) => setData('frecuencia_cardiaca', parseInt(e.target.value) || 0)}
+                                                            onChange={(e) => {
+                                                                clearFieldError('frecuencia_cardiaca');
+                                                                setData('frecuencia_cardiaca', parseInt(e.target.value) || 0);
+                                                            }}
                                                             placeholder="Normal: 60-100 lpm"
+                                                            className={getFieldErrorClass('frecuencia_cardiaca')}
                                                         />
+                                                        {hasFieldError('frecuencia_cardiaca') && (
+                                                            <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                        )}
                                                         <p className="text-xs text-muted-foreground">
                                                             Rango normal: 60-100 lpm | Bradicardia: &lt;60 | Taquicardia: &gt;100
                                                         </p>
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="frecuencia_respiratoria">Frecuencia Respiratoria (rpm) *</Label>
+                                                        <Label htmlFor="frecuencia_respiratoria" className={hasFieldError('frecuencia_respiratoria') ? 'text-red-600' : ''}>Frecuencia Respiratoria (rpm) *</Label>
                                                         <Input
                                                             id="frecuencia_respiratoria"
                                                             type="number"
-                                                            min="8"
-                                                            max="40"
+                                                            min="10"
+                                                            max="80"
                                                             value={data.frecuencia_respiratoria}
-                                                            onChange={(e) => setData('frecuencia_respiratoria', parseInt(e.target.value) || 0)}
+                                                            onChange={(e) => {
+                                                                clearFieldError('frecuencia_respiratoria');
+                                                                setData('frecuencia_respiratoria', parseInt(e.target.value) || 0);
+                                                            }}
                                                             placeholder="Normal: 12-20 rpm"
+                                                            className={getFieldErrorClass('frecuencia_respiratoria')}
                                                         />
+                                                        {hasFieldError('frecuencia_respiratoria') && (
+                                                            <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                        )}
                                                         <p className="text-xs text-muted-foreground">
                                                             Rango normal: 12-20 rpm | Bradipnea: &lt;12 | Taquipnea: &gt;20
                                                         </p>
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="temperatura">Temperatura (°C) *</Label>
+                                                        <Label htmlFor="temperatura" className={hasFieldError('temperatura') ? 'text-red-600' : ''}>Temperatura (°C) *</Label>
                                                         <Input
                                                             id="temperatura"
                                                             type="number"
                                                             step="0.1"
-                                                            min="32"
-                                                            max="45"
+                                                            min="34"
+                                                            max="42"
                                                             value={data.temperatura}
-                                                            onChange={(e) => setData('temperatura', parseFloat(e.target.value) || 0)}
+                                                            onChange={(e) => {
+                                                                clearFieldError('temperatura');
+                                                                setData('temperatura', parseFloat(e.target.value) || 0);
+                                                            }}
                                                             placeholder="Normal: 36.1-37.2°C"
+                                                            className={getFieldErrorClass('temperatura')}
                                                         />
+                                                        {hasFieldError('temperatura') && (
+                                                            <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                        )}
                                                         <p className="text-xs text-muted-foreground">
                                                             Normal: 36.1-37.2°C | Hipotermia: &lt;36°C | Fiebre: &gt;37.5°C
                                                         </p>
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="tension_sistolica">Tensión Arterial Sistólica (mmHg) *</Label>
+                                                        <Label htmlFor="tension_sistolica" className={hasFieldError('tension_sistolica') ? 'text-red-600' : ''}>Tensión Arterial Sistólica (mmHg) *</Label>
                                                         <Input
                                                             id="tension_sistolica"
                                                             type="number"
-                                                            min="60"
-                                                            max="250"
+                                                            min="50"
+                                                            max="300"
                                                             value={data.tension_sistolica}
-                                                            onChange={(e) => setData('tension_sistolica', parseInt(e.target.value) || 0)}
+                                                            onChange={(e) => {
+                                                                clearFieldError('tension_sistolica');
+                                                                setData('tension_sistolica', parseInt(e.target.value) || 0);
+                                                            }}
                                                             placeholder="Normal: 90-120 mmHg"
+                                                            className={getFieldErrorClass('tension_sistolica')}
                                                         />
+                                                        {hasFieldError('tension_sistolica') && (
+                                                            <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                        )}
                                                         <p className="text-xs text-muted-foreground">
                                                             Normal: 90-120 mmHg | Hipotensión: &lt;90 | Hipertensión: &gt;140
                                                         </p>
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="tension_diastolica">Tensión Arterial Diastólica (mmHg) *</Label>
+                                                        <Label htmlFor="tension_diastolica" className={hasFieldError('tension_diastolica') ? 'text-red-600' : ''}>Tensión Arterial Diastólica (mmHg) *</Label>
                                                         <Input
                                                             id="tension_diastolica"
                                                             type="number"
-                                                            min="40"
-                                                            max="150"
+                                                            min="20"
+                                                            max="200"
                                                             value={data.tension_diastolica}
-                                                            onChange={(e) => setData('tension_diastolica', parseInt(e.target.value) || 0)}
+                                                            onChange={(e) => {
+                                                                clearFieldError('tension_diastolica');
+                                                                setData('tension_diastolica', parseInt(e.target.value) || 0);
+                                                            }}
                                                             placeholder="Normal: 60-80 mmHg"
+                                                            className={getFieldErrorClass('tension_diastolica')}
                                                         />
+                                                        {hasFieldError('tension_diastolica') && (
+                                                            <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                        )}
                                                         <p className="text-xs text-muted-foreground">
                                                             Normal: 60-80 mmHg | Hipotensión: &lt;60 | Hipertensión: &gt;90
                                                         </p>
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="saturacion_oxigeno">Saturación de Oxígeno (%) *</Label>
+                                                        <Label htmlFor="saturacion_oxigeno" className={hasFieldError('saturacion_oxigeno') ? 'text-red-600' : ''}>Saturación de Oxígeno (%) *</Label>
                                                         <Input
                                                             id="saturacion_oxigeno"
                                                             type="number"
-                                                            min="70"
+                                                            min="50"
                                                             max="100"
                                                             value={data.saturacion_oxigeno}
-                                                            onChange={(e) => setData('saturacion_oxigeno', parseInt(e.target.value) || 0)}
+                                                            onChange={(e) => {
+                                                                clearFieldError('saturacion_oxigeno');
+                                                                setData('saturacion_oxigeno', parseInt(e.target.value) || 0);
+                                                            }}
                                                             placeholder="Normal: 95-100%"
+                                                            className={getFieldErrorClass('saturacion_oxigeno')}
                                                         />
+                                                        {hasFieldError('saturacion_oxigeno') && (
+                                                            <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                        )}
                                                         <p className="text-xs text-muted-foreground">
                                                             Normal: 95-100% | Hipoxemia leve: 90-94% | Hipoxemia severa: &lt;90%
                                                         </p>
@@ -3923,8 +4097,8 @@ export default function IngresarRegistro() {
                                                         <Input
                                                             id="glucometria"
                                                             type="number"
-                                                            min="20"
-                                                            max="600"
+                                                            min="0"
+                                                            max="1000"
                                                             value={data.glucometria}
                                                             onChange={(e) => setData('glucometria', parseInt(e.target.value) || 0)}
                                                             placeholder="Normal: 70-110 mg/dL"
@@ -3935,9 +4109,12 @@ export default function IngresarRegistro() {
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="escala_glasgow">Escala de Glasgow *</Label>
-                                                        <Select value={data.escala_glasgow} onValueChange={(value) => setData('escala_glasgow', value)}>
-                                                            <SelectTrigger>
+                                                        <Label htmlFor="escala_glasgow" className={hasFieldError('escala_glasgow') ? 'text-red-600' : ''}>Escala de Glasgow *</Label>
+                                                        <Select value={data.escala_glasgow} onValueChange={(value) => {
+                                                            clearFieldError('escala_glasgow');
+                                                            setData('escala_glasgow', value);
+                                                        }}>
+                                                            <SelectTrigger className={hasFieldError('escala_glasgow') ? 'border-red-500' : ''}>
                                                                 <SelectValue placeholder="Seleccione" />
                                                             </SelectTrigger>
                                                             <SelectContent>
@@ -3948,7 +4125,59 @@ export default function IngresarRegistro() {
                                                                 ))}
                                                             </SelectContent>
                                                         </Select>
+                                                        {hasFieldError('escala_glasgow') && (
+                                                            <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                        )}
                                                     </div>
+
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="requerimiento_oxigeno" className={hasFieldError('requerimiento_oxigeno') ? 'text-red-600' : ''}>Requerimiento de oxígeno *</Label>
+                                                        <Select value={data.requerimiento_oxigeno} onValueChange={(value) => {
+                                                            clearFieldError('requerimiento_oxigeno');
+                                                            setData('requerimiento_oxigeno', value);
+                                                            if (value === 'NO') {
+                                                                setData('medio_soporte_oxigeno', '');
+                                                                clearFieldError('medio_soporte_oxigeno');
+                                                            }
+                                                        }}>
+                                                            <SelectTrigger id="requerimiento_oxigeno" className={hasFieldError('requerimiento_oxigeno') ? 'border-red-500' : ''}>
+                                                                <SelectValue placeholder="Seleccione" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="NO">NO</SelectItem>
+                                                                <SelectItem value="SI">SÍ</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        {hasFieldError('requerimiento_oxigeno') && (
+                                                            <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                        )}
+                                                    </div>
+
+                                                    {data.requerimiento_oxigeno === 'SI' && (
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="medio_soporte_oxigeno" className={hasFieldError('medio_soporte_oxigeno') ? 'text-red-600' : ''}>Medio de soporte de oxígeno *</Label>
+                                                            <Select value={data.medio_soporte_oxigeno} onValueChange={(value) => {
+                                                                clearFieldError('medio_soporte_oxigeno');
+                                                                setData('medio_soporte_oxigeno', value);
+                                                            }}>
+                                                                <SelectTrigger id="medio_soporte_oxigeno" className={hasFieldError('medio_soporte_oxigeno') ? 'border-red-500' : ''}>
+                                                                    <SelectValue placeholder="Seleccione el medio de soporte" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="Canula nasal">Canula nasal</SelectItem>
+                                                                    <SelectItem value="Mascara simple">Mascara simple</SelectItem>
+                                                                    <SelectItem value="Mascara de no reinhalacion">Mascara de no reinhalacion</SelectItem>
+                                                                    <SelectItem value="Ventury (Alto flujo)">Ventury (Alto flujo)</SelectItem>
+                                                                    <SelectItem value="Intubación Orotraqueal">Intubación Orotraqueal</SelectItem>
+                                                                    <SelectItem value="Traqueostomía">Traqueostomía</SelectItem>
+                                                                    <SelectItem value="Canula nasal de alto flujo">Canula nasal de alto flujo</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                            {hasFieldError('medio_soporte_oxigeno') && (
+                                                                <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -3957,14 +4186,20 @@ export default function IngresarRegistro() {
                                                 <h3 className="text-lg font-medium">Examen Físico</h3>
                                                 <div className="grid gap-4">
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="examen_fisico">Examen físico *</Label>
+                                                        <Label htmlFor="examen_fisico" className={hasFieldError('examen_fisico') ? 'text-red-600' : ''}>Examen físico *</Label>
                                                         <textarea
                                                             id="examen_fisico"
                                                             value={data.examen_fisico}
-                                                            onChange={(e) => setData('examen_fisico', e.target.value)}
+                                                            onChange={(e) => {
+                                                                clearFieldError('examen_fisico');
+                                                                setData('examen_fisico', e.target.value);
+                                                            }}
                                                             placeholder="Describa los hallazgos del examen físico"
-                                                            className="w-full min-h-[120px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
+                                                            className={`w-full min-h-[120px] px-3 py-2 border rounded-md focus:outline-none focus:ring-2 resize-vertical ${hasFieldError('examen_fisico') ? 'border-red-500 focus:ring-red-500 focus:border-transparent' : 'border-gray-300 focus:ring-primary focus:border-transparent'}`}
                                                         />
+                                                        {hasFieldError('examen_fisico') && (
+                                                            <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                        )}
                                                     </div>
 
                                                     <div className="space-y-2">
@@ -3977,23 +4212,6 @@ export default function IngresarRegistro() {
                                                             className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
                                                         />
                                                     </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Sexta sección: Requerimiento de oxígeno */}
-                                            <div className="space-y-4">
-                                                <h3 className="text-lg font-medium">Requerimientos</h3>
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="requerimiento_oxigeno">Requerimiento de oxígeno *</Label>
-                                                    <Select value={data.requerimiento_oxigeno} onValueChange={(value) => setData('requerimiento_oxigeno', value)}>
-                                                        <SelectTrigger id="requerimiento_oxigeno">
-                                                            <SelectValue placeholder="Seleccione" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="NO">NO</SelectItem>
-                                                            <SelectItem value="SI">SÍ</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
                                                 </div>
                                             </div>
 
@@ -4040,23 +4258,32 @@ export default function IngresarRegistro() {
                                             {/* Primera sección: Información de remisión */}
                                             <div className="space-y-4">
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="motivo_remision">Motivo de remisión *</Label>
+                                                    <Label htmlFor="motivo_remision" className={hasFieldError('motivo_remision') ? 'text-red-600' : ''}>Motivo de remisión *</Label>
                                                     <textarea
                                                         id="motivo_remision"
                                                         value={data.motivo_remision}
-                                                        onChange={(e) => setData('motivo_remision', e.target.value)}
+                                                        onChange={(e) => {
+                                                            clearFieldError('motivo_remision');
+                                                            setData('motivo_remision', e.target.value);
+                                                        }}
                                                         placeholder="Describa detalladamente el motivo por el cual se remite al paciente"
-                                                        className="w-full min-h-[120px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-vertical"
+                                                        className={`w-full min-h-[120px] px-3 py-2 border rounded-md focus:outline-none focus:ring-2 resize-vertical ${hasFieldError('motivo_remision') ? 'border-red-500 focus:ring-red-500 focus:border-transparent' : 'border-gray-300 focus:ring-primary focus:border-transparent'}`}
                                                     />
+                                                    {hasFieldError('motivo_remision') && (
+                                                        <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                    )}
                                                 </div>
                                             </div>
 
                                             {/* Segunda sección: Tipo de solicitud y especialidad */}
                                             <div className="grid gap-6 md:grid-cols-2">
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="tipo_solicitud">Tipo solicitud *</Label>
-                                                    <Select value={data.tipo_solicitud} onValueChange={(value) => setData('tipo_solicitud', value)}>
-                                                        <SelectTrigger>
+                                                    <Label htmlFor="tipo_solicitud" className={hasFieldError('tipo_solicitud') ? 'text-red-600' : ''}>Tipo solicitud *</Label>
+                                                    <Select value={data.tipo_solicitud} onValueChange={(value) => {
+                                                        clearFieldError('tipo_solicitud');
+                                                        setData('tipo_solicitud', value);
+                                                    }}>
+                                                        <SelectTrigger className={hasFieldError('tipo_solicitud') ? 'border-red-500' : ''}>
                                                             <SelectValue placeholder="Seleccione" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -4067,13 +4294,16 @@ export default function IngresarRegistro() {
                                                             ))}
                                                         </SelectContent>
                                                     </Select>
+                                                    {hasFieldError('tipo_solicitud') && (
+                                                        <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                    )}
                                                 </div>
 
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="especialidad_solicitada">Especialidad solicitada * (Selección múltiple)</Label>
+                                                    <Label htmlFor="especialidad_solicitada" className={hasFieldError('especialidad_solicitada') ? 'text-red-600' : ''}>Especialidad solicitada * (Selección múltiple)</Label>
                                                     <div className="relative">
                                                         <Select>
-                                                            <SelectTrigger>
+                                                            <SelectTrigger className={hasFieldError('especialidad_solicitada') ? 'border-red-500' : ''}>
                                                                 <SelectValue 
                                                                     placeholder={
                                                                         data.especialidad_solicitada.length === 0 
@@ -4117,14 +4347,17 @@ export default function IngresarRegistro() {
                                                                                         
                                                                                         if (currentValues.includes(especialidad.value)) {
                                                                                             // Remover si ya está seleccionado
-                                                                                            setData('especialidad_solicitada', 
-                                                                                                currentValues.filter(val => val !== especialidad.value)
-                                                                                            );
+                                                                                            const newValues = currentValues.filter(val => val !== especialidad.value);
+                                                                                            setData('especialidad_solicitada', newValues);
+                                                                                            if (newValues.length > 0) {
+                                                                                                clearFieldError('especialidad_solicitada');
+                                                                                            }
                                                                                         } else {
                                                                                             // Agregar si no está seleccionado
                                                                                             setData('especialidad_solicitada', 
                                                                                                 [...currentValues, especialidad.value]
                                                                                             );
+                                                                                            clearFieldError('especialidad_solicitada');
                                                                                         }
                                                                                     }}
                                                                                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
@@ -4162,9 +4395,11 @@ export default function IngresarRegistro() {
                                                                                 <button
                                                                                     type="button"
                                                                                     onClick={() => {
-                                                                                        setData('especialidad_solicitada', 
-                                                                                            data.especialidad_solicitada.filter(val => val !== value)
-                                                                                        );
+                                                                                        const newValues = data.especialidad_solicitada.filter(val => val !== value);
+                                                                                        setData('especialidad_solicitada', newValues);
+                                                                                        if (newValues.length > 0) {
+                                                                                            clearFieldError('especialidad_solicitada');
+                                                                                        }
                                                                                     }}
                                                                                     className="ml-1 h-3 w-3 text-blue-600 hover:text-blue-800"
                                                                                 >
@@ -4176,6 +4411,9 @@ export default function IngresarRegistro() {
                                                                 </div>
                                                             </div>
                                                         )}
+                                                        {hasFieldError('especialidad_solicitada') && (
+                                                            <p className="text-sm text-red-600 mt-1">Este campo es obligatorio</p>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
@@ -4183,12 +4421,15 @@ export default function IngresarRegistro() {
                                             {/* Tercera sección: Tipos de servicio y apoyo */}
                                             <div className="grid gap-6 md:grid-cols-2">
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="tipo_servicio">Tipo de servicio *</Label>
-                                                    <Select value={data.tipo_servicio} onValueChange={(value) => setData('tipo_servicio', value)}>
-                                                        <SelectTrigger id="tipo_servicio">
+                                                    <Label htmlFor="tipo_servicio" className={hasFieldError('tipo_servicio') ? 'text-red-600' : ''}>Tipo de servicio *</Label>
+                                                    <Select value={data.tipo_servicio} onValueChange={(value) => {
+                                                        clearFieldError('tipo_servicio');
+                                                        setData('tipo_servicio', value);
+                                                    }}>
+                                                        <SelectTrigger id="tipo_servicio" className={hasFieldError('tipo_servicio') ? 'border-red-500' : ''}>
                                                             <SelectValue placeholder="Seleccione" />
                                                         </SelectTrigger>
-                                                        <SelectContent>
+                                                        <SelectContent side="bottom" sideOffset={4} avoidCollisions={false}>
                                                             {tiposServicio.map((servicio) => (
                                                                 <SelectItem key={servicio.value} value={servicio.value}>
                                                                     {servicio.label}
@@ -4196,6 +4437,9 @@ export default function IngresarRegistro() {
                                                             ))}
                                                         </SelectContent>
                                                     </Select>
+                                                    {hasFieldError('tipo_servicio') && (
+                                                        <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -4206,7 +4450,7 @@ export default function IngresarRegistro() {
                                                     <SelectTrigger id="tipo_apoyo">
                                                         <SelectValue placeholder="Seleccione" />
                                                     </SelectTrigger>
-                                                    <SelectContent>
+                                                    <SelectContent side="bottom" sideOffset={4} avoidCollisions={false}>
                                                         {tiposApoyo.map((apoyo) => (
                                                             <SelectItem key={apoyo.value} value={apoyo.value}>
                                                                 {apoyo.label}

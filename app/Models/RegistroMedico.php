@@ -49,12 +49,13 @@ class RegistroMedico extends Model
         'examen_fisico',
         'tratamiento',
         'plan_terapeutico',
+        'requerimiento_oxigeno',
+        'medio_soporte_oxigeno',
 
         // Paso 4: Datos De Remisión
         'motivo_remision',
         'tipo_solicitud',
         'especialidad_solicitada',
-        'requerimiento_oxigeno',
         'tipo_servicio',
         'tipo_apoyo',
 

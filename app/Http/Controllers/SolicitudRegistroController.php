@@ -111,7 +111,7 @@ class SolicitudRegistroController extends Controller
                     }
                 },
             ],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', 'confirmed', Rules\Password::min(8)],
         ];
 
         $request->validate($rules, [
@@ -136,6 +136,7 @@ class SolicitudRegistroController extends Controller
             'email.max' => 'El correo electrónico no puede exceder 255 caracteres.',
             'password.required' => 'La contraseña es requerida.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
         ]);
 
         // Crear solicitud de registro con contraseña hasheada

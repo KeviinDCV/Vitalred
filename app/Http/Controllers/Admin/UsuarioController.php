@@ -139,7 +139,7 @@ class UsuarioController extends Controller
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', 'confirmed', Rules\Password::min(8)],
             'role' => 'required|in:administrador,medico,ips',
             'is_active' => 'boolean',
             // Campos EPS siempre requeridos
@@ -162,6 +162,7 @@ class UsuarioController extends Controller
             'email.unique' => 'Este correo electrónico ya está registrado.',
             'password.required' => 'La contraseña es requerida.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
             'role.required' => 'El rol es requerido.',
             'role.in' => 'El rol seleccionado no es válido.',
             'eps_id.integer' => 'El ID de EPS debe ser un número válido.',
