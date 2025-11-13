@@ -15,6 +15,7 @@ class Institucion extends Model
         'tipo',
         'nombre',
         'codigo_habilitacion',
+        'nit',
         'departamento',
         'municipio',
         'activo',

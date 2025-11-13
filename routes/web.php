@@ -27,6 +27,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('usuarios/{usuario}', [App\Http\Controllers\Admin\UsuarioController::class, 'update'])->name('usuarios.update');
         Route::patch('usuarios/{usuario}/toggle-status', [App\Http\Controllers\Admin\UsuarioController::class, 'toggleStatus'])->name('usuarios.toggle-status');
         Route::delete('usuarios/{usuario}', [App\Http\Controllers\Admin\UsuarioController::class, 'destroy'])->name('usuarios.destroy');
+        
+        // Rutas de solicitudes de registro
+        Route::get('usuarios/solicitudes', [App\Http\Controllers\SolicitudRegistroController::class, 'index'])->name('usuarios.solicitudes');
+        Route::post('usuarios/solicitudes/{id}/aprobar', [App\Http\Controllers\SolicitudRegistroController::class, 'aprobar'])->name('usuarios.solicitudes.aprobar');
+        Route::post('usuarios/solicitudes/{id}/rechazar', [App\Http\Controllers\SolicitudRegistroController::class, 'rechazar'])->name('usuarios.solicitudes.rechazar');
 
         Route::get('referencias', fn() => Inertia::render('admin/referencias'))->name('referencias');
         // Route::get('reportes', fn() => Inertia::render('admin/reportes'))->name('reportes'); // No se usa por ahora

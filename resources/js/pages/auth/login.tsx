@@ -4,7 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import { LoaderCircle, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { ErrorModal } from '@/components/error-modal';
@@ -139,6 +139,16 @@ export default function Login({ status, throttle_error, throttle_seconds, thrott
                     );
                 }}
             </Form>
+
+            {/* Botón de Registrarse */}
+            <div className="mt-4 sm:mt-5 text-center">
+                <Link
+                    href={route('register')}
+                    className="inline-flex items-center justify-center text-sm sm:text-base font-medium text-primary hover:text-primary/80 transition-colors underline underline-offset-4"
+                >
+                    ¿No tienes cuenta? Solicita tu registro aquí
+                </Link>
+            </div>
 
             {status && (
                 <div className="mt-3 sm:mt-4 p-2.5 sm:p-3 text-center text-xs sm:text-sm font-medium text-emerald-700 bg-gradient-to-b from-emerald-50 to-emerald-100/50 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.5)]">

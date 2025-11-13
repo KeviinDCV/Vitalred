@@ -6,9 +6,10 @@ interface AuthLayoutProps {
     name?: string;
     title?: string;
     description?: string;
+    showHeader?: boolean;
 }
 
-export default function AuthSimpleLayout({ children, title, description }: PropsWithChildren<AuthLayoutProps>) {
+export default function AuthSimpleLayout({ children, title, description, showHeader = true }: PropsWithChildren<AuthLayoutProps>) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const images = ['/images/1.png', '/images/2.png', '/images/3.png'];
 
@@ -23,30 +24,27 @@ export default function AuthSimpleLayout({ children, title, description }: Props
     return (
         <div className="flex min-h-screen w-full max-w-full bg-slate-50 overflow-hidden">
             {/* Lado izquierdo - Formulario de Login */}
-            <div className="flex flex-1 flex-col px-5 py-8 sm:px-8 sm:py-12 md:px-12 md:py-16 lg:flex-none lg:px-16 lg:py-12 xl:px-24 bg-slate-100 overflow-y-auto">
+            <div className="flex flex-1 flex-col px-5 py-6 sm:px-8 sm:py-8 md:px-12 md:py-10 lg:flex-none lg:px-16 lg:py-8 xl:px-24 bg-slate-100 overflow-y-auto">
                 <div className="mx-auto w-full max-w-[420px] sm:max-w-md md:max-w-lg lg:max-w-md lg:w-full">
-                    {/* Header con Logo y Título Principal - Responsive sizing */}
-                    <div className="mb-8 sm:mb-10 md:mb-12 text-center">
-                        <Link href={route('home')} className="inline-block group mb-6 sm:mb-7 md:mb-8">
-                            <div className="mx-auto mb-4 sm:mb-5 md:mb-6">
-                                <AppLogoIcon size={100} className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-[120px] lg:h-[120px] transition-transform duration-300 group-hover:scale-105 filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.1)] group-hover:drop-shadow-[0_8px_16px_rgba(0,0,0,0.15)]" />
-                            </div>
-                            <span className="sr-only">Ir al inicio</span>
-                        </Link>
-
-                        <div className="space-y-2 sm:space-y-2.5 md:space-y-3">
-                            <h1 className="text-3xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-primary tracking-tight leading-tight drop-shadow-sm">
-                                HERMES
-                            </h1>
-                            <p className="text-xs sm:text-sm md:text-base text-slate-600 font-medium tracking-wide uppercase leading-relaxed max-w-xs sm:max-w-sm mx-auto px-4 sm:px-0">
-                                Herramienta Estandarizada de Referencia y Contrarreferencia Médica Sistematizada
-                            </p>
+                    {/* Header con Logo y Título Principal - Compacto con animación */}
+                    {showHeader && (
+                        <div className="mb-6 sm:mb-7 md:mb-8 text-center">
+                            <Link href={route('home')} className="inline-block group">
+                                <div className="mx-auto relative">
+                                    <AppLogoIcon size={100} className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-[120px] lg:h-[120px] transition-transform duration-300 group-hover:scale-105 filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.1)] group-hover:drop-shadow-[0_8px_16px_rgba(0,0,0,0.15)]" />
+                                    {/* Título HERMES con animación suave */}
+                                    <h1 className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-bold text-primary tracking-tight leading-tight drop-shadow-sm mt-2 sm:mt-3 md:mt-4 animate-[slideUp_0.6s_ease-out]">
+                                        HERMES
+                                    </h1>
+                                </div>
+                                <span className="sr-only">Ir al inicio</span>
+                            </Link>
                         </div>
-                    </div>
+                    )}
 
                     {/* Sección de Login - Responsive spacing */}
-                    <div className="space-y-5 sm:space-y-6">
-                        <div className="text-center space-y-1.5 sm:space-y-2">
+                    <div className="space-y-4 sm:space-y-5">
+                        <div className="text-center space-y-1 sm:space-y-1.5">
                             <h2 className="text-xl sm:text-2xl md:text-2xl font-semibold text-slate-800">{title}</h2>
                             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed px-2 sm:px-0">{description}</p>
                         </div>

@@ -23,6 +23,12 @@ class User extends Authenticatable
         'password',
         'role',
         'is_active',
+        'ips_id',
+        'ips_nombre',
+        'nit',
+        'nombre_responsable',
+        'cargo_responsable',
+        'telefono',
     ];
 
     /**
@@ -79,5 +85,13 @@ class User extends Authenticatable
     public function isActive(): bool
     {
         return $this->is_active;
+    }
+
+    /**
+     * Relación con la institución (IPS)
+     */
+    public function institucion()
+    {
+        return $this->belongsTo(Institucion::class, 'ips_id');
     }
 }
