@@ -3230,18 +3230,21 @@ export default function IngresarRegistro() {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="numero_identificacion" className={hasFieldError('numero_identificacion') ? 'text-red-600' : ''}>
+                                        <Label htmlFor="numero_identificacion" className={(hasFieldError('numero_identificacion') || errors.numero_identificacion) ? 'text-red-600' : ''}>
                                             Número de identificación *
                                         </Label>
                                         <Input
                                             id="numero_identificacion"
                                             value={data.numero_identificacion}
-                                            onChange={(e) => setData('numero_identificacion', e.target.value)}
+                                            onChange={(e) => {
+                                                clearFieldError('numero_identificacion');
+                                                setData('numero_identificacion', e.target.value);
+                                            }}
                                             placeholder="Ingrese el número sin puntos ni comas"
-                                            className={getFieldErrorClass('numero_identificacion')}
+                                            className={getFieldErrorClass('numero_identificacion') || (errors.numero_identificacion ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '')}
                                         />
-                                        {hasFieldError('numero_identificacion') && (
-                                            <p className="text-sm text-red-600">Este campo es obligatorio</p>
+                                        {(hasFieldError('numero_identificacion') || errors.numero_identificacion) && (
+                                            <p className="text-sm text-red-600">{errors.numero_identificacion || 'Este campo es obligatorio'}</p>
                                         )}
                                     </div>
 
@@ -4506,10 +4509,20 @@ export default function IngresarRegistro() {
                                                                 },
                                                                 onError: (errors) => {
                                                                     console.error('Errores de validación:', errors);
-                                                                    toast.error("Error al guardar el registro", {
-                                                                        description: "Por favor revise los datos e intente nuevamente.",
-                                                                        duration: 5000,
-                                                                    });
+                                                                    
+                                                                    // Verificar si es el error de límite de registros por día
+                                                                    if (errors.numero_identificacion && 
+                                                                        errors.numero_identificacion.includes('más de dos veces en el día')) {
+                                                                        toast.error("Límite de registros alcanzado", {
+                                                                            description: errors.numero_identificacion,
+                                                                            duration: 8000,
+                                                                        });
+                                                                    } else {
+                                                                        toast.error("Error al guardar el registro", {
+                                                                            description: "Por favor revise los datos e intente nuevamente.",
+                                                                            duration: 5000,
+                                                                        });
+                                                                    }
                                                                 },
                                                                 onFinish: () => {
                                                                     setIsSavingRecord(false);

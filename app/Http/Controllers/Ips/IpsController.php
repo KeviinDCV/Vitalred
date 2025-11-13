@@ -158,6 +158,17 @@ class IpsController extends Controller
         $validatedData['clasificacion_triage'] = null;
         $validatedData['tratamiento'] = null;
 
+        // Validar que el paciente no haya sido ingresado más de 2 veces en el día
+        $registrosHoy = RegistroMedico::where('numero_identificacion', $validatedData['numero_identificacion'])
+            ->whereDate('created_at', today())
+            ->count();
+
+        if ($registrosHoy >= 2) {
+            return back()->withErrors([
+                'numero_identificacion' => 'Este paciente ya fue ingresado más de dos veces en el día, por favor debe esperar',
+            ])->withInput();
+        }
+
         // Crear el registro médico con el user_id del IPS
         $registro = RegistroMedico::create([
             'user_id' => auth()->id(), // IPS que creó el registro
