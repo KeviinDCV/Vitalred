@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AppLayoutInertia from '@/layouts/app-layout-inertia';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { Search, Users, FileText, ChevronLeft, ChevronRight, Brain, CheckCircle, XCircle, Clock, X } from 'lucide-react';
+import { Search, Users, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useState } from 'react';
 
 interface RegistroMedico {
@@ -77,8 +77,6 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
 
     const estadisticas = stats || {
         total: registros.total || 0,
-        priorizados: registros.data.filter(r => r.prioriza_ia === true).length,
-        no_priorizados: registros.data.filter(r => r.prioriza_ia === false).length,
     };
 
     const handleSearch = (term: string) => {
@@ -99,55 +97,6 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
         );
     };
 
-    const getPrioridadIABadge = (priorizaIA?: boolean) => {
-        if (priorizaIA === undefined || priorizaIA === null) {
-            return (
-                <Badge variant="outline" className="bg-gray-50">
-                    Pendiente IA
-                </Badge>
-            );
-        }
-
-        return priorizaIA ? (
-            <Badge variant="destructive" className="bg-red-600">
-                ✓ Prioriza
-            </Badge>
-        ) : (
-            <Badge variant="secondary" className="bg-gray-200 text-gray-700">
-                ✗ No Prioriza
-            </Badge>
-        );
-    };
-
-    const getEstadoBadge = (estado: string) => {
-        switch (estado.toLowerCase()) {
-            case 'aceptado':
-            case 'atendido':
-                return (
-                    <Badge className="bg-green-100 text-green-700 border-green-200">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Aceptado
-                    </Badge>
-                );
-            case 'rechazado':
-            case 'derivado':
-                return (
-                    <Badge className="bg-red-100 text-red-700 border-red-200">
-                        <XCircle className="h-3 w-3 mr-1" />
-                        Rechazado
-                    </Badge>
-                );
-            case 'enviado':
-            case 'pendiente':
-            default:
-                return (
-                    <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200">
-                        <Clock className="h-3 w-3 mr-1" />
-                        Pendiente
-                    </Badge>
-                );
-        }
-    };
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('es-ES', {
@@ -172,20 +121,6 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
                                 <span className="text-xs sm:text-sm text-slate-600">Total:</span>
                                 <span className="text-base sm:text-lg font-bold text-slate-900">{estadisticas.total}</span>
                             </div>
-                            {estadisticas.priorizados > 0 && (
-                                <div className="flex items-center gap-1.5 sm:gap-2 bg-gradient-to-b from-white to-green-50/30 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_8px_rgba(34,197,94,0.15),inset_0_1px_0_rgba(255,255,255,0.8)] touch-manipulation">
-                                    <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
-                                    <span className="text-xs sm:text-sm text-slate-600">Priorizados:</span>
-                                    <span className="text-base sm:text-lg font-bold text-green-600">{estadisticas.priorizados}</span>
-                                </div>
-                            )}
-                            {estadisticas.no_priorizados > 0 && (
-                                <div className="flex items-center gap-1.5 sm:gap-2 bg-gradient-to-b from-white to-blue-50/30 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.05),0_4px_8px_rgba(59,130,246,0.15),inset_0_1px_0_rgba(255,255,255,0.8)] touch-manipulation">
-                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
-                                    <span className="text-xs sm:text-sm text-slate-600">No Priorizados:</span>
-                                    <span className="text-base sm:text-lg font-bold text-blue-600">{estadisticas.no_priorizados}</span>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -257,8 +192,6 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
                                                 <TableHead>EPS</TableHead>
                                                 <TableHead>Edad</TableHead>
                                                 <TableHead>Tipo de Paciente</TableHead>
-                                                <TableHead>Prioridad</TableHead>
-                                                <TableHead>Estado</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -298,12 +231,6 @@ export default function ConsultaPacientesIPS({ registros, filters, stats, auth }
                                                         <Badge variant="secondary">
                                                             {registro.tipo_paciente}
                                                         </Badge>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {getPrioridadIABadge(registro.prioriza_ia)}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {getEstadoBadge(registro.estado)}
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
