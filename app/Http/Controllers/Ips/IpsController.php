@@ -110,7 +110,7 @@ class IpsController extends Controller
             'saturacion_oxigeno' => 'required|integer|min:50|max:100',
             'glucometria' => 'nullable|integer|min:0|max:1000',
             'requerimiento_oxigeno' => 'required|in:SI,NO',
-            'medio_soporte_oxigeno' => 'required_if:requerimiento_oxigeno,SI|nullable|string|max:255',
+            'medio_soporte_oxigeno' => 'nullable|required_if:requerimiento_oxigeno,SI|string|max:255',
             'escala_glasgow' => 'required|string',
             'examen_fisico' => 'required|string',
             'plan_terapeutico' => 'nullable|string',
