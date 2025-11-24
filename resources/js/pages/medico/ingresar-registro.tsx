@@ -2800,6 +2800,8 @@ export default function IngresarRegistro() {
                 } else {
                     console.log('   📅 Fecha de ingreso: NO_ENCONTRADA en ninguna variación');
                     console.log('   🔍 Campos buscados: fecha_ingreso, fechaIngreso, fecha_de_ingreso, fechaDeIngreso, ingreso_fecha');
+                    // Si no hay fecha de ingreso, asegurar que dias_hospitalizados sea 0
+                    setData('dias_hospitalizados', 0);
                 }
 
                 // 🚫 DIAGNÓSTICOS (CIE-10) NO SE LLENAN AUTOMÁTICAMENTE - Responsabilidad del médico
@@ -2908,6 +2910,7 @@ export default function IngresarRegistro() {
             'tipo_paciente',
             'diagnostico_principal',
             'fecha_ingreso',
+            'dias_hospitalizados',
             'motivo_consulta',
             'enfermedad_actual',
             'antecedentes',
@@ -2931,6 +2934,10 @@ export default function IngresarRegistro() {
             if (field === 'medio_soporte_oxigeno') {
                 return data.requerimiento_oxigeno === 'SI' && !data.medio_soporte_oxigeno;
             }
+            // Para dias_hospitalizados, permitir 0 como válido (solo rechazar null/undefined)
+            if (field === 'dias_hospitalizados') {
+                return data.dias_hospitalizados === null || data.dias_hospitalizados === undefined;
+            }
             return !data[field as keyof typeof data];
         });
 
@@ -2941,6 +2948,7 @@ export default function IngresarRegistro() {
                 tipo_paciente: 'Tipo de paciente',
                 diagnostico_principal: 'Diagnóstico principal',
                 fecha_ingreso: 'Fecha de ingreso',
+                dias_hospitalizados: 'Días hospitalizados',
                 motivo_consulta: 'Motivo consulta',
                 enfermedad_actual: 'Enfermedad actual',
                 antecedentes: 'Antecedentes',

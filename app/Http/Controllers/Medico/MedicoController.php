@@ -123,6 +123,16 @@ class MedicoController extends Controller
         $validatedData['clasificacion_triage'] = null;
         $validatedData['tratamiento'] = null;
 
+        // Calcular días hospitalizados automáticamente si es 0 o null
+        if (empty($validatedData['dias_hospitalizados']) && !empty($validatedData['fecha_ingreso'])) {
+            $fechaIngreso = \Carbon\Carbon::parse($validatedData['fecha_ingreso']);
+            $validatedData['dias_hospitalizados'] = $fechaIngreso->diffInDays(now());
+            \Log::info('Días hospitalizados calculados automáticamente', [
+                'fecha_ingreso' => $validatedData['fecha_ingreso'],
+                'dias_calculados' => $validatedData['dias_hospitalizados']
+            ]);
+        }
+
         // Validar que el paciente no haya sido ingresado más de 2 veces en el día
         $registrosHoy = RegistroMedico::where('numero_identificacion', $validatedData['numero_identificacion'])
             ->whereDate('created_at', today())
