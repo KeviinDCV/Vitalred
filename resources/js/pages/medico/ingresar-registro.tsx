@@ -2762,9 +2762,11 @@ export default function IngresarRegistro() {
                         setData('institucion_remitente', institucionEncontrada.value);
                         console.log('✅ Institución remitente encontrada y mapeada:', extractedData.institucion_remitente, '-> mapeada a:', institucionEncontrada.value, '-', institucionEncontrada.label);
                     } else {
-                        // Si no se encuentra en la lista, dejar vacío para que el usuario busque manualmente
+                        // Si no se encuentra en la lista, guardar el texto extraído por la IA
+                        // El usuario puede modificarlo manualmente si es necesario
+                        setData('institucion_remitente', extractedData.institucion_remitente);
                         console.log('⚠️ Institución remitente extraida por IA no encontrada en la lista:', extractedData.institucion_remitente);
-                        console.log('👉 El usuario debe buscarla manualmente o agregarla al JSON');
+                        console.log('✅ Guardado el texto extraído. El usuario puede modificarlo manualmente si es necesario.');
                     }
                 }
 

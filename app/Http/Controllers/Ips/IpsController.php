@@ -90,7 +90,7 @@ class IpsController extends Controller
             'asegurador_secundario' => 'nullable|string|max:255',
             'departamento' => 'required|string|max:255',
             'ciudad' => 'required|string|max:255',
-            'institucion_remitente' => 'required|string|max:255',
+            'institucion_remitente' => 'nullable|string|max:255',
 
             // Paso 3: Datos Clínicos
             'tipo_paciente' => 'required|string|max:255',
