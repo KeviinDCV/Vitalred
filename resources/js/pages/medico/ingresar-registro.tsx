@@ -2880,13 +2880,19 @@ export default function IngresarRegistro() {
             'institucion_remitente'
         ];
 
+        // Si asegurador es 'eps', asegurador_secundario es obligatorio
+        if (data.asegurador === 'eps' && !data.asegurador_secundario) {
+            requiredFields.push('asegurador_secundario');
+        }
+
         const missingFields = requiredFields.filter(field => !data[field as keyof typeof data]);
 
         if (missingFields.length > 0) {
             setValidationErrors(missingFields);
 
             const fieldNames: Record<string, string> = {
-                asegurador: 'Asegurador',
+                asegurador: 'Tipo de asegurador (EPS/ARL/SOAT)',
+                asegurador_secundario: 'Nombre de la EPS',
                 departamento: 'Departamento',
                 ciudad: 'Ciudad',
                 institucion_remitente: 'Institución remitente'
