@@ -76,11 +76,11 @@ export default function Register({ eps, nits }: RegisterProps) {
     }, [flash]);
 
     return (
-        <AuthLayout title="Registro de EPS" description="Regístrate como EPS en el sistema HERMES" showHeader={false}>
+        <AuthLayout title="Registro de EPS" description="Regístrate como EPS en el sistema HERMES" showHeader={true}>
             <Head title="Registro de EPS - HERMES">
-                <meta 
-                    name="description" 
-                    content="Regístrate como Entidad Promotora de Salud en el sistema HERMES" 
+                <meta
+                    name="description"
+                    content="Regístrate como Entidad Promotora de Salud en el sistema HERMES"
                 />
             </Head>
 
@@ -138,259 +138,271 @@ export default function Register({ eps, nits }: RegisterProps) {
 
                     return (
                         <>
-                            <div className="space-y-4 sm:space-y-5">
-                                {/* Selección de EPS */}
-                                <div className="space-y-1.5 sm:space-y-2">
-                                    <Label htmlFor="eps" className="text-xs sm:text-sm font-medium text-slate-700">
-                                        EPS <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Select value={epsSeleccionada} onValueChange={handleEpsChange}>
-                                        <SelectTrigger className="h-10 sm:h-11">
-                                            <SelectValue placeholder="Seleccione una EPS o escriba manualmente" />
-                                        </SelectTrigger>
-                                        <SelectContent className="max-h-80">
-                                            <div className="px-2 pb-2 sticky top-0 bg-white border-b z-10">
-                                                <Input
-                                                    type="text"
-                                                    placeholder="Buscar EPS..."
-                                                    value={searchEps}
-                                                    onChange={(e) => setSearchEps(e.target.value)}
-                                                    className="h-9 text-sm"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                />
-                                            </div>
-                                            <SelectItem value="manual" className="font-medium text-primary">
-                                                + Escribir EPS manualmente
-                                            </SelectItem>
-                                            {epsFiltradas.map((epsItem) => (
-                                                <SelectItem key={epsItem.id} value={epsItem.id.toString()}>
-                                                    {epsItem.nombre}
+                            <div className="space-y-3">
+                                {/* Row 1: EPS and NIT - 2 columnas en desktop */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {/* Selección de EPS */}
+                                    <div className="space-y-1">
+                                        <Label htmlFor="eps" className="text-xs font-medium text-slate-700">
+                                            EPS <span className="text-red-500">*</span>
+                                        </Label>
+                                        <Select value={epsSeleccionada} onValueChange={handleEpsChange}>
+                                            <SelectTrigger className="h-9">
+                                                <SelectValue placeholder="Seleccione una EPS" />
+                                            </SelectTrigger>
+                                            <SelectContent className="max-h-80">
+                                                <div className="px-2 pb-2 sticky top-0 bg-white border-b z-10">
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="Buscar EPS..."
+                                                        value={searchEps}
+                                                        onChange={(e) => setSearchEps(e.target.value)}
+                                                        className="h-8 text-xs"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    />
+                                                </div>
+                                                <SelectItem value="manual" className="font-medium text-primary text-xs">
+                                                    + Escribir manualmente
                                                 </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {epsSeleccionada === 'manual' && (
-                                        <div className="mt-2">
-                                            <div className="relative">
-                                                <Building2 className="absolute left-3 top-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 -translate-y-1/2 text-slate-400" />
-                                                <Input
-                                                    id="eps_nombre"
-                                                    type="text"
-                                                    name="eps_nombre"
-                                                    value={epsManual}
-                                                    onChange={(e) => {
-                                                        setEpsManual(e.target.value);
-                                                        setData('eps_nombre', e.target.value);
-                                                    }}
-                                                    placeholder="Nombre de la EPS"
-                                                    className="pl-9 sm:pl-10 h-10 sm:h-11 text-sm sm:text-base"
-                                                    required={epsSeleccionada === 'manual'}
-                                                />
+                                                {epsFiltradas.map((epsItem) => (
+                                                    <SelectItem key={epsItem.id} value={epsItem.id.toString()} className="text-xs">
+                                                        {epsItem.nombre}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {epsSeleccionada === 'manual' && (
+                                            <div className="mt-1">
+                                                <div className="relative">
+                                                    <Building2 className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                                                    <Input
+                                                        id="eps_nombre"
+                                                        type="text"
+                                                        name="eps_nombre"
+                                                        value={epsManual}
+                                                        onChange={(e) => {
+                                                            setEpsManual(e.target.value);
+                                                            setData('eps_nombre', e.target.value);
+                                                        }}
+                                                        placeholder="Nombre de la EPS"
+                                                        className="pl-8 h-9 text-sm"
+                                                        required={epsSeleccionada === 'manual'}
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
-                                    <InputError message={errors.eps_id || errors.eps_nombre} />
-                                </div>
+                                        )}
+                                        <InputError message={errors.eps_id || errors.eps_nombre} />
+                                    </div>
 
-                                {/* Selección de NIT */}
-                                <div className="space-y-1.5 sm:space-y-2">
-                                    <Label htmlFor="nit" className="text-xs sm:text-sm font-medium text-slate-700">
-                                        NIT <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Select value={nitSeleccionado} onValueChange={handleNitChange}>
-                                        <SelectTrigger className="h-10 sm:h-11">
-                                            <SelectValue placeholder="Seleccione un NIT o escriba manualmente" />
-                                        </SelectTrigger>
-                                        <SelectContent className="max-h-80">
-                                            <div className="px-2 pb-2 sticky top-0 bg-white border-b z-10">
-                                                <Input
-                                                    type="text"
-                                                    placeholder="Buscar NIT..."
-                                                    value={searchNit}
-                                                    onChange={(e) => setSearchNit(e.target.value)}
-                                                    className="h-9 text-sm"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                />
-                                            </div>
-                                            <SelectItem value="manual" className="font-medium text-primary">
-                                                + Escribir NIT manualmente
-                                            </SelectItem>
-                                            {nitsFiltrados.map((nit) => (
-                                                <SelectItem key={nit} value={nit}>
-                                                    {nit}
+                                    {/* Selección de NIT */}
+                                    <div className="space-y-1">
+                                        <Label htmlFor="nit" className="text-xs font-medium text-slate-700">
+                                            NIT <span className="text-red-500">*</span>
+                                        </Label>
+                                        <Select value={nitSeleccionado} onValueChange={handleNitChange}>
+                                            <SelectTrigger className="h-9">
+                                                <SelectValue placeholder="Seleccione un NIT" />
+                                            </SelectTrigger>
+                                            <SelectContent className="max-h-80">
+                                                <div className="px-2 pb-2 sticky top-0 bg-white border-b z-10">
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="Buscar NIT..."
+                                                        value={searchNit}
+                                                        onChange={(e) => setSearchNit(e.target.value)}
+                                                        className="h-8 text-xs"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    />
+                                                </div>
+                                                <SelectItem value="manual" className="font-medium text-primary text-xs">
+                                                    + Escribir manualmente
                                                 </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {(nitSeleccionado === 'manual' || (!nitSeleccionado && nitManual)) && (
-                                        <div className="mt-2">
-                                            <div className="relative">
-                                                <FileText className="absolute left-3 top-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 -translate-y-1/2 text-slate-400" />
-                                                <Input
-                                                    id="nit"
-                                                    type="text"
-                                                    name="nit"
-                                                    value={nitManual}
-                                                    onChange={(e) => {
-                                                        setNitManual(e.target.value);
-                                                        setData('nit', e.target.value);
-                                                    }}
-                                                    placeholder="Número de Identificación Tributaria"
-                                                    className="pl-9 sm:pl-10 h-10 sm:h-11 text-sm sm:text-base"
-                                                    required
-                                                />
+                                                {nitsFiltrados.map((nit) => (
+                                                    <SelectItem key={nit} value={nit} className="text-xs">
+                                                        {nit}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {(nitSeleccionado === 'manual' || (!nitSeleccionado && nitManual)) && (
+                                            <div className="mt-1">
+                                                <div className="relative">
+                                                    <FileText className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                                                    <Input
+                                                        id="nit"
+                                                        type="text"
+                                                        name="nit"
+                                                        value={nitManual}
+                                                        onChange={(e) => {
+                                                            setNitManual(e.target.value);
+                                                            setData('nit', e.target.value);
+                                                        }}
+                                                        placeholder="NIT de la entidad"
+                                                        className="pl-8 h-9 text-sm"
+                                                        required
+                                                    />
+                                                </div>
                                             </div>
+                                        )}
+                                        <InputError message={errors.nit} />
+                                    </div>
+                                </div>
+
+                                {/* Row 2: Nombre y Cargo del responsable - 2 columnas en desktop */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {/* Nombre del responsable */}
+                                    <div className="space-y-1">
+                                        <Label htmlFor="nombre_responsable" className="text-xs font-medium text-slate-700">
+                                            Nombre del Responsable <span className="text-red-500">*</span>
+                                        </Label>
+                                        <div className="relative">
+                                            <User className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                                            <Input
+                                                id="nombre_responsable"
+                                                type="text"
+                                                name="nombre_responsable"
+                                                value={data.nombre_responsable || ''}
+                                                onChange={(e) => setData('nombre_responsable', e.target.value)}
+                                                placeholder="Ej: Dr. Juan Pérez"
+                                                className="pl-8 h-9 text-sm"
+                                                required
+                                            />
                                         </div>
-                                    )}
-                                    <InputError message={errors.nit} />
+                                        <InputError message={errors.nombre_responsable} />
+                                    </div>
+
+                                    {/* Cargo del responsable */}
+                                    <div className="space-y-1">
+                                        <Label htmlFor="cargo_responsable" className="text-xs font-medium text-slate-700">
+                                            Cargo del Responsable <span className="text-red-500">*</span>
+                                        </Label>
+                                        <div className="relative">
+                                            <Briefcase className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                                            <Input
+                                                id="cargo_responsable"
+                                                type="text"
+                                                name="cargo_responsable"
+                                                value={data.cargo_responsable || ''}
+                                                onChange={(e) => setData('cargo_responsable', e.target.value)}
+                                                placeholder="Ej: Director Médico"
+                                                className="pl-8 h-9 text-sm"
+                                                required
+                                            />
+                                        </div>
+                                        <InputError message={errors.cargo_responsable} />
+                                    </div>
                                 </div>
 
-                                {/* Nombre del responsable */}
-                                <div className="space-y-1.5 sm:space-y-2">
-                                    <Label htmlFor="nombre_responsable" className="text-xs sm:text-sm font-medium text-slate-700">
-                                        Nombre del Responsable <span className="text-red-500">*</span>
-                                    </Label>
-                                    <div className="relative">
-                                        <User className="absolute left-3 top-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 -translate-y-1/2 text-slate-400" />
-                                        <Input
-                                            id="nombre_responsable"
-                                            type="text"
-                                            name="nombre_responsable"
-                                            value={data.nombre_responsable || ''}
-                                            onChange={(e) => setData('nombre_responsable', e.target.value)}
-                                            placeholder="Ej: Dr. Juan Pérez"
-                                            className="pl-9 sm:pl-10 h-10 sm:h-11 text-sm sm:text-base"
-                                            required
-                                        />
+                                {/* Row 3: Teléfono y Email - 2 columnas en desktop */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {/* Teléfono */}
+                                    <div className="space-y-1">
+                                        <Label htmlFor="telefono" className="text-xs font-medium text-slate-700">
+                                            Teléfono/Contacto <span className="text-red-500">*</span>
+                                        </Label>
+                                        <div className="relative">
+                                            <Phone className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                                            <Input
+                                                id="telefono"
+                                                type="tel"
+                                                name="telefono"
+                                                value={data.telefono || ''}
+                                                onChange={(e) => setData('telefono', e.target.value)}
+                                                placeholder="Ej: 3001234567"
+                                                className="pl-8 h-9 text-sm"
+                                                required
+                                            />
+                                        </div>
+                                        <InputError message={errors.telefono} />
                                     </div>
-                                    <InputError message={errors.nombre_responsable} />
+
+                                    {/* Correo electrónico */}
+                                    <div className="space-y-1">
+                                        <Label htmlFor="email" className="text-xs font-medium text-slate-700">
+                                            Correo Institucional <span className="text-red-500">*</span>
+                                        </Label>
+                                        <div className="relative">
+                                            <Mail className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                                            <Input
+                                                id="email"
+                                                type="email"
+                                                name="email"
+                                                value={data.email || ''}
+                                                onChange={(e) => setData('email', e.target.value)}
+                                                placeholder="correo@institucion.com"
+                                                className="pl-8 h-9 text-sm"
+                                                required
+                                            />
+                                        </div>
+                                        <InputError message={errors.email} />
+                                    </div>
                                 </div>
 
-                                {/* Cargo del responsable */}
-                                <div className="space-y-1.5 sm:space-y-2">
-                                    <Label htmlFor="cargo_responsable" className="text-xs sm:text-sm font-medium text-slate-700">
-                                        Cargo del Responsable <span className="text-red-500">*</span>
-                                    </Label>
-                                    <div className="relative">
-                                        <Briefcase className="absolute left-3 top-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 -translate-y-1/2 text-slate-400" />
-                                        <Input
-                                            id="cargo_responsable"
-                                            type="text"
-                                            name="cargo_responsable"
-                                            value={data.cargo_responsable || ''}
-                                            onChange={(e) => setData('cargo_responsable', e.target.value)}
-                                            placeholder="Ej: Director Médico"
-                                            className="pl-9 sm:pl-10 h-10 sm:h-11 text-sm sm:text-base"
-                                            required
-                                        />
+                                {/* Row 4: Contraseñas - 2 columnas en desktop */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {/* Contraseña */}
+                                    <div className="space-y-1">
+                                        <Label htmlFor="password" className="text-xs font-medium text-slate-700">
+                                            Contraseña <span className="text-red-500">*</span>
+                                        </Label>
+                                        <div className="relative">
+                                            <Lock className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                                            <Input
+                                                id="password"
+                                                type={showPassword ? "text" : "password"}
+                                                name="password"
+                                                value={data.password || ''}
+                                                onChange={(e) => setData('password', e.target.value)}
+                                                placeholder="Mínimo 8 caracteres"
+                                                className="pl-8 pr-8 h-9 text-sm"
+                                                required
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                            >
+                                                {showPassword ? (
+                                                    <EyeOff className="h-3.5 w-3.5" />
+                                                ) : (
+                                                    <Eye className="h-3.5 w-3.5" />
+                                                )}
+                                            </button>
+                                        </div>
+                                        <InputError message={errors.password} />
                                     </div>
-                                    <InputError message={errors.cargo_responsable} />
-                                </div>
 
-                                {/* Teléfono */}
-                                <div className="space-y-1.5 sm:space-y-2">
-                                    <Label htmlFor="telefono" className="text-xs sm:text-sm font-medium text-slate-700">
-                                        Teléfono/Contacto <span className="text-red-500">*</span>
-                                    </Label>
-                                    <div className="relative">
-                                        <Phone className="absolute left-3 top-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 -translate-y-1/2 text-slate-400" />
-                                        <Input
-                                            id="telefono"
-                                            type="tel"
-                                            name="telefono"
-                                            value={data.telefono || ''}
-                                            onChange={(e) => setData('telefono', e.target.value)}
-                                            placeholder="Ej: 3001234567"
-                                            className="pl-9 sm:pl-10 h-10 sm:h-11 text-sm sm:text-base"
-                                            required
-                                        />
+                                    {/* Confirmar Contraseña */}
+                                    <div className="space-y-1">
+                                        <Label htmlFor="password_confirmation" className="text-xs font-medium text-slate-700">
+                                            Confirmar Contraseña <span className="text-red-500">*</span>
+                                        </Label>
+                                        <div className="relative">
+                                            <Lock className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                                            <Input
+                                                id="password_confirmation"
+                                                type={showPasswordConfirmation ? "text" : "password"}
+                                                name="password_confirmation"
+                                                value={data.password_confirmation || ''}
+                                                onChange={(e) => setData('password_confirmation', e.target.value)}
+                                                placeholder="Repite la contraseña"
+                                                className="pl-8 pr-8 h-9 text-sm"
+                                                required
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
+                                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                            >
+                                                {showPasswordConfirmation ? (
+                                                    <EyeOff className="h-3.5 w-3.5" />
+                                                ) : (
+                                                    <Eye className="h-3.5 w-3.5" />
+                                                )}
+                                            </button>
+                                        </div>
+                                        <InputError message={errors.password_confirmation} />
                                     </div>
-                                    <InputError message={errors.telefono} />
-                                </div>
-
-                                {/* Correo electrónico */}
-                                <div className="space-y-1.5 sm:space-y-2">
-                                    <Label htmlFor="email" className="text-xs sm:text-sm font-medium text-slate-700">
-                                        Correo Electrónico Institucional <span className="text-red-500">*</span>
-                                    </Label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-3 top-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 -translate-y-1/2 text-slate-400" />
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            name="email"
-                                            value={data.email || ''}
-                                            onChange={(e) => setData('email', e.target.value)}
-                                            placeholder="correo@institucion.com"
-                                            className="pl-9 sm:pl-10 h-10 sm:h-11 text-sm sm:text-base"
-                                            required
-                                        />
-                                    </div>
-                                    <InputError message={errors.email} />
-                                </div>
-
-                                {/* Contraseña */}
-                                <div className="space-y-1.5 sm:space-y-2">
-                                    <Label htmlFor="password" className="text-xs sm:text-sm font-medium text-slate-700">
-                                        Contraseña <span className="text-red-500">*</span>
-                                    </Label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-3 top-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 -translate-y-1/2 text-slate-400" />
-                                        <Input
-                                            id="password"
-                                            type={showPassword ? "text" : "password"}
-                                            name="password"
-                                            value={data.password || ''}
-                                            onChange={(e) => setData('password', e.target.value)}
-                                            placeholder="Mínimo 8 caracteres"
-                                            className="pl-9 sm:pl-10 pr-9 sm:pr-10 h-10 sm:h-11 text-sm sm:text-base"
-                                            required
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                                        >
-                                            {showPassword ? (
-                                                <EyeOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                            ) : (
-                                                <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                            )}
-                                        </button>
-                                    </div>
-                                    <InputError message={errors.password} />
-                                </div>
-
-                                {/* Confirmar Contraseña */}
-                                <div className="space-y-1.5 sm:space-y-2">
-                                    <Label htmlFor="password_confirmation" className="text-xs sm:text-sm font-medium text-slate-700">
-                                        Confirmar Contraseña <span className="text-red-500">*</span>
-                                    </Label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-3 top-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 -translate-y-1/2 text-slate-400" />
-                                        <Input
-                                            id="password_confirmation"
-                                            type={showPasswordConfirmation ? "text" : "password"}
-                                            name="password_confirmation"
-                                            value={data.password_confirmation || ''}
-                                            onChange={(e) => setData('password_confirmation', e.target.value)}
-                                            placeholder="Repite la contraseña"
-                                            className="pl-9 sm:pl-10 pr-9 sm:pr-10 h-10 sm:h-11 text-sm sm:text-base"
-                                            required
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                                        >
-                                            {showPasswordConfirmation ? (
-                                                <EyeOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                            ) : (
-                                                <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                            )}
-                                        </button>
-                                    </div>
-                                    <InputError message={errors.password_confirmation} />
                                 </div>
                             </div>
 
