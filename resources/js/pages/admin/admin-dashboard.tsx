@@ -49,7 +49,6 @@ export default function AdminDashboard({ usuariosRecientes, actividadSistema }: 
     const interval = setInterval(() => {
       router.reload({
         only: ['usuariosRecientes', 'actividadSistema'],
-        preserveScroll: true,
       });
     }, 30000); // 30 segundos
 
@@ -76,116 +75,112 @@ export default function AdminDashboard({ usuariosRecientes, actividadSistema }: 
       breadcrumbs={breadcrumbs}
       user={auth.user}
     >
-      <div className="flex h-full flex-1 flex-col gap-4 p-6">
-        {/* Header Compacto */}
+      {/* 
+        RESPONSIVE DESIGN PRINCIPLES:
+        Principle 1 - Box System: Header, Stats, Table as distinct boxes with clear relationships
+        Principle 2 - Rearrange with Purpose: Stack on mobile, grid on desktop - NO horizontal scroll
+      */}
+      <div className="flex flex-col gap-4 sm:gap-5 md:gap-6">
+        {/* Header BOX */}
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Panel de Administración</h1>
-          <p className="text-sm text-muted-foreground">Gestión completa del sistema</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Panel de Administración</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">Gestión completa del sistema</p>
         </div>
 
-        {/* Grid de Contenido - 2 Columnas */}
-        <div className="grid gap-3 lg:grid-cols-3">
-          {/* Usuarios Recientes - 2 columnas */}
-          <Card className="lg:col-span-2">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Usuarios Recientes</CardTitle>
-              <p className="text-xs text-muted-foreground mt-1">Últimos usuarios registrados • Actualización automática</p>
+        {/* Content Grid - Stack on mobile, side-by-side on lg+ */}
+        <div className="grid gap-4 lg:grid-cols-3">
+          
+          {/* Usuarios Recientes BOX - 2 cols on desktop */}
+          <Card className="lg:col-span-2 overflow-hidden">
+            <CardHeader className="p-4 sm:p-5 md:p-6 pb-3">
+              <CardTitle className="text-base sm:text-lg">Usuarios Recientes</CardTitle>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Últimos registrados • Auto-refresh</p>
             </CardHeader>
-            <CardContent className="pt-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border">
-                    <TableHead>Nombre</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Rol</TableHead>
-                    <TableHead>Estado</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {usuariosRecientes.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                        No hay usuarios registrados aún
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    usuariosRecientes.map((usuario) => (
-                      <TableRow key={usuario.id} className="border-border">
-                        <TableCell className="font-medium">{usuario.name}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{usuario.email}</TableCell>
-                        <TableCell className="text-sm">
-                          <Badge variant={usuario.role === 'administrador' ? 'default' : 'secondary'}>
-                            {usuario.role === 'administrador' ? 'Admin' : usuario.role === 'medico' ? 'Médico' : 'IPS'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                              usuario.is_active 
-                                ? 'bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400'
-                                : 'bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400'
-                            }`}>
-                              {usuario.is_active ? 'Activo' : 'Inactivo'}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {formatearFecha(usuario.created_at)}
-                            </span>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+            <CardContent className="p-0">
+              {/* Mobile: Card list, Desktop: Table */}
+              <div className="divide-y divide-border">
+                {usuariosRecientes.length === 0 ? (
+                  <div className="text-center text-muted-foreground py-8 text-xs sm:text-sm px-4">
+                    No hay usuarios registrados aún
+                  </div>
+                ) : (
+                  usuariosRecientes.map((usuario) => (
+                    <div key={usuario.id} className="p-3 sm:p-4 flex items-center justify-between gap-3">
+                      {/* User info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-xs sm:text-sm truncate">{usuario.name}</div>
+                        <div className="text-[10px] sm:text-xs text-muted-foreground truncate">{usuario.email}</div>
+                      </div>
+                      {/* Role badge */}
+                      <Badge variant={usuario.role === 'administrador' ? 'default' : 'secondary'} className="text-[10px] sm:text-xs flex-shrink-0">
+                        {usuario.role === 'administrador' ? 'Admin' : usuario.role === 'medico' ? 'Médico' : 'IPS'}
+                      </Badge>
+                      {/* Status */}
+                      <div className="flex flex-col items-end flex-shrink-0">
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
+                          usuario.is_active 
+                            ? 'bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400'
+                            : 'bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400'
+                        }`}>
+                          {usuario.is_active ? 'Activo' : 'Inactivo'}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground mt-0.5">
+                          {formatearFecha(usuario.created_at)}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </CardContent>
           </Card>
 
-          {/* Actividad del Sistema - 1 columna */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Actividad del Sistema</CardTitle>
-              <p className="text-xs text-muted-foreground mt-1">Resumen de actividad reciente</p>
+          {/* Actividad BOX */}
+          <Card className="overflow-hidden">
+            <CardHeader className="p-4 sm:p-5 md:p-6 pb-3">
+              <CardTitle className="text-base sm:text-lg">Actividad</CardTitle>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Resumen reciente</p>
             </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/30">
-                    <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-500" />
+            <CardContent className="p-4 sm:p-5 md:p-6 pt-0">
+              <div className="space-y-2 sm:space-y-3">
+                <div className="flex items-center gap-3 p-2.5 sm:p-3 rounded-lg bg-muted/50">
+                  <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/30 flex-shrink-0">
+                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">Nuevos Usuarios Hoy</p>
-                    <p className="text-xs text-muted-foreground">+{actividadSistema.nuevos_usuarios_hoy} registrados</p>
+                    <p className="text-xs sm:text-sm font-medium">Nuevos Hoy</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">+{actividadSistema.nuevos_usuarios_hoy} registrados</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/30">
-                    <Users className="h-5 w-5 text-blue-600 dark:text-blue-500" />
+                <div className="flex items-center gap-3 p-2.5 sm:p-3 rounded-lg bg-muted/50">
+                  <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/30 flex-shrink-0">
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">Usuarios Esta Semana</p>
-                    <p className="text-xs text-muted-foreground">+{actividadSistema.nuevos_usuarios_semana} de {actividadSistema.total_usuarios} totales</p>
+                    <p className="text-xs sm:text-sm font-medium">Esta Semana</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">+{actividadSistema.nuevos_usuarios_semana} de {actividadSistema.total_usuarios}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/30">
-                    <FileText className="h-5 w-5 text-blue-600 dark:text-blue-500" />
+                <div className="flex items-center gap-3 p-2.5 sm:p-3 rounded-lg bg-muted/50">
+                  <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/30 flex-shrink-0">
+                    <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">Registros Médicos</p>
-                    <p className="text-xs text-muted-foreground">{actividadSistema.registros_medicos_semana} esta semana / {actividadSistema.registros_medicos_total} totales</p>
+                    <p className="text-xs sm:text-sm font-medium">Registros</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">{actividadSistema.registros_medicos_semana} esta semana / {actividadSistema.registros_medicos_total} total</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/30">
-                    <Activity className="h-5 w-5 text-blue-600 dark:text-blue-500" />
+                <div className="flex items-center gap-3 p-2.5 sm:p-3 rounded-lg bg-muted/50">
+                  <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/30 flex-shrink-0">
+                    <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">Distribución de Roles</p>
-                    <p className="text-xs text-muted-foreground">
-                      {actividadSistema.usuarios_por_rol.administradores} admins, {actividadSistema.usuarios_por_rol.medicos} médicos, {actividadSistema.usuarios_por_rol.ips} IPS
+                    <p className="text-xs sm:text-sm font-medium">Distribución</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">
+                      {actividadSistema.usuarios_por_rol.administradores} Admin · {actividadSistema.usuarios_por_rol.medicos} Médico · {actividadSistema.usuarios_por_rol.ips} IPS
                     </p>
                   </div>
                 </div>
