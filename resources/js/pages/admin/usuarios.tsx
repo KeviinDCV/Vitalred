@@ -245,21 +245,26 @@ export default function GestionUsuarios({ usuarios, stats, eps = [], nits = [], 
             user={auth.user}
         >
             
-            <div className="flex h-full flex-1 flex-col gap-4 p-6">
-                {/* Header Compacto con Pestañas */}
-                <div className="flex items-center justify-between">
+            {/* 
+                RESPONSIVE DESIGN PRINCIPLES:
+                Principle 1 - Box System: Header, Tabs, Stats, Table as distinct boxes
+                Principle 2 - Rearrange with Purpose: Stack on mobile, grid on desktop
+            */}
+            <div className="flex flex-col gap-4 sm:gap-5 md:gap-6">
+                {/* Header - Responsive: Stack on mobile, row on tablet+ */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Gestión de Usuarios</h1>
-                        <p className="text-sm text-muted-foreground">
+                        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Gestión de Usuarios</h1>
+                        <p className="text-xs sm:text-sm text-muted-foreground">
                             Administra los usuarios del sistema
                         </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        {/* Pestañas */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        {/* Pestañas - Full width on mobile */}
                         <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
                             <button
                                 onClick={() => setActiveTab('usuarios')}
-                                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                                     activeTab === 'usuarios'
                                         ? 'bg-background text-foreground shadow-sm'
                                         : 'text-muted-foreground hover:text-foreground'
@@ -272,7 +277,7 @@ export default function GestionUsuarios({ usuarios, stats, eps = [], nits = [], 
                                     setActiveTab('solicitudes');
                                     router.get(route('admin.usuarios.solicitudes'), {}, { preserveState: true });
                                 }}
-                                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors relative ${
+                                className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors relative ${
                                     activeTab === 'solicitudes'
                                         ? 'bg-background text-foreground shadow-sm'
                                         : 'text-muted-foreground hover:text-foreground'
@@ -280,7 +285,7 @@ export default function GestionUsuarios({ usuarios, stats, eps = [], nits = [], 
                             >
                                 Solicitudes
                                 {solicitudes.filter(s => s.estado === 'pendiente').length > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] sm:text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
                                         {solicitudes.filter(s => s.estado === 'pendiente').length}
                                     </span>
                                 )}
@@ -541,175 +546,167 @@ export default function GestionUsuarios({ usuarios, stats, eps = [], nits = [], 
                 {/* Contenido según pestaña activa */}
                 {activeTab === 'usuarios' ? (
                     <>
-                        {/* Grid Layout: Estadísticas a la izquierda, Tabla a la derecha */}
-                        <div className="grid gap-4 lg:grid-cols-[280px_1fr] flex-1">
-                    {/* Columna de Estadísticas */}
-                    <div className="flex flex-col gap-3">
-                        <Card className="p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-medium text-muted-foreground">Total Usuarios</p>
-                                    <h3 className="text-2xl font-bold mt-1">{stats.total}</h3>
-                                </div>
-                                <UserCheck className="h-8 w-8 text-blue-600 dark:text-blue-500 opacity-60" />
-                            </div>
-                        </Card>
+                        {/* Grid Layout - Responsive: Stack on mobile, side-by-side on desktop */}
+                        <div className="grid gap-4 lg:grid-cols-[240px_1fr] xl:grid-cols-[280px_1fr]">
+                            {/* Estadísticas - Horizontal scroll on mobile, vertical on desktop */}
+                            <div className="flex lg:flex-col gap-2 sm:gap-3 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 -mx-3 px-3 sm:-mx-4 sm:px-4 lg:mx-0 lg:px-0">
+                                <Card className="p-3 sm:p-4 min-w-[140px] sm:min-w-[160px] lg:min-w-0 flex-shrink-0 lg:flex-shrink">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Total</p>
+                                            <h3 className="text-lg sm:text-2xl font-bold mt-0.5 sm:mt-1">{stats.total}</h3>
+                                        </div>
+                                        <UserCheck className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 dark:text-blue-500 opacity-60" />
+                                    </div>
+                                </Card>
 
-                        <Card className="p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-medium text-muted-foreground">Administradores</p>
-                                    <h3 className="text-2xl font-bold mt-1">{stats.administradores}</h3>
-                                </div>
-                                <UserCheck className="h-8 w-8 text-blue-600 dark:text-blue-500 opacity-60" />
-                            </div>
-                        </Card>
+                                <Card className="p-3 sm:p-4 min-w-[140px] sm:min-w-[160px] lg:min-w-0 flex-shrink-0 lg:flex-shrink">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Admins</p>
+                                            <h3 className="text-lg sm:text-2xl font-bold mt-0.5 sm:mt-1">{stats.administradores}</h3>
+                                        </div>
+                                        <UserCheck className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 dark:text-blue-500 opacity-60" />
+                                    </div>
+                                </Card>
 
-                        <Card className="p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-medium text-muted-foreground">Médicos</p>
-                                    <h3 className="text-2xl font-bold mt-1">{stats.medicos}</h3>
-                                </div>
-                                <UserCheck className="h-8 w-8 text-blue-600 dark:text-blue-500 opacity-60" />
-                            </div>
-                        </Card>
+                                <Card className="p-3 sm:p-4 min-w-[140px] sm:min-w-[160px] lg:min-w-0 flex-shrink-0 lg:flex-shrink">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">Médicos</p>
+                                            <h3 className="text-lg sm:text-2xl font-bold mt-0.5 sm:mt-1">{stats.medicos}</h3>
+                                        </div>
+                                        <UserCheck className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 dark:text-blue-500 opacity-60" />
+                                    </div>
+                                </Card>
 
-                        <Card className="p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-medium text-muted-foreground">EPS</p>
-                                    <h3 className="text-2xl font-bold mt-1">{stats.eps}</h3>
-                                </div>
-                                <UserCheck className="h-8 w-8 text-blue-600 dark:text-blue-500 opacity-60" />
-                            </div>
-                        </Card>
+                                <Card className="p-3 sm:p-4 min-w-[140px] sm:min-w-[160px] lg:min-w-0 flex-shrink-0 lg:flex-shrink">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] sm:text-xs font-medium text-muted-foreground">EPS</p>
+                                            <h3 className="text-lg sm:text-2xl font-bold mt-0.5 sm:mt-1">{stats.eps}</h3>
+                                        </div>
+                                        <UserCheck className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 dark:text-blue-500 opacity-60" />
+                                    </div>
+                                </Card>
 
-                        <Card className="p-4 bg-blue-50 dark:bg-blue-950/20">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-medium text-blue-700 dark:text-blue-400">Usuarios Activos</p>
-                                    <h3 className="text-2xl font-bold mt-1 text-blue-700 dark:text-blue-400">{stats.activos}</h3>
-                                </div>
-                                <UserCheck className="h-8 w-8 text-blue-600 dark:text-blue-500 opacity-70" />
+                                <Card className="p-3 sm:p-4 min-w-[140px] sm:min-w-[160px] lg:min-w-0 flex-shrink-0 lg:flex-shrink bg-blue-50 dark:bg-blue-950/20">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] sm:text-xs font-medium text-blue-700 dark:text-blue-400">Activos</p>
+                                            <h3 className="text-lg sm:text-2xl font-bold mt-0.5 sm:mt-1 text-blue-700 dark:text-blue-400">{stats.activos}</h3>
+                                        </div>
+                                        <UserCheck className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 dark:text-blue-500 opacity-70" />
+                                    </div>
+                                </Card>
                             </div>
-                        </Card>
-                    </div>
 
-                    {/* Tabla de Usuarios con Buscador Integrado */}
-                    <Card className="flex flex-col overflow-hidden">
-                        <CardHeader className="pb-3">
-                            <div className="flex items-center justify-between gap-4">
-                                <div>
-                                    <CardTitle className="text-lg">Lista de Usuarios</CardTitle>
-                                    <CardDescription>
-                                        {filteredUsuarios.length} usuario{filteredUsuarios.length !== 1 ? 's' : ''} {searchTerm ? 'encontrado' + (filteredUsuarios.length !== 1 ? 's' : '') : ''}
-                                    </CardDescription>
-                                </div>
-                                <div className="relative w-80">
-                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input
-                                        placeholder="Buscar por nombre, email o rol..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-10"
-                                    />
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-0 flex-1 overflow-auto">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Nombre</TableHead>
-                                    <TableHead>Email</TableHead>
-                                    <TableHead>Rol</TableHead>
-                                    <TableHead>Estado</TableHead>
-                                    <TableHead>Fecha Registro</TableHead>
-                                    <TableHead className="text-right">Acciones</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredUsuarios.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                                            {searchTerm ? 'No se encontraron usuarios que coincidan con la búsqueda.' : 'No hay usuarios registrados.'}
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    filteredUsuarios.map((usuario) => (
-                                    <TableRow key={usuario.id}>
-                                        <TableCell className="font-medium">{usuario.name}</TableCell>
-                                        <TableCell>{usuario.email}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={usuario.role === 'administrador' ? 'default' : 'secondary'}>
-                                                {usuario.role === 'administrador' ? 'Administrador' : usuario.role === 'medico' ? 'Médico' : 'EPS'}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant={usuario.is_active ? 'default' : 'destructive'}>
-                                                {usuario.is_active ? 'Activo' : 'Inactivo'}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>{new Date(usuario.created_at).toLocaleDateString()}</TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end space-x-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleEdit(usuario)}
-                                                    title="Editar usuario"
-                                                >
-                                                    <Edit className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleToggleStatus(usuario)}
-                                                    className={usuario.is_active ? 'text-destructive hover:text-destructive' : 'text-success hover:text-success'}
-                                                    title={usuario.is_active ? 'Desactivar usuario' : 'Activar usuario'}
-                                                >
-                                                    {usuario.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-                                                </Button>
-                                                <AlertDialog>
-                                                    <AlertDialogTrigger asChild>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="text-destructive hover:text-destructive"
-                                                            title="Eliminar usuario"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
-                                                    </AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                        <AlertDialogHeader>
-                                                            <AlertDialogTitle>¿Eliminar usuario?</AlertDialogTitle>
-                                                            <AlertDialogDescription>
-                                                                Esta acción no se puede deshacer. Se eliminará permanentemente el usuario <strong>{usuario.name}</strong> y todos sus datos asociados.
-                                                            </AlertDialogDescription>
-                                                        </AlertDialogHeader>
-                                                        <AlertDialogFooter>
-                                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                            <AlertDialogAction
-                                                                onClick={() => handleDelete(usuario)}
-                                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                                            >
-                                                                Eliminar
-                                                            </AlertDialogAction>
-                                                        </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                </AlertDialog>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                        </CardContent>
-                    </Card>
-                </div>
+                            {/* Tabla de Usuarios - Responsive */}
+                            <Card className="flex flex-col overflow-hidden">
+                                <CardHeader className="p-3 sm:p-4 md:p-6 pb-2 sm:pb-3">
+                                    {/* Stack on mobile, row on tablet+ */}
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                        <div>
+                                            <CardTitle className="text-base sm:text-lg">Lista de Usuarios</CardTitle>
+                                            <CardDescription className="text-xs sm:text-sm">
+                                                {filteredUsuarios.length} usuario{filteredUsuarios.length !== 1 ? 's' : ''}
+                                            </CardDescription>
+                                        </div>
+                                        <div className="relative w-full sm:w-64 md:w-80">
+                                            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 -translate-y-1/2 text-muted-foreground" />
+                                            <Input
+                                                placeholder="Buscar..."
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                                className="pl-9 sm:pl-10 h-9 sm:h-10 text-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="p-3 sm:p-4 md:p-6 pt-0 flex-1 overflow-auto">
+                                    {/* Table with horizontal scroll */}
+                                    <div className="-mx-3 sm:-mx-4 md:-mx-6">
+                                        <div className="overflow-x-auto">
+                                            <Table className="min-w-[700px]">
+                                                <TableHeader>
+                                                    <TableRow>
+                                                        <TableHead className="text-xs sm:text-sm">Nombre</TableHead>
+                                                        <TableHead className="text-xs sm:text-sm hidden sm:table-cell">Email</TableHead>
+                                                        <TableHead className="text-xs sm:text-sm">Rol</TableHead>
+                                                        <TableHead className="text-xs sm:text-sm">Estado</TableHead>
+                                                        <TableHead className="text-xs sm:text-sm hidden md:table-cell">Registro</TableHead>
+                                                        <TableHead className="text-xs sm:text-sm text-right">Acciones</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {filteredUsuarios.length === 0 ? (
+                                                        <TableRow>
+                                                            <TableCell colSpan={6} className="text-center py-6 sm:py-8 text-xs sm:text-sm text-muted-foreground">
+                                                                {searchTerm ? 'No se encontraron usuarios.' : 'No hay usuarios.'}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ) : (
+                                                        filteredUsuarios.map((usuario) => (
+                                                            <TableRow key={usuario.id}>
+                                                                <TableCell className="py-2 sm:py-3">
+                                                                    <div className="font-medium text-xs sm:text-sm">{usuario.name}</div>
+                                                                    <div className="text-[10px] sm:text-xs text-muted-foreground sm:hidden">{usuario.email}</div>
+                                                                </TableCell>
+                                                                <TableCell className="py-2 sm:py-3 hidden sm:table-cell text-xs sm:text-sm">{usuario.email}</TableCell>
+                                                                <TableCell className="py-2 sm:py-3">
+                                                                    <Badge variant={usuario.role === 'administrador' ? 'default' : 'secondary'} className="text-[10px] sm:text-xs">
+                                                                        {usuario.role === 'administrador' ? 'Admin' : usuario.role === 'medico' ? 'Médico' : 'EPS'}
+                                                                    </Badge>
+                                                                </TableCell>
+                                                                <TableCell className="py-2 sm:py-3">
+                                                                    <Badge variant={usuario.is_active ? 'default' : 'destructive'} className="text-[10px] sm:text-xs">
+                                                                        {usuario.is_active ? 'Activo' : 'Inactivo'}
+                                                                    </Badge>
+                                                                </TableCell>
+                                                                <TableCell className="py-2 sm:py-3 hidden md:table-cell text-xs sm:text-sm">
+                                                                    {new Date(usuario.created_at).toLocaleDateString()}
+                                                                </TableCell>
+                                                                <TableCell className="py-2 sm:py-3 text-right">
+                                                                    <div className="flex justify-end gap-1">
+                                                                        <Button variant="outline" size="sm" onClick={() => handleEdit(usuario)} className="h-7 w-7 sm:h-8 sm:w-8 p-0">
+                                                                            <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                                                                        </Button>
+                                                                        <Button variant="outline" size="sm" onClick={() => handleToggleStatus(usuario)} className={`h-7 w-7 sm:h-8 sm:w-8 p-0 ${usuario.is_active ? 'text-destructive' : 'text-success'}`}>
+                                                                            {usuario.is_active ? <UserX className="h-3 w-3 sm:h-4 sm:w-4" /> : <UserCheck className="h-3 w-3 sm:h-4 sm:w-4" />}
+                                                                        </Button>
+                                                                        <AlertDialog>
+                                                                            <AlertDialogTrigger asChild>
+                                                                                <Button variant="outline" size="sm" className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-destructive">
+                                                                                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                                                                                </Button>
+                                                                            </AlertDialogTrigger>
+                                                                            <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
+                                                                                <AlertDialogHeader>
+                                                                                    <AlertDialogTitle className="text-base sm:text-lg">¿Eliminar usuario?</AlertDialogTitle>
+                                                                                    <AlertDialogDescription className="text-xs sm:text-sm">
+                                                                                        Se eliminará permanentemente <strong>{usuario.name}</strong>.
+                                                                                    </AlertDialogDescription>
+                                                                                </AlertDialogHeader>
+                                                                                <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                                                                                    <AlertDialogCancel className="w-full sm:w-auto">Cancelar</AlertDialogCancel>
+                                                                                    <AlertDialogAction onClick={() => handleDelete(usuario)} className="w-full sm:w-auto bg-destructive hover:bg-destructive/90">
+                                                                                        Eliminar
+                                                                                    </AlertDialogAction>
+                                                                                </AlertDialogFooter>
+                                                                            </AlertDialogContent>
+                                                                        </AlertDialog>
+                                                                    </div>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))
+                                                    )}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </>
                 ) : (
                     /* Vista de Solicitudes */
