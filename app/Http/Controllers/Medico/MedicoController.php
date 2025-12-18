@@ -251,10 +251,8 @@ class MedicoController extends Controller
      */
     public function descargarHistoria(RegistroMedico $registro)
     {
-        // Verificar que el registro pertenece al médico actual
-        if ($registro->user_id !== auth()->id()) {
-            abort(403, 'No tienes permiso para descargar esta historia clínica.');
-        }
+        // Los médicos pueden ver cualquier historia clínica
+        // La autorización se maneja a nivel de middleware ('medico')
 
         // Verificar que existe el archivo
         if (!$registro->historia_clinica_path) {

@@ -44,7 +44,7 @@ const PDFViewer = ({ pdfUrl, onClose }: PDFViewerProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 flex flex-col">
+    <div className="fixed inset-0 z-[70] bg-black/80 flex flex-col">
       {/* Header con controles */}
       <div className="bg-slate-900 text-white p-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
