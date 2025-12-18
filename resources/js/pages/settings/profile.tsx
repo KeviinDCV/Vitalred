@@ -34,13 +34,13 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         shadow-[0_2px_4px_rgba(0,0,0,0.06),0_8px_20px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)] 
                         relative 
                         before:absolute before:inset-0 before:rounded-lg sm:before:rounded-xl before:pointer-events-none">
-                        
+
                         {/* Header con jerarquía visual */}
                         <div className="border-b border-slate-100/80 pb-4 sm:pb-5 p-4 sm:p-6 
                             bg-gradient-to-b from-white/60 to-transparent">
-                            <HeadingSmall 
-                                title="Información del perfil" 
-                                description="Actualiza tu nombre y dirección de correo electrónico" 
+                            <HeadingSmall
+                                title="Información del perfil"
+                                description="Actualiza tu nombre y dirección de correo electrónico"
                             />
                         </div>
 
@@ -134,7 +134,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
                                         {/* Actions - PROMINENT SHADOW (Large Depth) with gradient */}
                                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 pt-2">
-                                            <Button 
+                                            <Button
                                                 disabled={processing}
                                                 className="w-full sm:w-auto
                                                     shadow-[0_1px_2px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.12),0_6px_20px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.25)]
@@ -182,7 +182,8 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         </div>
                     </div>
 
-                    <DeleteUser />
+                    {/* Solo mostrar opción de eliminar cuenta para administradores */}
+                    {auth.user.role === 'administrador' && <DeleteUser />}
                 </div>
             </SettingsLayout>
         </AppLayout>

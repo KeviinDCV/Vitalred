@@ -13,12 +13,12 @@ export function AppHeaderFloating() {
         user.role === 'administrador'
             ? 'Administrador'
             : user.role === 'medico'
-            ? 'Médico'
-            : 'IPS';
+                ? 'Médico'
+                : 'IPS';
 
     return (
         /* Top Bar with Logo and User - Responsive Layout System */
-        <header className="fixed top-0 left-0 right-0 z-40 w-full bg-slate-50/95 backdrop-blur-md border-b border-slate-200/60 shadow-sm">
+        <header className="fixed top-0 left-0 right-0 z-40 w-full bg-slate-50/95 backdrop-blur-md">
             {/* Container with responsive padding - Principle 1: Clear box relationships */}
             <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
                 {/* Flexible height for better touch targets on mobile - Principle 2: Purposeful rearrangement */}
